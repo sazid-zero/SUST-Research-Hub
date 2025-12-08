@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { MobileMenu } from "@/components/mobile-menu"
-import { DashboardSelector } from "@/components/dashboard-selector"
 import {
     BookOpen,
     Users,
@@ -948,8 +947,8 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
             <section className="relative z-30 border-t border-border py-16 sm:py-24 bg-transparent">
                 <div className="px-6 lg:px-12">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">SUST Thesis Repository by Numbers</h2>
-                        <p className="text-muted-foreground text-lg">A thriving community of researchers and innovators</p>
+                        <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">SUST Research Hub by Numbers</h2>
+                        <p className="text-muted-foreground text-lg">A thriving community of researchers and innovators from SUST</p>
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-3">
