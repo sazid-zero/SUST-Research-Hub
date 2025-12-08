@@ -973,7 +973,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
-            <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-950 dark:bg-green-950 backdrop-blur-md">
+            <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10" />
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
