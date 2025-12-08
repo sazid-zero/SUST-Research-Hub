@@ -397,8 +397,8 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                             <span className="font-medium">Profile</span>
                         </Link>
 
-                        <div className="px-4 py-3">
-                            <DashboardSelector />
+                        <div className="px-2 py-3">
+                            <AuthButton user={user} />
                         </div>
 
                         {navItems.map((item) => (

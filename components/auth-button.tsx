@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/lib/auth"
+import { LayoutDashboard } from "lucide-react"
 
 interface AuthButtonProps {
   user: User | null
@@ -32,7 +33,10 @@ export function AuthButton({ user }: AuthButtonProps) {
 
   return (
     <Button asChild>
+        <div className="flex items-center gap-2">
+      <LayoutDashboard className=" h-4 w-4" />
       <Link href={dashboardUrl}>Dashboard</Link>
+        </div>
     </Button>
   )
 }
