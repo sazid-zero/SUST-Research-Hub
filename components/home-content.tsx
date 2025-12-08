@@ -953,7 +953,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
                     <div className="grid gap-8 md:grid-cols-3">
                         {[
-                            { value: "37", label: "Theses", icon: FileText },
+                            { value: "37", label: "Papers", icon: FileText },
                             { value: "12", label: "Departments", icon: BookOpen },
                             { value: "50+", label: "Researchers", icon: Users },
                         ].map((stat, idx) => {
