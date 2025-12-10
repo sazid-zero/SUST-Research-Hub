@@ -22,8 +22,8 @@ interface ThesisContentProps {
 export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: ThesisContentProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
-  const [selectedYearFrom, setSelectedYearFrom] = useState("All Years")
-  const [selectedYearTo, setSelectedYearTo] = useState("All Years")
+  const [selectedYearFrom, setSelectedYearFrom] = useState("All")
+  const [selectedYearTo, setSelectedYearTo] = useState("All")
   const [selectedField, setSelectedField] = useState("All Fields")
   const [selectedSupervisor, setSelectedSupervisor] = useState("All Supervisors")
   const [sortBy, setSortBy] = useState("trending")
@@ -35,7 +35,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
   }, [])
 
   const departments = ["All Departments", ...new Set(theses.map((t) => t.department))]
-  const years = ["All Years", ...new Set(theses.map((t) => t.year).sort((a, b) => b - a))]
+  const years = ["All", ...new Set(theses.map((t) => t.year).sort((a, b) => b - a))]
   const fields = ["All Fields", ...new Set(theses.flatMap((t) => t.keywords))]
   const supervisors = ["All Supervisors", ...new Set(theses.map((t) => t.supervisor).filter(Boolean))]
 
@@ -47,7 +47,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
 
     const matchesDepartment = selectedDepartment === "All Departments" || thesis.department === selectedDepartment
     const matchesYear =
-      (selectedYearFrom === "All Years" && selectedYearTo === "All Years") ||
+      (selectedYearFrom === "All" && selectedYearTo === "All") ||
       (thesis.year >= Number.parseInt(selectedYearFrom) && thesis.year <= Number.parseInt(selectedYearTo))
     const matchesField =
       selectedField === "All Fields" ||
@@ -60,8 +60,8 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
   const clearFilters = () => {
     setSearchQuery("")
     setSelectedDepartment("All Departments")
-    setSelectedYearFrom("All Years")
-    setSelectedYearTo("All Years")
+    setSelectedYearFrom("All")
+    setSelectedYearTo("All")
     setSelectedField("All Fields")
     setSelectedSupervisor("All Supervisors")
   }
@@ -69,8 +69,8 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
   const hasActiveFilters =
     searchQuery !== "" ||
     selectedDepartment !== "All Departments" ||
-    selectedYearFrom !== "All Years" ||
-    selectedYearTo !== "All Years" ||
+    selectedYearFrom !== "All" ||
+    selectedYearTo !== "All" ||
     selectedField !== "All Fields" ||
     selectedSupervisor !== "All Supervisors"
 
@@ -101,7 +101,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
                 <div>
                   <Label className="text-xs text-foreground font-medium mb-2 block">Department</Label>
                   <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border">
@@ -117,7 +117,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
                 <div>
                   <Label className="text-xs text-foreground font-medium mb-2 block">Field</Label>
                   <Select value={selectedField} onValueChange={setSelectedField}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border">
@@ -133,7 +133,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
                 <div>
                   <Label className="text-xs text-foreground font-medium mb-2 block">Supervisor</Label>
                   <Select value={selectedSupervisor} onValueChange={setSelectedSupervisor}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border">
@@ -147,35 +147,39 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
                 </div>
 
                 <div>
-                  <Label className="text-xs text-foreground font-medium mb-2 block">Year From</Label>
-                  <Select value={selectedYearFrom} onValueChange={setSelectedYearFrom}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      {years.map((year) => (
-                        <SelectItem key={year} value={String(year)}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-foreground font-medium mb-2 block">Year To</Label>
-                  <Select value={selectedYearTo} onValueChange={setSelectedYearTo}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      {years.map((year) => (
-                        <SelectItem key={year} value={String(year)}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="text-xs text-foreground font-medium mb-3 block">Year</Label>
+                  <div className="flex gap-4">
+                    <div className="flex gap-1 items-center">
+                      <p className="text-xs text-muted-foreground mb-1">From</p>
+                      <Select value={selectedYearFrom} onValueChange={setSelectedYearFrom}>
+                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                          {years.map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-1 items-center">
+                      <p className="text-xs text-muted-foreground mb-1">To</p>
+                      <Select value={selectedYearTo} onValueChange={setSelectedYearTo}>
+                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                          {years.map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-border">

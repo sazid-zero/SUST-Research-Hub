@@ -2,12 +2,16 @@
 
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
-import { FolderOpen, Search, X, ArrowUpDown } from "lucide-react"
-import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
+import { Eye, Zap, Search, X, ArrowUpDown } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+
 interface ProjectsContentProps {
     user: any
 }
@@ -15,59 +19,102 @@ interface ProjectsContentProps {
 const sampleProjects = [
     {
         id: 1,
-        name: "AI Lab Research Initiative",
-        field: "Machine Learning",
+        title: "AI Lab Research Initiative - Advanced Machine Learning Systems",
+        authors: [
+            { id: 1, full_name: "Dr. Ahmed Hassan", student_id: "supervisor1" },
+            { id: 2, full_name: "Team Lead: Sarah Mohamed", student_id: "lead1" },
+        ],
+        abstract:
+            "Our research initiative focuses on developing state-of-the-art machine learning systems for real-world applications. The project encompasses multiple research areas including computer vision, natural language processing, and reinforcement learning.",
         department: "Computer Science & Engineering",
-        supervisor: "Dr. Ahmed",
+        field: "Machine Learning",
         year: 2024,
+        keywords: ["Machine Learning", "Deep Learning", "AI Research", "Computer Vision", "NLP"],
         views: 2341,
         downloads: 567,
-        likes: 234,
         updated: "2 days ago",
     },
     {
         id: 2,
-        name: "Biomedical Engineering Group",
-        field: "Biomedical",
+        title: "Biomedical Engineering Group - Medical Device Innovation",
+        authors: [
+            { id: 3, full_name: "Dr. Sarah Ibrahim", student_id: "supervisor2" },
+            { id: 4, full_name: "Team Lead: Youssef Ali", student_id: "lead2" },
+        ],
+        abstract:
+            "A collaborative research project aimed at developing innovative biomedical devices and diagnostic tools. We combine engineering principles with medical science to create solutions for healthcare challenges.",
         department: "Biochemistry",
-        supervisor: "Dr. Sarah",
+        field: "Biomedical",
         year: 2024,
+        keywords: ["Biomedical", "Medical Devices", "Healthcare", "Diagnostics", "Innovation"],
         views: 1876,
         downloads: 423,
-        likes: 156,
         updated: "5 days ago",
     },
     {
         id: 3,
-        name: "Robotics Lab Projects",
-        field: "Robotics",
+        title: "Robotics Lab Projects - Autonomous Systems Development",
+        authors: [
+            { id: 5, full_name: "Prof. Hassan Khaled", student_id: "supervisor3" },
+            { id: 6, full_name: "Team Lead: Fatima Ahmed", student_id: "lead3" },
+        ],
+        abstract:
+            "Research and development of autonomous robotic systems with applications in manufacturing, logistics, and service industries. The project explores navigation, manipulation, and human-robot interaction.",
         department: "Mechanical Engineering",
-        supervisor: "Prof. Hassan",
+        field: "Robotics",
         year: 2024,
+        keywords: ["Robotics", "Autonomous Systems", "Navigation", "Control Systems", "AI"],
         views: 3421,
         downloads: 789,
-        likes: 342,
         updated: "1 day ago",
     },
 ]
 
 export default function ProjectsContent({ user }: ProjectsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    const [filterField, setFilterField] = useState("all")
+    const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
+    const [selectedYear, setSelectedYear] = useState("All")
+    const [selectedField, setSelectedField] = useState("All Fields")
     const [sortBy, setSortBy] = useState("trending")
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const departments = ["All Departments", ...new Set(sampleProjects.map((p) => p.department))]
+    const years = ["All", ...new Set(sampleProjects.map((p) => p.year).sort((a, b) => b - a))]
+    const fields = ["All Fields", ...new Set(sampleProjects.flatMap((p) => p.keywords))]
 
     const filteredProjects = sampleProjects.filter((project) => {
-        const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesField = filterField === "all" || project.field === filterField
-        return matchesSearch && matchesField
+        const matchesSearch =
+            project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            project.authors?.some((author: any) => author.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            project.keywords.some((k: string) => k.toLowerCase().includes(searchQuery.toLowerCase()))
+
+        const matchesDepartment = selectedDepartment === "All Departments" || project.department === selectedDepartment
+        const matchesYear = selectedYear === "All" || project.year === Number.parseInt(selectedYear)
+        const matchesField =
+            selectedField === "All Fields" ||
+            project.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
+
+        return matchesSearch && matchesDepartment && matchesYear && matchesField
     })
 
     const clearFilters = () => {
         setSearchQuery("")
-        setFilterField("all")
+        setSelectedDepartment("All Departments")
+        setSelectedYear("All")
+        setSelectedField("All Fields")
     }
 
-    const hasActiveFilters = searchQuery !== "" || filterField !== "all"
+    const hasActiveFilters =
+        searchQuery !== "" ||
+        selectedDepartment !== "All Departments" ||
+        selectedYear !== "All" ||
+        selectedField !== "All Fields"
+
+    if (!mounted) return null
 
     return (
         <div className="min-h-screen bg-background">
@@ -93,18 +140,71 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
 
                             <div className="space-y-4">
                                 <div>
-                                    <Label className="text-xs text-foreground font-medium mb-2 block">Field</Label>
-                                    <Select value={filterField} onValueChange={setFilterField}>
-                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
-                                            <SelectValue placeholder="All Fields" />
+                                    <Label className="text-xs text-foreground font-medium mb-2 block">Department</Label>
+                                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            <SelectItem value="all">All Fields</SelectItem>
-                                            <SelectItem value="Machine Learning">Machine Learning</SelectItem>
-                                            <SelectItem value="Biomedical">Biomedical</SelectItem>
-                                            <SelectItem value="Robotics">Robotics</SelectItem>
+                                            {departments.map((dept) => (
+                                                <SelectItem key={dept} value={dept}>
+                                                    {dept}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-foreground font-medium mb-2 block">Field</Label>
+                                    <Select value={selectedField} onValueChange={setSelectedField}>
+                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-popover border-border">
+                                            {fields.slice(0, 10).map((field) => (
+                                                <SelectItem key={field} value={field}>
+                                                    {field}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-foreground font-medium mb-3 block">Year</Label>
+                                    <div className="flex gap-4">
+                                        <div className="flex gap-1 items-center">
+                                            <p className="text-xs text-muted-foreground mb-1">From</p>
+                                            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-popover border-border">
+                                                    {years.map((year) => (
+                                                        <SelectItem key={year} value={String(year)}>
+                                                            {year}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="flex gap-1 items-center">
+                                            <p className="text-xs text-muted-foreground mb-1">To</p>
+                                            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-popover border-border">
+                                                    {years.map((year) => (
+                                                        <SelectItem key={year} value={String(year)}>
+                                                            {year}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="pt-4 border-t border-border">
@@ -119,19 +219,19 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
 
                     {/* Main Content Area */}
                     <div className="lg:col-span-3 space-y-4">
-                        {/* Search and Sort Bar */}
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                            <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground dark:text-foreground whitespace-nowrap mr-2">
-                                <p className="font-semibold text-lg">Projects</p> {sampleProjects.length}
+                            <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground whitespace-nowrap mr-2">
+                                <p className="font-semibold text-lg">Projects </p>
+                                {filteredProjects.length}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="relative">
-                                    <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
+                                    <Zap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
                                     <Input
                                         placeholder="Search projects..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/50 border-2 border-border text-sm text-muted-foreground dark:text-foreground focus:outline-none focus:border-primary/50 focus:bg-background transition-colors"
+                                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/50 border-2 border-border text-sm text-muted-foreground dark:text-foreground dark:text-foreground focus:outline-none focus:border-primary/50 focus:bg-background transition-colors"
                                     />
                                 </div>
                             </div>
@@ -149,9 +249,8 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
                             </Select>
                         </div>
 
-                        {/* Projects List - 1 column */}
                         {filteredProjects.length > 0 ? (
-                            <motion.div className="space-y-2">
+                            <motion.div className="space-y-3">
                                 {filteredProjects.map((project, index) => (
                                     <motion.div
                                         key={project.id}
@@ -160,24 +259,81 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
                                         transition={{ duration: 0.3, delay: index * 0.05 }}
                                     >
                                         <div className="border border-border hover:border-primary/50 rounded-lg p-4 transition-all hover:shadow-sm group cursor-pointer">
-                                            <div className="flex items-start gap-3 mb-2">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded bg-muted text-muted-foreground flex-shrink-0">
-                                                    <FolderOpen className="h-4 w-4" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                                                        {project.name}
-                                                    </h3>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {project.field} • {project.supervisor}
+                                            <div className="space-y-3">
+                                                {/* Title and Meta */}
+                                                <div>
+                                                    <Link href={`/project/${project.id}`}>
+                                                        <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                                                            {project.title}
+                                                        </h3>
+                                                    </Link>
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        By{" "}
+                                                        {project.authors?.map((author: any, idx: number) => (
+                                                            <span key={author.id || idx}>
+                                <Link
+                                    href={`/project/member/${author.student_id}`}
+                                    className="font-medium hover:text-primary transition-colors"
+                                >
+                                  {author.full_name}
+                                </Link>
+                                                                {idx < project.authors.length - 1 && ", "}
+                              </span>
+                                                        ))}
+                                                        {" • "}
+                                                        {project.department} • {project.year}
                                                     </p>
                                                 </div>
-                                            </div>
-                                            <div className="flex gap-4 text-xs text-muted-foreground">
-                                                <span>Updated {project.updated}</span>
-                                                <span>👁️ {project.views}</span>
-                                                <span>⬇️ {project.downloads}</span>
-                                                <span>👍 {project.likes}</span>
+
+                                                {/* Abstract */}
+                                                <p className="text-xs text-foreground leading-relaxed line-clamp-2">{project.abstract}</p>
+
+                                                {/* Keywords */}
+                                                <div className="flex flex-wrap gap-2">
+                                                    {project.keywords.slice(0, 3).map((keyword, idx) => (
+                                                        <Badge key={idx} className="bg-primary/10 text-primary border border-primary/20 text-xs">
+                                                            {keyword}
+                                                        </Badge>
+                                                    ))}
+                                                    {project.keywords.length > 3 && (
+                                                        <Badge className="bg-muted text-muted-foreground border border-border text-xs">
+                                                            +{project.keywords.length - 3} more
+                                                        </Badge>
+                                                    )}
+                                                </div>
+
+                                                {/* Stats and Actions */}
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-border">
+                                                    <div className="flex gap-4 text-xs text-muted-foreground">
+                                                        <div className="flex items-center gap-2">
+                                                            <Eye className="h-4 w-4" />
+                                                            <span>{project.views} views</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Zap className="h-4 w-4" />
+                                                            <span>{project.downloads} downloads</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2 w-full sm:w-auto">
+                                                        <Link href={`/project/${project.id}`} className="flex-1 sm:flex-none">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="border-border hover:bg-muted bg-transparent w-full sm:w-auto text-xs"
+                                                            >
+                                                                <Eye className="h-4 w-4 mr-1" />
+                                                                View
+                                                            </Button>
+                                                        </Link>
+                                                        <Button
+                                                            size="sm"
+                                                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
+                                                        >
+                                                            <Zap className="h-4 w-4 mr-1" />
+                                                            Download
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -187,7 +343,7 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
                             <Card className="border border-border bg-card p-8 text-center">
                                 <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
                                 <h3 className="text-sm font-semibold text-foreground mb-1">No projects found</h3>
-                                <p className="text-xs text-muted-foreground">Try adjusting your search</p>
+                                <p className="text-xs text-muted-foreground">Try adjusting your search or filters</p>
                             </Card>
                         )}
                     </div>
