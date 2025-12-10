@@ -3,11 +3,8 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { MobileMenu } from "@/components/mobile-menu"
 import {
     BookOpen,
-    Users,
     FileText,
     Zap,
     Microscope,
@@ -16,24 +13,22 @@ import {
     ExternalLink,
     Star,
     Eye,
-    User,
     Search,
     Shield,
     BarChart3,
     Video,
     Mail,
-    Menu,
-    X,
-    Moon,
-    Sun,
+    Database,
+    Cpu,
+    FolderOpen,
+    ArrowRight,
 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { useTheme } from "next-themes"
-import { AuthButton } from "@/components/auth-button"
-import { UserProfileDropdown } from "@/components/user-profile-dropdown"
 import type { Thesis } from "@/lib/data/theses"
+import { GlobalNavbar } from "@/components/global-navbar"
 
 interface HomeContentProps {
     user: any
@@ -60,10 +55,10 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     const [scrollPosition, setScrollPosition] = useState(0)
     const { scrollY } = useScroll()
 
-    const heroSectionHeight = 300
+    const heroSectionHeight = 400 // reduced from 800 to 400 to make scroll animation 2x faster
     const textScale = useTransform(scrollY, [0, heroSectionHeight], [1, 0.8])
     const textOpacity = useTransform(scrollY, [0, heroSectionHeight], [1, 0])
-    const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0])
+    const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0]) // reduced from 300 to 150 for faster button fade
 
     useEffect(() => {
         setMounted(true)
@@ -271,172 +266,30 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
         { label: "Help", href: "/help" },
     ]
 
+    // Animation variants for the explore repositories section
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+            },
+        },
+    }
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" },
+        },
+    }
+
     return (
-        <div className="min-h-screen relative overflow-hidden">
-            <div className="fixed inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-background to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950" />
-
-                <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-gradient-radial from-emerald-200/40 via-emerald-100/20 to-transparent dark:from-emerald-500/20 dark:via-emerald-900/10 blur-3xl" />
-                    <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] rounded-full bg-gradient-radial from-cyan-200/30 via-cyan-100/15 to-transparent dark:from-cyan-500/15 dark:via-cyan-900/10 blur-3xl" />
-                    <div className="absolute bottom-[10%] left-[15%] w-[550px] h-[550px] rounded-full bg-gradient-radial from-teal-200/35 via-teal-100/20 to-transparent dark:from-teal-500/20 dark:via-teal-900/10 blur-3xl" />
-                    <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-gradient-radial from-blue-100/25 via-blue-50/10 to-transparent dark:from-blue-500/15 dark:via-blue-900/5 blur-3xl" />
-                    <div className="absolute bottom-[20%] right-[20%] w-[450px] h-[450px] rounded-full bg-gradient-radial from-emerald-300/30 via-emerald-100/15 to-transparent dark:from-emerald-500/20 dark:via-emerald-900/10 blur-3xl" />
-                </div>
-
-                <div
-                    className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                    }}
-                />
-
-                <div
-                    className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]"
-                    style={{
-                        backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                        backgroundSize: "40px 40px",
-                        color: "rgb(16 185 129)",
-                    }}
-                />
-            </div>
-
-            <nav className="hidden md:fixed md:top-0 md:left-0 md:right-0 md:z-50 md:flex md:bg-background/70 md:backdrop-blur-xl md:supports-[backdrop-filter]:bg-background/50">
-                <div className="px-6 lg:px-12 w-full">
-                    <div className="flex h-16 items-center justify-between">
-                        <Link href="/" className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                                <BookOpen className="h-6 w-6 text-primary-foreground" />
-                            </div>
-                            <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Research Hub
-              </span>
-                        </Link>
-
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link
-                                href="/browse"
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                Browse
-                            </Link>
-                            <Link
-                                href="/#features"
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                Features
-                            </Link>
-                            <Link
-                                href="/#about"
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                About
-                            </Link>
-                            <Link
-                                href="/help"
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                Help
-                            </Link>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <ThemeToggle />
-                            <MobileMenu
-                                items={[
-                                    { label: "Browse", href: "/browse" },
-                                    { label: "Features", href: "/#features" },
-                                    { label: "About", href: "/#about" },
-                                    { label: "Help", href: "/help" },
-                                ]}
-                                hasAuth={true}
-                            />
-                            <div className="hidden sm:flex items-center gap-4">
-                                <AuthButton user={user} />
-                                <UserProfileDropdown user={user} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden fixed bottom-6 right-6 z-[999] flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg hover:shadow-xl transition-shadow"
-            >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-
-            {isMobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 z-[998] bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
-            )}
-
-            <aside
-                className={`md:hidden fixed inset-y-0 right-0 z-[999] w-64 bg-background border-l border-border transform transition-transform duration-300 ease-in-out ${
-                    isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-                }`}
-            >
-                <div className="flex flex-col h-full p-6">
-                    <Link href="/" className="flex items-center gap-3 mb-8" onClick={() => setIsMobileMenuOpen(false)}>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                            <BookOpen className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                        <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Research Hub
-            </span>
-                    </Link>
-
-                    <nav className="flex-1 space-y-3">
-                        <Link
-                            href="/settings"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                            <User className="h-5 w-5" />
-                            <span className="font-medium">Profile</span>
-                        </Link>
-
-                        <div className="px-2 py-3">
-                            <AuthButton user={user} />
-                        </div>
-
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                            >
-                                {item.label === "Browse" && <BookOpen className="h-5 w-5" />}
-                                {item.label === "Features" && <Zap className="h-5 w-5" />}
-                                {item.label === "About" && <FileText className="h-5 w-5" />}
-                                {item.label === "Help" && <Mail className="h-5 w-5" />}
-                                <span className="font-medium">{item.label}</span>
-                            </Link>
-                        ))}
-
-                        <div className="my-2 border-t border-border" />
-
-                        <button
-                            onClick={() => {
-                                setTheme(theme === "dark" ? "light" : "dark")
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                        >
-                            {mounted && theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                            <span className="font-medium">Dark Mode</span>
-                        </button>
-                    </nav>
-
-                    <div className="border-t border-border pt-4">
-                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full">
-                            <Button className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0">
-                                Login
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </aside>
+        <div className="min-h-screen bg-background">
+            <GlobalNavbar user={user} />
 
             <section
                 ref={heroRef}
@@ -858,7 +711,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 </div>
 
                                 <div className="flex justify-center mt-8 relative z-20">
-                                    <Link href="/browse">
+                                    <Link href="/explore">
                                         <Button
                                             size="lg"
                                             className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg shadow-primary/25"
@@ -874,6 +727,132 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
+            {/* Explore Repositories Section */}
+            <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 z-30">
+                <div className="mx-auto max-w-7xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, duration: 0.6 }}
+                        className="mb-12 space-y-4"
+                    >
+                        <h2 className="text-3xl md:text-4xl font-bold text-foreground">Explore All Repositories</h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl">
+                            Discover theses, papers, datasets, models, and collaborative research projects from SUST
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 auto-rows-max"
+                    >
+                        {[
+                            {
+                                id: "theses",
+                                title: "Research Theses",
+                                description: "Complete academic research documents from student projects and faculty work",
+                                icon: BookOpen,
+                                href: "/browse",
+                                color: "from-blue-500 to-cyan-500",
+                                stats: { count: allTheses.length, label: "Theses" },
+                                highlight: "Full-text searchable repository with advanced filters",
+                            },
+                            {
+                                id: "papers",
+                                title: "Published Papers",
+                                description: "Peer-reviewed publications and research papers from journal/conference submissions",
+                                icon: FileText,
+                                href: "/papers",
+                                color: "from-purple-500 to-pink-500",
+                                stats: { count: 47, label: "Papers" },
+                                highlight: "Indexed with DOI and citation metadata",
+                            },
+                            {
+                                id: "datasets",
+                                title: "Research Datasets",
+                                description: "Curated datasets used in academic research, ready for download and analysis",
+                                icon: Database,
+                                href: "/datasets",
+                                color: "from-green-500 to-emerald-500",
+                                stats: { count: 23, label: "Datasets" },
+                                highlight: "Organized by research domain and format",
+                            },
+                            {
+                                id: "models",
+                                title: "ML Models",
+                                description: "Pre-trained machine learning models and computational resources for research",
+                                icon: Cpu,
+                                href: "/models",
+                                color: "from-orange-500 to-red-500",
+                                stats: { count: 12, label: "Models" },
+                                highlight: "Complete model cards with training details",
+                            },
+                            {
+                                id: "projects",
+                                title: "Research Projects",
+                                description: "Collaborative research projects, ongoing work, and departmental initiatives",
+                                icon: FolderOpen,
+                                href: "/projects",
+                                color: "from-indigo-500 to-blue-500",
+                                stats: { count: 34, label: "Projects" },
+                                highlight: "Team collaboration and project tracking",
+                            },
+                        ].map((repo, idx) => {
+                            const Icon = repo.icon
+                            return (
+                                <motion.div
+                                    key={repo.id}
+                                    variants={itemVariants}
+                                    className={`group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover:shadow-xl transition-all duration-300`}
+                                >
+                                    {/* Background gradient */}
+                                    <div
+                                        className={`absolute inset-0 bg-gradient-to-br ${repo.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                                    />
+
+                                    {/* Content */}
+                                    <div className="relative z-10 space-y-4 h-full flex flex-col">
+                                        <div
+                                            className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${repo.color} text-white`}
+                                        >
+                                            <Icon className="h-6 w-6" />
+                                        </div>
+
+                                        <div className="space-y-2 flex-1">
+                                            <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                                                {repo.title}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground line-clamp-2">{repo.description}</p>
+                                            <p className="text-xs text-primary/80 font-medium pt-2">{repo.highlight}</p>
+                                        </div>
+
+                                        <div className="space-y-3 pt-4 border-t border-border">
+                                            <div className="space-y-1">
+                                                <p className="text-2xl font-bold text-foreground">{repo.stats.count}</p>
+                                                <p className="text-xs text-muted-foreground">{repo.stats.label}</p>
+                                            </div>
+
+                                            <Link href={repo.href} className="block">
+                                                <Button
+                                                    className="w-full gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-md"
+                                                    size="sm"
+                                                >
+                                                    Explore
+                                                    <ArrowRight className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Features section remains */}
             <section id="features" className="relative py-16 sm:py-20 bg-transparent z-30">
                 <div className="px-6 lg:px-12">
                     <div className="text-center mb-12 max-w-3xl mx-auto">
@@ -944,34 +923,36 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
-            <section className="relative z-30 border-t border-border py-16 sm:py-24 bg-transparent">
-                <div className="px-6 lg:px-12">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">SUST Research Hub by Numbers</h2>
-                        <p className="text-muted-foreground text-lg">A thriving community of researchers and innovators from SUST</p>
-                    </div>
+            {/* <section className="relative z-30 border-t border-border py-16 sm:py-24 bg-transparent">
+        <div className="px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">SUST Research Hub by Numbers</h2>
+            <p className="text-muted-foreground text-lg">
+              A thriving community of researchers and innovators from SUST
+            </p>
+          </div>
 
-                    <div className="grid gap-8 md:grid-cols-3">
-                        {[
-                            { value: "37", label: "Papers", icon: FileText },
-                            { value: "12", label: "Departments", icon: BookOpen },
-                            { value: "50+", label: "Researchers", icon: Users },
-                        ].map((stat, idx) => {
-                            const Icon = stat.icon
-                            return (
-                                <Card
-                                    key={idx}
-                                    className="border-border bg-card/50 p-8 shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all text-center"
-                                >
-                                    <Icon className="h-8 w-8 text-primary mb-4 mx-auto" />
-                                    <p className="text-4xl font-bold text-foreground mb-2">{stat.value}</p>
-                                    <p className="text-muted-foreground">{stat.label}</p>
-                                </Card>
-                            )
-                        })}
-                    </div>
-                </div>
-            </section>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              { value: "37", label: "Papers", icon: FileText },
+              { value: "12", label: "Departments", icon: BookOpen },
+              { value: "50+", label: "Researchers", icon: Users },
+            ].map((stat, idx) => {
+              const Icon = stat.icon
+              return (
+                <Card
+                  key={idx}
+                  className="border-border bg-card/50 p-8 shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all text-center"
+                >
+                  <Icon className="h-8 w-8 text-primary mb-4 mx-auto" />
+                  <p className="text-4xl font-bold text-foreground mb-2">{stat.value}</p>
+                  <p className="text-muted-foreground">{stat.label}</p>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section> */}
 
             <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10" />
