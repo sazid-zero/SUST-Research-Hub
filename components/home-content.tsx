@@ -60,10 +60,10 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     const [scrollPosition, setScrollPosition] = useState(0)
     const { scrollY } = useScroll()
 
-    const heroSectionHeight = 800
+    const heroSectionHeight = 300
     const textScale = useTransform(scrollY, [0, heroSectionHeight], [1, 0.8])
     const textOpacity = useTransform(scrollY, [0, heroSectionHeight], [1, 0])
-    const buttonsOpacity = useTransform(scrollY, [0, 300], [1, 0])
+    const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0])
 
     useEffect(() => {
         setMounted(true)
