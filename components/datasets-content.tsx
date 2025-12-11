@@ -24,14 +24,10 @@ import {
     MessageSquare,
     Brain,
     Wand2,
-    Network,
-    Layers,
-    FileJson,
-    FileSpreadsheet,
-    Package,
-    Folder,
-    Music,
-    Globe,
+    Grid3x3,
+    TableIcon,
+    Link,
+    Ear, AudioLines, Layers, Network, Languages, Package, Globe, FileJson, FileSpreadsheet, Folder, Music, Eye,
 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -175,12 +171,12 @@ const formatNumber = (num: number) => {
 
 const allTasks = {
     multimodal: [
-        { key: "audio-text-to-text", label: "Audio-Text-to-Text", icon: Mic, color: "text-orange-600" },
+        { key: "audio-text-to-text", label: "Audio-Text-to-Text", icon: AudioLines, color: "text-orange-600" },
         { key: "image-text-to-text", label: "Image-Text-to-Text", icon: ImageIcon, color: "text-orange-600" },
         {
             key: "visual-question-answering",
             label: "Visual Question Answering",
-            icon: MessageSquare,
+            icon: Eye,
             color: "text-orange-600",
         },
         {
@@ -196,8 +192,8 @@ const allTasks = {
     "computer-vision": [
         { key: "depth-estimation", label: "Depth Estimation", icon: Layers, color: "text-blue-600" },
         { key: "image-classification", label: "Image Classification", icon: ImageIcon, color: "text-blue-600" },
-        { key: "object-detection", label: "Object Detection", icon: Box, color: "text-blue-600" },
-        { key: "image-segmentation", label: "Image Segmentation", icon: ImageIcon, color: "text-blue-600" },
+        { key: "object-detection", label: "Object Detection", icon: Grid3x3, color: "text-blue-600" },
+        { key: "image-segmentation", label: "Image Segmentation", icon: Layers, color: "text-blue-600" },
         { key: "text-to-image", label: "Text-to-Image", icon: Wand2, color: "text-blue-600" },
         { key: "image-to-text", label: "Image-to-Text", icon: FileText, color: "text-blue-600" },
         { key: "image-to-image", label: "Image-to-Image", icon: ImageIcon, color: "text-blue-600" },
@@ -213,47 +209,47 @@ const allTasks = {
         {
             key: "zero-shot-image-classification",
             label: "Zero-Shot Image Classification",
-            icon: ImageIcon,
+            icon: Eye,
             color: "text-blue-600",
         },
         { key: "mask-generation", label: "Mask Generation", icon: Layers, color: "text-blue-600" },
-        { key: "zero-shot-object-detection", label: "Zero-Shot Object Detection", icon: Box, color: "text-blue-600" },
+        { key: "zero-shot-object-detection", label: "Zero-Shot Object Detection", icon: Grid3x3, color: "text-blue-600" },
         { key: "text-to-3d", label: "Text-to-3D", icon: Box, color: "text-blue-600" },
         { key: "image-to-3d", label: "Image-to-3D", icon: Box, color: "text-blue-600" },
-        { key: "image-feature-extraction", label: "Image Feature Extraction", icon: Brain, color: "text-blue-600" },
-        { key: "keypoint-detection", label: "Keypoint Detection", icon: Layers, color: "text-blue-600" },
+        { key: "image-feature-extraction", label: "Image Feature Extraction", icon: Network, color: "text-blue-600" },
+        { key: "keypoint-detection", label: "Keypoint Detection", icon: Grid3x3, color: "text-blue-600" },
         { key: "video-to-video", label: "Video-to-Video", icon: Video, color: "text-blue-600" },
     ],
     nlp: [
-        { key: "text-classification", label: "Text Classification", icon: Type, color: "text-green-600" },
-        { key: "token-classification", label: "Token Classification", icon: Type, color: "text-green-600" },
-        { key: "table-question-answering", label: "Table Question Answering", icon: Table, color: "text-green-600" },
+        { key: "text-classification", label: "Text Classification", icon: FileText, color: "text-green-600" },
+        { key: "token-classification", label: "Token Classification", icon: FileText, color: "text-green-600" },
+        { key: "table-question-answering", label: "Table Question Answering", icon: TableIcon, color: "text-green-600" },
         { key: "question-answering", label: "Question Answering", icon: MessageSquare, color: "text-green-600" },
         { key: "zero-shot-classification", label: "Zero-Shot Classification", icon: Sparkles, color: "text-green-600" },
-        { key: "translation", label: "Translation", icon: Globe, color: "text-green-600" },
+        { key: "translation", label: "Translation", icon: Languages, color: "text-green-600" },
         { key: "summarization", label: "Summarization", icon: FileText, color: "text-green-600" },
-        { key: "feature-extraction", label: "Feature Extraction", icon: Brain, color: "text-green-600" },
-        { key: "text-generation", label: "Text Generation", icon: Type, color: "text-green-600" },
-        { key: "fill-mask", label: "Fill-Mask", icon: Type, color: "text-green-600" },
-        { key: "sentence-similarity", label: "Sentence Similarity", icon: MessageSquare, color: "text-green-600" },
-        { key: "text-ranking", label: "Text Ranking", icon: TrendingUp, color: "text-green-600" },
+        { key: "feature-extraction", label: "Feature Extraction", icon: Network, color: "text-green-600" },
+        { key: "text-generation", label: "Text Generation", icon: MessageSquare, color: "text-green-600" },
+        { key: "fill-mask", label: "Fill-Mask", icon: FileText, color: "text-green-600" },
+        { key: "sentence-similarity", label: "Sentence Similarity", icon: Link, color: "text-green-600" },
+        { key: "text-ranking", label: "Text Ranking", icon: ArrowUpDown, color: "text-green-600" },
     ],
     audio: [
         { key: "text-to-speech", label: "Text-to-Speech", icon: Mic, color: "text-purple-600" },
-        { key: "text-to-audio", label: "Text-to-Audio", icon: Music, color: "text-purple-600" },
-        { key: "automatic-speech-recognition", label: "Automatic Speech Recognition", icon: Mic, color: "text-purple-600" },
-        { key: "audio-to-audio", label: "Audio-to-Audio", icon: Music, color: "text-purple-600" },
-        { key: "audio-classification", label: "Audio Classification", icon: Music, color: "text-purple-600" },
+        { key: "text-to-audio", label: "Text-to-Audio", icon: AudioLines, color: "text-purple-600" },
+        { key: "automatic-speech-recognition", label: "Automatic Speech Recognition", icon: Ear, color: "text-purple-600" },
+        { key: "audio-to-audio", label: "Audio-to-Audio", icon: AudioLines, color: "text-purple-600" },
+        { key: "audio-classification", label: "Audio Classification", icon: AudioLines, color: "text-purple-600" },
         { key: "voice-activity-detection", label: "Voice Activity Detection", icon: Mic, color: "text-purple-600" },
     ],
     tabular: [
-        { key: "tabular-classification", label: "Tabular Classification", icon: Table, color: "text-cyan-600" },
-        { key: "tabular-regression", label: "Tabular Regression", icon: TrendingUp, color: "text-cyan-600" },
-        { key: "time-series-forecasting", label: "Time Series Forecasting", icon: TrendingUp, color: "text-cyan-600" },
+        { key: "tabular-classification", label: "Tabular Classification", icon: TableIcon, color: "text-cyan-600" },
+        { key: "tabular-regression", label: "Tabular Regression", icon: TableIcon, color: "text-cyan-600" },
+        { key: "time-series-forecasting", label: "Time Series Forecasting", icon: ArrowUpDown, color: "text-cyan-600" },
     ],
     rl: [
         { key: "reinforcement-learning", label: "Reinforcement Learning", icon: Brain, color: "text-pink-600" },
-        { key: "robotics", label: "Robotics", icon: Box, color: "text-pink-600" },
+        { key: "robotics", label: "Robotics", icon: Bot, color: "text-pink-600" },
     ],
     other: [{ key: "graph-machine-learning", label: "Graph Machine Learning", icon: Network, color: "text-gray-600" }],
 }
@@ -360,10 +356,10 @@ const modalityColors: Record<string, { icon: any; colorClass: string; bgClass: s
 }
 
 const domains = [
-    { key: "computer-vision", label: "Computer Vision", icon: ImageIcon, color: "text-blue-600" },
-    { key: "natural-language", label: "Natural Language", icon: Type, color: "text-green-600" },
-    { key: "audio-processing", label: "Audio Processing", icon: Music, color: "text-purple-600" },
-    { key: "medical-imaging", label: "Medical Imaging", icon: FileText, color: "text-red-600" },
+    { key: "computer-vision", label: "Computer Vision", icon: Eye, color: "text-blue-600" },
+    { key: "natural-language", label: "Natural Language", icon: MessageSquare, color: "text-green-600" },
+    { key: "audio-processing", label: "Audio Processing", icon: AudioLines, color: "text-purple-600" },
+    { key: "medical-imaging", label: "Medical Imaging", icon: Heart, color: "text-red-600" },
     { key: "geospatial", label: "Geospatial Data", icon: Map, color: "text-orange-600" },
     { key: "finance", label: "Finance", icon: TrendingUp, color: "text-yellow-600" },
     { key: "climate", label: "Climate", icon: Globe, color: "text-cyan-600" },
@@ -721,7 +717,7 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                         className="group cursor-pointer min-w-0"
                                     >
                                         <div className="space-y-2 border border-border rounded-lg p-4 hover:border-primary/50 transition-colors min-w-0">
-                                            <h3 className="text-base font-normal font-sans text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-nowrap min-w-0">
+                                            <h3 className="text-sm font-semibold font-sans text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-nowrap min-w-0">
                                                 <IconBrandDatabricks className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
                                                 <span className="truncate">{dataset.name}</span>
                                             </h3>
