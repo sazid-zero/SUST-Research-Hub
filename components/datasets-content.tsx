@@ -27,7 +27,7 @@ import {
     Grid3x3,
     TableIcon,
     Link,
-    Ear, AudioLines, Layers, Network, Languages, Package, Globe, FileJson, FileSpreadsheet, Folder, Music, Eye,
+    Ear, AudioLines, Layers, Network, Languages, Package, Globe, FileJson, FileSpreadsheet, Folder, Music, Eye, Filter,
 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -379,6 +379,7 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
     const [selectedYearTo, setSelectedYearTo] = useState("All")
     const [sortBy, setSortBy] = useState("trending")
     const [activeTab, setActiveTab] = useState<"main" | "tasks" | "libraries" | "domains">("main")
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
     const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
 
@@ -688,6 +689,15 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                 </div>
                             </div>
 
+                            {/* Mobile Filter Button */}
+                            <button
+                                onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+                                className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-lg bg-background border-2 border-border hover:border-primary/50 transition-colors"
+                            >
+                                <Filter className="h-4 w-4" />
+                                <span className="text-xs font-medium">Filters</span>
+                            </button>
+
                             <Select value={sortBy} onValueChange={setSortBy}>
                                 <SelectTrigger className="w-44 bg-background border-border h-9 text-xs">
                                     <ArrowUpDown className="h-3 w-3 mr-1" />
@@ -700,6 +710,159 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Mobile Filters Modal */}
+                        {isMobileFilterOpen && (
+                            <div className="fixed inset-0 z-40 lg:hidden">
+                                <div
+                                    className="absolute inset-0 bg-black/50"
+                                    onClick={() => setIsMobileFilterOpen(false)}
+                                />
+                                <Card className="absolute top-0 right-0 bottom-0 w-full max-w-sm border-l border-border bg-card p-6 overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-semibold">Filters</h2>
+                                        <button
+                                            onClick={() => setIsMobileFilterOpen(false)}
+                                            className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {/* Modalities */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold mb-3">Modalities</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {modalities.map((modality) => {
+                                                    const Icon = modality.icon
+                                                    return (
+                                                        <button
+                                                            key={modality.key}
+                                                            onClick={() => {
+                                                                setFilterModality(modality.key)
+                                                                setIsMobileFilterOpen(false)
+                                                            }}
+                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
+                                                                filterModality === modality.key
+                                                                    ? "bg-primary/10 text-primary border-primary/20"
+                                                                    : "bg-background border-border hover:bg-muted"
+                                                            }`}
+                                                        >
+                                                            <Icon className={`h-3.5 w-3.5 ${modality.color}`} />
+                                                            {modality.label}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Format */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold mb-3">Format</h3>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {formats.map((format) => {
+                                                    const Icon = format.icon
+                                                    return (
+                                                        <button
+                                                            key={format.key}
+                                                            onClick={() => {
+                                                                setFilterFormat(format.key)
+                                                                setIsMobileFilterOpen(false)
+                                                            }}
+                                                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border ${
+                                                                filterFormat === format.key
+                                                                    ? "bg-primary/10 text-primary border-primary/20"
+                                                                    : "bg-background border-border hover:bg-muted"
+                                                            }`}
+                                                        >
+                                                            <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                                                            {format.label}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Domains */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold mb-3">Domains</h3>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {domains.map((domain) => {
+                                                    const Icon = domain.icon
+                                                    return (
+                                                        <button
+                                                            key={domain.key}
+                                                            onClick={() => {
+                                                                setFilterDomain(domain.label)
+                                                                setIsMobileFilterOpen(false)
+                                                            }}
+                                                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
+                                                                filterDomain === domain.label
+                                                                    ? "bg-primary/10 text-primary border-primary/20"
+                                                                    : "bg-background border-border hover:bg-muted"
+                                                            }`}
+                                                        >
+                                                            <Icon className={`h-3.5 w-3.5 flex-shrink-0 ${domain.color}`} />
+                                                            <span className="truncate">{domain.label}</span>
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Year Range */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold mb-3">Year</h3>
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground mb-1">From</p>
+                                                    <Select value={selectedYearFrom} onValueChange={setSelectedYearFrom}>
+                                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-popover border-border">
+                                                            <SelectItem value="All">All Years</SelectItem>
+                                                            {years.map((year) => (
+                                                                <SelectItem key={year} value={String(year)}>
+                                                                    {year}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground mb-1">To</p>
+                                                    <Select value={selectedYearTo} onValueChange={setSelectedYearTo}>
+                                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-popover border-border">
+                                                            <SelectItem value="All">All Years</SelectItem>
+                                                            {years.map((year) => (
+                                                                <SelectItem key={year} value={String(year)}>
+                                                                    {year}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {hasActiveFilters && (
+                                            <button
+                                                onClick={clearFilters}
+                                                className="w-full text-xs text-primary hover:underline flex items-center justify-center gap-1 py-2"
+                                            >
+                                                <X className="h-3 w-3" />
+                                                Clear Filters
+                                            </button>
+                                        )}
+                                    </div>
+                                </Card>
+                            </div>
+                        )}
 
                         {filteredDatasets.length > 0 ? (
                             <motion.div
