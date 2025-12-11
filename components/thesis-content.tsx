@@ -80,7 +80,7 @@ export function ThesisContent({ user, theses, pageTitle = "Research Theses" }: T
     <div className="min-h-screen bg-background">
       <GlobalNavbar user={user} />
 
-      <div className="lg:mx-22 mx-auto px-4 lg:px-8 pt-6 pb-12 mt-2">
+      <div className="lg:mx-22 mx-auto px-4 lg:px-8 pb-12">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-4">
           <div className="hidden lg:block lg:col-span-1">
             <Card className="border border-border bg-card p-6 sticky top-20">
