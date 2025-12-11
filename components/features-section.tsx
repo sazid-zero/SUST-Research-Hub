@@ -218,7 +218,7 @@ export function FeaturesSection() {
                 <motion.h2
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                     className="text-4xl sm:text-5xl font-bold mb-4 leading-tight"
                 >
@@ -231,7 +231,7 @@ export function FeaturesSection() {
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-lg mb-16 max-w-3xl mx-auto leading-relaxed text-muted-foreground"
                 >
@@ -240,12 +240,8 @@ export function FeaturesSection() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
                     {features.map((feature, index) => (
-                        <motion.div
+                        <div
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: false }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
                             className={`relative rounded-xl p-6 bg-card/80 backdrop-blur-sm
                 transition-all duration-300 shadow-xl/30 shadow-primary inset-shadow-sm inset-shadow-primary/80 dark:inset-shadow-primary hover:shadow-xl/50 hover:shadow-primary 
                 ${isDark ? "bg-card/50" : "bg-card"}`}
@@ -267,7 +263,7 @@ export function FeaturesSection() {
                                 Learn more
                                 <span className="text-lg">→</span>
                             </Link>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>
