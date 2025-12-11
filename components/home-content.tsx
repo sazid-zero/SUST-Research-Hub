@@ -12,11 +12,9 @@ import {
     ExternalLink,
     Star,
     Eye,
-    Search,
-    Shield,
     BarChart3,
-    Video,
     Mail,
+    ArrowRight,
 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
@@ -25,7 +23,7 @@ import { useTheme } from "next-themes"
 import type { Thesis } from "@/lib/data/theses"
 import { GlobalNavbar } from "@/components/global-navbar"
 import {AnimatedParticles, RepositoryShowcase} from "@/components/repository-showcase"
-import {FeaturesSection} from "@/components/features-section";
+import { FeaturesSection } from "@/components/features-section"
 
 interface HomeContentProps {
     user: any
@@ -705,142 +703,227 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
             </section>
 
             {/* 3D Repository Showcase Section */}
-            <section id="explore"
-                     className="relative py-4 px-4 sm:px-6 pb-20 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background">
+            <section
+                id="explore"
+                className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
+            >
                 <RepositoryShowcase />
 
-                <FeaturesSection/>
+                <FeaturesSection />
             </section>
 
-            <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10" />
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
-                <div className="max-w-4xl px-6 lg:px-12 mx-auto relative z-10 text-center">
-                    <h2 className="text-3xl font-bold text-white sm:text-4xl mb-6">Ready to Contribute?</h2>
-                    <p className="text-white text-lg mb-8 max-w-2xl mx-auto">
-                        Join thousands of researchers sharing their work and advancing academic knowledge at SUST.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button
-                            asChild
-                            size="lg"
-                            className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-105"
-                        >
-                            <Link href="/register">
-                                Get Started
-                                <ExternalLink className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                        <Button
-                            asChild
-                            size="lg"
-                            variant="outline"
-                            className="border-green-600 text-foreground hover:text-white bg-white dark:bg-background hover:bg-green-600 hover:scale-110"
-                        >
-                            <Link href="/help">Learn More</Link>
-                        </Button>
+            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background">
+                {/* Subtle gradient overlays for depth */}
+                <AnimatedParticles/>
+                <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
+
+                <div className="max-w-5xl px-6 lg:px-12 mx-auto relative z-10">
+                    <div className="text-center space-y-8">
+                        {/* Small eyebrow text */}
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+                            Join the Research Community
+                        </div>
+
+                        {/* Main headline with text-balance for optimal line breaks */}
+                        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
+                            Share your research.
+                            <br />
+                            <span className="text-muted-foreground">Inspire the world.</span>
+                        </h2>
+
+                        {/* Supporting text */}
+                        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
+                            Be part of a growing community of researchers and academics at SUST contributing to the advancement of
+                            knowledge.
+                        </p>
+
+                        {/* CTA buttons with refined spacing */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                            <Button
+                                asChild
+                                size="lg"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                            >
+                                <Link href="/register">
+                                    Get Started
+                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button
+                                asChild
+                                size="lg"
+                                variant="ghost"
+                                className="text-foreground hover:text-foreground hover:bg-muted/50 px-8"
+                            >
+                                <Link href="/explore">
+                                    Explore Theses
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </div>
+
+                        {/* Social proof / stats bar */}
+                        <div className="pt-12 flex flex-col sm:flex-row gap-8 sm:gap-12 justify-center items-center text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="flex -space-x-2">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background" />
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-primary border-2 border-background" />
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background" />
+                                </div>
+                                <span className="text-muted-foreground">
+                  <span className="font-semibold text-foreground">1,200+</span> researchers
+                </span>
+                            </div>
+                            <div className="text-muted-foreground">
+                                <span className="font-semibold text-foreground">5,000+</span> theses published
+                            </div>
+                            <div className="text-muted-foreground">
+                                <span className="font-semibold text-foreground">15+</span> research fields
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <footer className="relative z-30 border-t border-border bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 backdrop-blur-md py-12">
-                <div className="px-6 lg:px-12">
-                    <div className="grid gap-8 md:grid-cols-6 mb-8">
-                        <div>
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                                    <BookOpen className="h-5 w-5 text-primary-foreground" />
+            <footer className="relative border-t border-border/50 bg-background/80 backdrop-blur-sm">
+                <div className="px-6 lg:px-12 py-16">
+                    {/* Main footer content */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+                        {/* Brand section */}
+                        <div className="lg:col-span-4 space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
+                                    <BookOpen className="h-5 w-5 text-white" />
                                 </div>
-                                <span className="font-bold text-foreground">SUST Research Hub</span>
+                                <div>
+                                    <h3 className="font-bold text-foreground">SUST Research Hub</h3>
+                                    <p className="text-xs text-muted-foreground">Academic Excellence</p>
+                                </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">Centralized repository for academic research at SUST.</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                                Empowering academic innovation through a centralized platform for research discovery and collaboration
+                                at SUST.
+                            </p>
                         </div>
-                        <div>
-                            <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li>
-                                    <Link href="/browse" className="hover:text-primary transition-colors">
-                                        Browse Theses
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/login" className="hover:text-primary transition-colors">
-                                        Login
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/register" className="hover:text-primary transition-colors">
-                                        Register
-                                    </Link>
-                                </li>
-                            </ul>
+
+                        {/* Navigation links - cleaner grid */}
+                        <div className="lg:col-span-5 grid grid-cols-2 sm:grid-cols-3 gap-8">
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold text-foreground">Platform</h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <Link href="/browse" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            Browse
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            Login
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href="/register"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            Register
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold text-foreground">Resources</h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <Link href="/help" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            Help Center
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href="/contact"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            Contact
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            FAQ
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold text-foreground">Legal</h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <Link
+                                            href="/privacy"
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                            Privacy
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            Terms
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="font-semibold text-foreground mb-4">Support</h4>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li>
-                                    <Link href="/help" className="hover:text-primary transition-colors">
-                                        Help Center
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/contact" className="hover:text-primary transition-colors">
-                                        Contact Us
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/faq" className="hover:text-primary transition-colors">
-                                        FAQ
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-foreground mb-4">Legal</h4>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li>
-                                    <Link href="/privacy" className="hover:text-primary transition-colors">
-                                        Privacy Policy
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/terms" className="hover:text-primary transition-colors">
-                                        Terms of Service
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="md:col-span-2">
-                            <h4 className="font-semibold text-foreground mb-4">Stay Updated</h4>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Get the latest research updates and academic insights delivered to your inbox.
+
+                        {/* Newsletter - minimal design */}
+                        <div className="lg:col-span-3 space-y-4">
+                            <h4 className="text-sm font-semibold text-foreground">Stay Connected</h4>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                Subscribe for research updates and academic insights.
                             </p>
                             <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                                <div className="flex gap-2">
-                                    <div className="relative flex-1">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <input
-                                            type="email"
-                                            placeholder="Enter your email"
-                                            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-all"
-                                            required
-                                        />
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 text-sm px-6 whitespace-nowrap"
-                                    >
-                                        Subscribe
-                                    </Button>
+                                <div className="relative">
+                                    <input
+                                        type="email"
+                                        placeholder="Email address"
+                                        className="w-full px-4 py-2.5 rounded-lg bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-all"
+                                        required
+                                    />
                                 </div>
+                                <Button
+                                    type="submit"
+                                    size="sm"
+                                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0"
+                                >
+                                    Subscribe
+                                    <ArrowRight className="ml-2 h-3 w-3" />
+                                </Button>
                             </form>
-                            <p className="text-xs text-muted-foreground mt-3">We respect your privacy. Unsubscribe anytime.</p>
                         </div>
                     </div>
-                    <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-                        <p>© 2025 SUST Research Repository. All rights reserved.</p>
-                        <p className="mt-2">Shahjalal University of Science and Technology</p>
+
+                    {/* Bottom bar - clean single line */}
+                    <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p className="text-xs text-muted-foreground text-center sm:text-left">
+                            © 2025 Shahjalal University of Science and Technology. All rights reserved.
+                        </p>
+                        <div className="flex items-center gap-6">
+                            <a
+                                href="https://github.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-primary transition-colors"
+                            >
+                                <Github className="h-4 w-4" />
+                            </a>
+                            <a href="mailto:contact@sust.edu" className="text-muted-foreground hover:text-primary transition-colors">
+                                <Mail className="h-4 w-4" />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
