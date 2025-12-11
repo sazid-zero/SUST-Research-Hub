@@ -74,7 +74,7 @@ function AnimatedParticles() {
             {particles.map((particle) => (
                 <motion.div
                     key={particle.id}
-                    className="absolute rounded-full bg-primary/20 dark:bg-white border border-white shadow-lg shadow-primary/30"
+                    className="absolute rounded-full bg-white border border-white shadow-lg shadow-primary/30"
                     style={{
                         left: `${particle.x}%`,
                         top: `${particle.y}%`,
