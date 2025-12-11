@@ -5,6 +5,7 @@ import { useTheme } from "./theme-provider"
 import { AnimatedParticles } from "@/components/repository-showcase"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import {scrollToExplore} from "@/components/scroll-to-section";
 
 const features = [
     {
@@ -98,7 +99,6 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
             top: "from-primary/10 to-primary/30",
             bottom: "from-primary/80 to-primary",
         }
-
     return (
         <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none">
             {cubes.map((cube, index) => (
@@ -261,7 +261,7 @@ export function FeaturesSection() {
 
                             <Link
                                 href="#explore"
-                                scroll={true}
+                                onClick={scrollToExplore}
                                 className="inline-flex items-center gap-2 text-primary text-sm font-medium hover:text-primary/80 transition-colors"
                             >
                                 Learn more

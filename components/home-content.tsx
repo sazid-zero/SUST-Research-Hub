@@ -5,6 +5,7 @@ import type React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import {scrollToExplore} from "@/components/scroll-to-section";
 import {
     BookOpen,
     Zap,
@@ -296,14 +297,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 return "/student/dashboard"
             default:
                 return "/register"
-        }
-    }
-
-    const scrollToExplore = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault()
-        const exploreSection = document.getElementById("explore-section")
-        if (exploreSection) {
-            exploreSection.scrollIntoView({ behavior: "smooth", block: "start" })
         }
     }
 
@@ -784,7 +777,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 variant="ghost"
                                 className="text-foreground hover:text-foreground hover:bg-muted/50 px-8"
                             >
-                                <Link href="/explore">
+                                <Link href="/theses">
                                     Explore Theses
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
@@ -814,7 +807,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
-            <footer className="relative border-t border-border/50 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
+            <footer className="relative border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
                 <div className="px-6 lg:px-12 py-16">
                     {/* Main footer content */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
