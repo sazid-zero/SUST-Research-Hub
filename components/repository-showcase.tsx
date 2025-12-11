@@ -52,7 +52,7 @@ const TAB_ROTATION_ORDER: Array<"theses" | "papers" | "projects" | "models" | "d
     "datasets",
 ]
 
-function AnimatedParticles() {
+ export function AnimatedParticles() {
     const [particles, setParticles] = useState<
         Array<{ id: number; x: number; y: number; size: number; duration: number }>
     >([])
@@ -159,7 +159,7 @@ export function RepositoryShowcase() {
     }
 
     return (
-        <section ref={containerRef} className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden ">
+        <section ref={containerRef} className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden  ">
             {/* Background effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent z-0" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse z-0" />
