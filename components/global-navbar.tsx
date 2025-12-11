@@ -34,6 +34,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
 
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/")
 
+    // @ts-ignore
     return (
         <>
             <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 border-b border-border/50">
@@ -158,7 +159,8 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
             </nav>
 
             {/* Spacer for fixed navbar */}
-            <div className="h-16" />
+            <div className="h-24" />
+
         </>
     )
 }

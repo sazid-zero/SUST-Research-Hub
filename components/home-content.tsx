@@ -55,7 +55,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     const [scrollPosition, setScrollPosition] = useState(0)
     const { scrollY } = useScroll()
 
-    const heroSectionHeight = 400 // reduced from 800 to 400 to make scroll animation 2x faster
+    const heroSectionHeight = 300 // reduced from 800 to 400 to make scroll animation 2x faster
     const textScale = useTransform(scrollY, [0, heroSectionHeight], [1, 0.8])
     const textOpacity = useTransform(scrollY, [0, heroSectionHeight], [1, 0])
     const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0]) // reduced from 300 to 150 for faster button fade
