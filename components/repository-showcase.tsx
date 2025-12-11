@@ -110,7 +110,7 @@ export function RepositoryShowcase() {
                 const nextIndex = (currentIndex + 1) % TAB_ROTATION_ORDER.length
                 return TAB_ROTATION_ORDER[nextIndex]
             })
-        }, 4000)
+        }, 2000)
 
         return () => clearInterval(interval)
     }, [isAutoRotating])
