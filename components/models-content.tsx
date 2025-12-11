@@ -428,7 +428,7 @@ export default function ModelsContent({ user }: ModelsContentProps) {
         <div className="min-h-screen bg-background">
             <GlobalNavbar user={user} />
 
-            <div className="mx-auto max-w-[83.5rem] px-4 lg:px-8 pb-12">
+            <div className="mx-auto lg:mx-20 px-4 lg:px-8 pb-12">
                 <div className="grid gap-6 lg:gap-8 lg:grid-cols-[400px_1fr]">
                     {/* Desktop Sidebar Filters */}
                     <div className="hidden lg:block">
@@ -924,7 +924,8 @@ export default function ModelsContent({ user }: ModelsContentProps) {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid  gap-x-4 gap-y-6 sm:grid-cols-1"
+                             style={{ gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))" }}>
                             {filteredModels.map((model, index) => {
                                 const taskConfig = taskCategories[model.task]
                                 const TaskIcon = taskConfig?.icon || FileText

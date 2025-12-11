@@ -29,6 +29,7 @@ import { useInView } from "react-intersection-observer"
 import { useTheme } from "next-themes"
 import type { Thesis } from "@/lib/data/theses"
 import { GlobalNavbar } from "@/components/global-navbar"
+import { RepositoryShowcase } from "@/components/repository-showcase"
 
 interface HomeContentProps {
     user: any
@@ -55,7 +56,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     const [scrollPosition, setScrollPosition] = useState(0)
     const { scrollY } = useScroll()
 
-    const heroSectionHeight = 300 // reduced from 800 to 400 to make scroll animation 2x faster
+    const heroSectionHeight = 400 // reduced from 800 to 400 to make scroll animation 2x faster
     const textScale = useTransform(scrollY, [0, heroSectionHeight], [1, 0.8])
     const textOpacity = useTransform(scrollY, [0, heroSectionHeight], [1, 0])
     const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0]) // reduced from 300 to 150 for faster button fade
@@ -508,6 +509,9 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                     />
                                 </div>
                                 <div className="absolute inset-0">
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.05)_0%,transparent_50%)]" />
+                                </div>
+                                <div className="absolute inset-0">
                                     <div
                                         className="absolute w-48 h-48 top-20 left-20"
                                         style={{
@@ -727,130 +731,11 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
-            {/* Explore Repositories Section */}
-            <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 z-30">
-                <div className="mx-auto max-w-7xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
-                        className="mb-12 space-y-4"
-                    >
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground">Explore All Repositories</h2>
-                        <p className="text-lg text-muted-foreground max-w-2xl">
-                            Discover theses, papers, datasets, models, and collaborative research projects from SUST
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 auto-rows-max"
-                    >
-                        {[
-                            {
-                                id: "theses",
-                                title: "Research Theses",
-                                description: "Complete academic research documents from student projects and faculty work",
-                                icon: BookOpen,
-                                href: "/browse",
-                                color: "from-blue-500 to-cyan-500",
-                                stats: { count: allTheses.length, label: "Theses" },
-                                highlight: "Full-text searchable repository with advanced filters",
-                            },
-                            {
-                                id: "papers",
-                                title: "Published Papers",
-                                description: "Peer-reviewed publications and research papers from journal/conference submissions",
-                                icon: FileText,
-                                href: "/papers",
-                                color: "from-purple-500 to-pink-500",
-                                stats: { count: 47, label: "Papers" },
-                                highlight: "Indexed with DOI and citation metadata",
-                            },
-                            {
-                                id: "datasets",
-                                title: "Research Datasets",
-                                description: "Curated datasets used in academic research, ready for download and analysis",
-                                icon: Database,
-                                href: "/datasets",
-                                color: "from-green-500 to-emerald-500",
-                                stats: { count: 23, label: "Datasets" },
-                                highlight: "Organized by research domain and format",
-                            },
-                            {
-                                id: "models",
-                                title: "ML Models",
-                                description: "Pre-trained machine learning models and computational resources for research",
-                                icon: Cpu,
-                                href: "/models",
-                                color: "from-orange-500 to-red-500",
-                                stats: { count: 12, label: "Models" },
-                                highlight: "Complete model cards with training details",
-                            },
-                            {
-                                id: "projects",
-                                title: "Research Projects",
-                                description: "Collaborative research projects, ongoing work, and departmental initiatives",
-                                icon: FolderOpen,
-                                href: "/projects",
-                                color: "from-indigo-500 to-blue-500",
-                                stats: { count: 34, label: "Projects" },
-                                highlight: "Team collaboration and project tracking",
-                            },
-                        ].map((repo, idx) => {
-                            const Icon = repo.icon
-                            return (
-                                <motion.div
-                                    key={repo.id}
-                                    variants={itemVariants}
-                                    className={`group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover:shadow-xl transition-all duration-300`}
-                                >
-                                    {/* Background gradient */}
-                                    <div
-                                        className={`absolute inset-0 bg-gradient-to-br ${repo.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-                                    />
-
-                                    {/* Content */}
-                                    <div className="relative z-10 space-y-4 h-full flex flex-col">
-                                        <div
-                                            className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${repo.color} text-white`}
-                                        >
-                                            <Icon className="h-6 w-6" />
-                                        </div>
-
-                                        <div className="space-y-2 flex-1">
-                                            <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                                                {repo.title}
-                                            </h3>
-                                            <p className="text-sm text-muted-foreground line-clamp-2">{repo.description}</p>
-                                            <p className="text-xs text-primary/80 font-medium pt-2">{repo.highlight}</p>
-                                        </div>
-
-                                        <div className="space-y-3 pt-4 border-t border-border">
-                                            <div className="space-y-1">
-                                                <p className="text-2xl font-bold text-foreground">{repo.stats.count}</p>
-                                                <p className="text-xs text-muted-foreground">{repo.stats.label}</p>
-                                            </div>
-
-                                            <Link href={repo.href} className="block">
-                                                <Button
-                                                    className="w-full gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-md"
-                                                    size="sm"
-                                                >
-                                                    Explore
-                                                    <ArrowRight className="h-4 w-4" />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )
-                        })}
-                    </motion.div>
-                </div>
+            {/* 3D Repository Showcase Section */}
+            <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 z-40 bg-background">
+                <RepositoryShowcase />
             </section>
+
 
             {/* Features section remains */}
             <section id="features" className="relative py-16 sm:py-20 bg-transparent z-30">
@@ -922,37 +807,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                     </div>
                 </div>
             </section>
-
-            {/* <section className="relative z-30 border-t border-border py-16 sm:py-24 bg-transparent">
-        <div className="px-6 lg:px-12">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">SUST Research Hub by Numbers</h2>
-            <p className="text-muted-foreground text-lg">
-              A thriving community of researchers and innovators from SUST
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              { value: "37", label: "Papers", icon: FileText },
-              { value: "12", label: "Departments", icon: BookOpen },
-              { value: "50+", label: "Researchers", icon: Users },
-            ].map((stat, idx) => {
-              const Icon = stat.icon
-              return (
-                <Card
-                  key={idx}
-                  className="border-border bg-card/50 p-8 shadow-xl hover:shadow-2xl hover:border-primary/50 transition-all text-center"
-                >
-                  <Icon className="h-8 w-8 text-primary mb-4 mx-auto" />
-                  <p className="text-4xl font-bold text-foreground mb-2">{stat.value}</p>
-                  <p className="text-muted-foreground">{stat.label}</p>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section> */}
 
             <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10" />
