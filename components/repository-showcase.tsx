@@ -74,7 +74,7 @@ function AnimatedParticles() {
             {particles.map((particle) => (
                 <motion.div
                     key={particle.id}
-                    className="absolute rounded-full bg-primary/20 dark:bg-primary/30 border border-primary/40 shadow-lg shadow-primary/30"
+                    className="absolute rounded-full bg-primary/20 dark:bg-white border border-white shadow-lg shadow-primary/30"
                     style={{
                         left: `${particle.x}%`,
                         top: `${particle.y}%`,
@@ -181,7 +181,7 @@ export function RepositoryShowcase() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12 space-y-4"
+                    className="text-center mb-20 space-y-4"
                 >
                     <h2 className="text-4xl md:text-5xl font-bold text-foreground">
                         Explore{" "}
