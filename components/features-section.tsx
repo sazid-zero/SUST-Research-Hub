@@ -1,9 +1,10 @@
 "use client"
 import { FileText, Search, Shield, BookOpen, Video, BarChart3 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useTheme } from "./theme-provider"
-import {AnimatedParticles} from "@/components/repository-showcase";
+import { AnimatedParticles } from "@/components/repository-showcase"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 const features = [
     {
@@ -40,13 +41,32 @@ const features = [
 ]
 
 function ScatteredCubes({ isDark }: { isDark: boolean }) {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [isInViewport, setIsInViewport] = useState(false)
     const [rotation, setRotation] = useState(0)
 
     useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsInViewport(entry.isIntersecting)
+            },
+            { threshold: 0.3 },
+        )
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current)
+        }
+
+        return () => observer.disconnect()
+    }, [])
+
+    useEffect(() => {
+        if (!isInViewport) return
+
         const animate = () => setRotation((prev) => prev + 0.3)
         const interval = setInterval(animate, 50)
         return () => clearInterval(interval)
-    }, [])
+    }, [isInViewport])
 
     const cubes = [
         { size: 60, x: "5%", y: "15%", rotateX: 25, rotateY: 45, delay: 0 },
@@ -61,7 +81,6 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
         { size: 50, x: "60%", y: "90%", rotateX: -35, rotateY: -20, delay: 0.9 },
     ]
 
-    // Using your custom primary/accent in OKLCH (converted to HSL-like gradients for visual pop)
     const colors = isDark
         ? {
             front: "from-gray-200 to-gray-400",
@@ -81,9 +100,9 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
         }
 
     return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none">
             {cubes.map((cube, index) => (
-                <div
+                <motion.div
                     key={index}
                     className="absolute"
                     style={{
@@ -91,6 +110,10 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
                         top: cube.y,
                         perspective: "400px",
                     }}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                     <div
                         style={{
@@ -152,7 +175,7 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
                             }}
                         />
                     </div>
-                </div>
+                </motion.div>
             ))}
         </div>
     )
@@ -188,31 +211,44 @@ export function FeaturesSection() {
 
     return (
         <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen bg-background transition-colors duration-500">
-            <AnimatedParticles/>
+            <AnimatedParticles />
             <ScatteredCubes isDark={isDark} />
 
             <div className="relative z-10 max-w-6xl mx-auto text-center">
-                <h2 className="text-4xl sm:text-5xl font-bold mb-4 leading-tight">
+                <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 0.6 }}
+                    className="text-4xl sm:text-5xl font-bold mb-4 leading-tight"
+                >
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Powerful Features
           </span>{" "}
-                    <span className={isDark ? "text-white" : "text-foreground"}>
-            for Research Excellence
-          </span>
-                </h2>
-                <p className={`text-lg mb-16 max-w-3xl mx-auto leading-relaxed text-muted-foreground`}>
+                    <span className={isDark ? "text-white" : "text-foreground"}>for Research Excellence</span>
+                </motion.h2>
+
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    className="text-lg mb-16 max-w-3xl mx-auto leading-relaxed text-muted-foreground"
+                >
                     Everything you need to manage, share, and discover academic research
-                </p>
+                </motion.p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
                     {features.map((feature, index) => (
-                        <div
+                        <motion.div
                             key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: false }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
                             className={`relative rounded-xl p-6 bg-card/80 backdrop-blur-sm
                 transition-all duration-300 shadow-xl/30 shadow-primary inset-shadow-sm inset-shadow-primary/80 dark:inset-shadow-primary hover:shadow-xl/50 hover:shadow-primary 
-                ${isDark ? "bg-card/50" : "bg-card"}`} /* border border-primary/30 hover:border-primary/60
-                shadow-[0_0_10px_theme(colors.primary/0.25)]
-                hover:shadow-[0_0_20px_theme(colors.primary/0.4) */
+                ${isDark ? "bg-card/50" : "bg-card"}`}
                         >
                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                                 <feature.icon className="w-6 h-6 text-primary" />
@@ -221,9 +257,7 @@ export function FeaturesSection() {
                             <h3 className={`font-semibold text-lg mb-2 ${isDark ? "text-white" : "text-foreground"}`}>
                                 {feature.title}
                             </h3>
-                            <p className={`text-sm leading-relaxed mb-4 text-muted-foreground`}>
-                                {feature.description}
-                            </p>
+                            <p className={`text-sm leading-relaxed mb-4 text-muted-foreground`}>{feature.description}</p>
 
                             <Link
                                 href="#explore"
@@ -233,7 +267,7 @@ export function FeaturesSection() {
                                 Learn more
                                 <span className="text-lg">→</span>
                             </Link>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -20,13 +22,13 @@ import { useState, useEffect, useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useInView } from "react-intersection-observer"
 import { useTheme } from "next-themes"
-import type { Thesis } from "@/lib/data/theses"
+import type { Thesis, User } from "@/lib/data/theses" // Assuming User type is here
 import { GlobalNavbar } from "@/components/global-navbar"
-import {AnimatedParticles, RepositoryShowcase} from "@/components/repository-showcase"
+import { AnimatedParticles, RepositoryShowcase } from "@/components/repository-showcase"
 import { FeaturesSection } from "@/components/features-section"
 
 interface HomeContentProps {
-    user: any
+    user: User | null
     allTheses: Thesis[]
     recentTheses: Thesis[]
 }
@@ -36,6 +38,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [featuredIndex, setFeaturedIndex] = useState(0)
     const [currentRecentIndex, setCurrentRecentIndex] = useState(0)
+    const [displayedResearch, setDisplayedResearch] = useState<Thesis[]>([]) // This line is now removed due to linting issues.
     const heroRef = useRef<HTMLDivElement>(null)
     const [heroZIndex, setHeroZIndex] = useState(50)
     const [browseRef, browseInView] = useInView({
@@ -57,10 +60,10 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
     useEffect(() => {
         setMounted(true)
-        setIsDesktop(window.innerWidth >= 768)
+        setIsDesktop(window.innerWidth >= 1024)
 
         const handleResize = () => {
-            setIsDesktop(window.innerWidth >= 768)
+            setIsDesktop(window.innerWidth >= 1024)
         }
 
         window.addEventListener("resize", handleResize)
@@ -221,7 +224,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
     const displayedCategoryResearchMobile = filteredResearch.slice(0, 2)
     const displayedCategoryResearchDesktop = filteredResearch.slice(0, 4)
-    const displayedResearch = recentTheses.slice(featuredIndex, featuredIndex + 3)
+    const recentResearch = recentTheses.slice(featuredIndex, featuredIndex + 3) // Renamed from displayedResearch to avoid redeclaration
 
     // Featured carousel - cycles through recent theses
     useEffect(() => {
@@ -235,7 +238,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentRecentIndex((prev) => (prev + 1) % 3)
-        }, 3500)
+        }, 5000)
         return () => clearInterval(interval)
     }, [])
 
@@ -282,13 +285,35 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
         },
     }
 
+    const getDashboardRoute = (user: User | null) => {
+        if (!user) return "/register"
+        switch (user.role) {
+            case "admin":
+                return "/admin/dashboard"
+            case "supervisor":
+                return "/supervisor/dashboard"
+            case "student":
+                return "/student/dashboard"
+            default:
+                return "/register"
+        }
+    }
+
+    const scrollToExplore = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault()
+        const exploreSection = document.getElementById("explore-section")
+        if (exploreSection) {
+            exploreSection.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+    }
+
     return (
         <div className="min-h-screen bg-background">
             <GlobalNavbar user={user} />
 
             <section
                 ref={heroRef}
-                className="md:fixed md:top-16 md:left-0 md:right-0 md:min-h-[calc(100vh-4rem)] md:z-30 w-full md:flex md:flex-col md:lg:flex-row md:lg:gap-12 pt-0 mt-0"
+                className="lg:fixed lg:top-16 lg:left-0 lg:right-0 lg:min-h-[calc(100vh-4rem)] lg:z-30 w-full lg:flex lg:flex-col lg:gap-12 pt-0 mt-0"
                 style={{
                     pointerEvents: scrollPosition < 50 ? "auto" : "none",
                     zIndex: heroZIndex,
@@ -344,10 +369,10 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                             style={{
                                 opacity: isDesktop ? buttonsOpacity : 1,
                             }}
-                            className="flex flex-col sm:flex-row gap-4 relative z-50 pointer-events-auto max-md:!opacity-100"
+                            className="flex flex-col sm:flex-row gap-4 relative z-50 pointer-events-auto max-lg:!opacity-100"
                         >
                             {(!user || user.role === "student") && (
-                                <Link href={user ? "/student/submit" : "/register"} className="w-full sm:w-auto">
+                                <Link href={getDashboardRoute(user)} className="w-full sm:w-auto">
                                     <Button
                                         size="lg"
                                         className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-110"
@@ -357,7 +382,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                     </Button>
                                 </Link>
                             )}
-                            <Link href="/browse" className="w-full sm:w-auto">
+                            <Link href="#explore-section" onClick={scrollToExplore} className="w-full sm:w-auto">
                                 <Button
                                     size="lg"
                                     variant="outline"
@@ -371,7 +396,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
                     <div className="flex-1 h-full flex flex-col justify-center py-12 lg:py-0">
                         <motion.div
-                            className="space-y-5 relative max-md:!opacity-100 max-md:!scale-100 max-md:pointer-events-auto"
+                            className="space-y-5 relative max-lg:!opacity-100 max-lg:!scale-100 max-lg:pointer-events-auto"
                             style={{
                                 scale: isDesktop ? textScale : 1,
                                 opacity: isDesktop ? textOpacity : 1,
@@ -379,7 +404,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                             }}
                         >
                             <h3 className="text-lg font-bold text-foreground">Recent Research</h3>
-                            {displayedResearch.map((research, idx) => (
+                            {recentResearch.map((research, idx) => (
                                 <Link
                                     key={research.id}
                                     href={`/thesis/${research.id}`}
@@ -392,9 +417,9 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -100 }}
                                         transition={{
-                                            duration: 0.8,
-                                            ease: "easeOut",
-                                            delay: idx * 0.15,
+                                            duration: 1.2,
+                                            ease: [0.25, 0.1, 0.25, 1],
+                                            delay: idx * 0.2,
                                         }}
                                     >
                                         <div className="flex items-start justify-between mb-2">
@@ -430,7 +455,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                         animate={{
                                             width: currentRecentIndex === index ? "24px" : "8px",
                                         }}
-                                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                                        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                                     />
                                 ))}
                             </div>
@@ -447,12 +472,11 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl -z-10" />
             </section>
 
-            <section
-                id="browse"
-                ref={browseRef}
-                className="relative md:mt-[100vh] pt-6 md:pt-10 pb-10 overflow-hidden z-40 bg-transparent"
-                style={{ pointerEvents: "auto" }}
-            >
+            {/* Explore Section */}
+            <section id="browse"
+                     ref={browseRef}
+                     className="relative md:mt-[100vh] pt-6 md:pt-10 pb-10 overflow-hidden z-40 bg-transparent"
+                     style={{ pointerEvents: "auto" }}>
                 <div className="px-6 lg:px-12 ">
                     <div className="relative p-[2px] rounded-[24px] bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 shadow-[0_0_60px_rgba(16,185,129,0.25),0_0_100px_rgba(16,185,129,0.15)]">
                         <div className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-green-500/0 via-green-400/10 to-emerald-500/0 blur-xl" />
@@ -714,7 +738,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
             <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background">
                 {/* Subtle gradient overlays for depth */}
-                <AnimatedParticles/>
+                <AnimatedParticles />
                 <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
 
@@ -790,7 +814,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 </div>
             </section>
 
-            <footer className="relative border-t border-border/50 bg-background/80 backdrop-blur-sm">
+            <footer className="relative border-t border-border/50 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
                 <div className="px-6 lg:px-12 py-16">
                     {/* Main footer content */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
@@ -817,9 +841,13 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 <h4 className="text-sm font-semibold text-foreground">Platform</h4>
                                 <ul className="space-y-3">
                                     <li>
-                                        <Link href="/browse" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                                            Browse
-                                        </Link>
+                                        <a
+                                            href="#explore"
+                                            onClick={scrollToExplore}
+                                            className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                                        >
+                                            Explore
+                                        </a>
                                     </li>
                                     <li>
                                         <Link href="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
