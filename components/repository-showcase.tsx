@@ -5,13 +5,13 @@ import type React from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { BookOpen, Database, Cpu, FileText, Folder, GraduationCap } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { ThesisContentMock } from "@/components/thesis-content-mock"
 import { PapersContent } from "@/components/papers-content"
 import ProjectsContent from "@/components/projects-content"
 import ModelsContent from "@/components/models-content"
 import DatasetsContent from "@/components/datasets-content"
-import {IconBrand4chan, IconBrandUnity} from "@tabler/icons-react";
+import { IconBrandUnity } from "@tabler/icons-react"
 
 const repositories = [
     {
@@ -100,9 +100,26 @@ function AnimatedParticles() {
 export function RepositoryShowcase() {
     const [activeRepo, setActiveRepo] = useState<"theses" | "papers" | "projects" | "models" | "datasets">("models")
     const [isAutoRotating, setIsAutoRotating] = useState(true)
+    const [isInViewport, setIsInViewport] = useState(true)
+    const containerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (!isAutoRotating) return
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsInViewport(entry.isIntersecting)
+            },
+            { threshold: 0.3 },
+        )
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current)
+        }
+
+        return () => observer.disconnect()
+    }, [])
+
+    useEffect(() => {
+        if (!isAutoRotating || !isInViewport) return
 
         const interval = setInterval(() => {
             setActiveRepo((current) => {
@@ -113,7 +130,7 @@ export function RepositoryShowcase() {
         }, 2000)
 
         return () => clearInterval(interval)
-    }, [isAutoRotating])
+    }, [isAutoRotating, isInViewport])
 
     const handleTabClick = (tab: "theses" | "papers" | "projects" | "models" | "datasets") => {
         setActiveRepo(tab)
@@ -142,7 +159,7 @@ export function RepositoryShowcase() {
     }
 
     return (
-        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden ">
+        <section ref={containerRef} className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden ">
             {/* Background effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent z-0" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse z-0" />
@@ -162,9 +179,9 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-25 space-y-4"
+                    className="text-center mb-12 space-y-4"
                 >
                     <h2 className="text-4xl md:text-5xl font-bold text-foreground">
                         Explore{" "}
@@ -181,7 +198,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.8 }}
                     className="relative"
                 >
@@ -220,7 +237,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="flex justify-center mt-10"
                 >
@@ -267,7 +284,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="flex justify-center mt-12"
                 >

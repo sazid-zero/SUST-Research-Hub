@@ -18,10 +18,6 @@ import {
     BarChart3,
     Video,
     Mail,
-    Database,
-    Cpu,
-    FolderOpen,
-    ArrowRight,
 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
@@ -225,8 +221,8 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 }
             })
 
-    const displayedCategoryResearch = filteredResearch.slice(0, 4)
     const displayedCategoryResearchMobile = filteredResearch.slice(0, 2)
+    const displayedCategoryResearchDesktop = filteredResearch.slice(0, 4)
     const displayedResearch = recentTheses.slice(featuredIndex, featuredIndex + 3)
 
     // Featured carousel - cycles through recent theses
@@ -460,8 +456,9 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 style={{ pointerEvents: "auto" }}
             >
                 <div className="px-6 lg:px-12 ">
-                    <div className="relative p-[3px] rounded-[24px] bg-green-600 shadow-[0_0_80px_rgba(16,185,129,0.15)] ">
-                        <div className="relative rounded-[21px] overflow-hidden border-3 border-border bg-card">
+                    <div className="relative p-[2px] rounded-[24px] bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 shadow-[0_0_60px_rgba(16,185,129,0.25),0_0_100px_rgba(16,185,129,0.15)]">
+                        <div className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-green-500/0 via-green-400/10 to-emerald-500/0 blur-xl" />
+                        <div className="relative rounded-[21px] overflow-hidden border border-border/50 bg-card">
                             <div className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-100">
                                 <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-96">
                                     <div
@@ -556,22 +553,22 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/[0.02] rounded-full blur-3xl pointer-events-none" />
                             <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-accent/[0.02] rounded-full blur-3xl pointer-events-none" />
 
-                            <div className="relative z-10 p-6 sm:p-12 ">
-                                <div className="mb-12">
-                                    <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">Browse by Field</h2>
-                                    <p className="text-muted-foreground text-lg">
+                            <div className="relative z-10 p-4 sm:p-8">
+                                <div className="mb-8">
+                                    <h2 className="text-2xl font-bold text-foreground sm:text-3xl mb-2">Browse by Field</h2>
+                                    <p className="text-muted-foreground text-sm sm:text-base">
                                         Explore research across different academic disciplines
                                     </p>
                                 </div>
 
-                                <div className="flex flex-wrap gap-3 mb-12 z-30">
+                                <div className="flex flex-wrap gap-2 mb-8 z-30">
                                     {researchCategories.map((cat) => {
                                         const Icon = cat.icon
                                         return (
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setSelectedCategory(cat.id)}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all border bg-card relative z-30 ${
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-sm transition-all border bg-card relative z-30 ${
                                                     selectedCategory === cat.id
                                                         ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent shadow-lg shadow-primary/25"
                                                         : "border-border text-foreground hover:border-primary/50 hover:bg-accent"
@@ -580,38 +577,38 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                                     animation: selectedCategory === cat.id ? "pulse 2s ease-in-out infinite" : "none",
                                                 }}
                                             >
-                                                <Icon className="h-4 w-4" />
-                                                {cat.label}
+                                                <Icon className="h-3.5 w-3.5" />
+                                                <span>{cat.label}</span>
                                                 <span className="text-xs opacity-75">({cat.count})</span>
                                             </button>
                                         )
                                     })}
                                 </div>
 
-                                <div className="grid gap-6 md:grid-cols-2">
+                                <div className="grid gap-4 md:grid-cols-2">
                                     {/* Mobile view - 2 items */}
                                     <div className="md:hidden contents">
                                         {displayedCategoryResearchMobile.map((research) => (
                                             <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
-                                                <Card className="relative overflow-hidden border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
-                                                    <div className="space-y-4">
+                                                <Card className="relative overflow-hidden border-border bg-card p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
+                                                    <div className="space-y-3">
                                                         <div>
-                                                            <div className="flex items-start justify-between mb-2">
-                                <span className="inline-block px-2 py-1 rounded bg-primary/10 text-primary text-xs font-medium">
+                                                            <div className="flex items-start justify-between mb-1.5">
+                                <span className="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
                                   {research.year}
                                 </span>
                                                                 <div className="flex items-center gap-1 text-muted-foreground">
-                                                                    <Star className="h-4 w-4 fill-primary text-primary" />
-                                                                    <span className="text-sm font-medium">{research.downloads}</span>
+                                                                    <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                                                                    <span className="text-xs font-medium">{research.downloads}</span>
                                                                 </div>
                                                             </div>
-                                                            <h3 className="text-lg font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight">
+                                                            <h3 className="text-base font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
                                                                 {research.title}
                                                             </h3>
                                                         </div>
 
-                                                        <div className="space-y-1">
-                                                            <p className="text-sm text-foreground font-medium">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-xs text-foreground font-medium line-clamp-1">
                                                                 {research.authors?.map((author: any, idx: number) => (
                                                                     <span key={author.id || idx}>
                                     {author.full_name}
@@ -619,31 +616,20 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                   </span>
                                                                 )) || research.author}
                                                             </p>
-                                                            <p className="text-sm text-muted-foreground">{research.department}</p>
+                                                            <p className="text-xs text-muted-foreground line-clamp-1">{research.department}</p>
                                                         </div>
 
-                                                        <p className="text-sm text-muted-foreground line-clamp-2">{research.abstract}</p>
+                                                        <p className="text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
 
-                                                        <div className="flex flex-wrap gap-2 pt-2">
-                                                            {research.keywords.slice(0, 3).map((keyword) => (
+                                                        <div className="flex flex-wrap gap-1.5 pt-1.5">
+                                                            {research.keywords.slice(0, 2).map((keyword) => (
                                                                 <span
                                                                     key={keyword}
-                                                                    className="inline-block px-2 py-1 rounded text-xs font-medium text-foreground bg-muted border border-border"
+                                                                    className="inline-block px-2 py-0.5 rounded-md bg-primary/5 text-primary text-xs"
                                                                 >
                                   {keyword}
                                 </span>
                                                             ))}
-                                                        </div>
-
-                                                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                                <Eye className="h-4 w-4" />
-                                                                <span className="text-xs">{research.views.toLocaleString()} views</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1 text-foreground group-hover:text-primary transition-colors">
-                                                                <span className="text-xs font-medium">View</span>
-                                                                <ExternalLink className="h-3 w-3" />
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 </Card>
@@ -653,27 +639,27 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
                                     {/* Desktop view - 4 items */}
                                     <div className="hidden md:contents">
-                                        {displayedCategoryResearch.map((research) => (
-                                            <Link key={research.id} href={`/thesis/${research.id}`} className="block group" prefetch={true}>
-                                                <Card className="relative overflow-hidden border-border bg-card p-6 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
-                                                    <div className="space-y-4">
+                                        {displayedCategoryResearchDesktop.map((research) => (
+                                            <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
+                                                <Card className="relative overflow-hidden border-border bg-card p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
+                                                    <div className="space-y-3">
                                                         <div>
-                                                            <div className="flex items-start justify-between mb-2">
-                                <span className="inline-block px-2 py-1 rounded bg-primary/10 text-primary text-xs font-medium">
+                                                            <div className="flex items-start justify-between mb-1.5">
+                                <span className="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
                                   {research.year}
                                 </span>
                                                                 <div className="flex items-center gap-1 text-muted-foreground">
-                                                                    <Star className="h-4 w-4 fill-primary text-primary" />
-                                                                    <span className="text-sm font-medium">{research.downloads}</span>
+                                                                    <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                                                                    <span className="text-xs font-medium">{research.downloads}</span>
                                                                 </div>
                                                             </div>
-                                                            <h3 className="text-lg font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight">
+                                                            <h3 className="text-base font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
                                                                 {research.title}
                                                             </h3>
                                                         </div>
 
-                                                        <div className="space-y-1">
-                                                            <p className="text-sm text-foreground font-medium">
+                                                        <div className="space-y-0.5">
+                                                            <p className="text-xs text-foreground font-medium line-clamp-1">
                                                                 {research.authors?.map((author: any, idx: number) => (
                                                                     <span key={author.id || idx}>
                                     {author.full_name}
@@ -681,31 +667,20 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                   </span>
                                                                 )) || research.author}
                                                             </p>
-                                                            <p className="text-sm text-muted-foreground">{research.department}</p>
+                                                            <p className="text-xs text-muted-foreground line-clamp-1">{research.department}</p>
                                                         </div>
 
-                                                        <p className="text-sm text-muted-foreground line-clamp-2">{research.abstract}</p>
+                                                        <p className="text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
 
-                                                        <div className="flex flex-wrap gap-2 pt-2">
-                                                            {research.keywords.slice(0, 3).map((keyword) => (
+                                                        <div className="flex flex-wrap gap-1.5 pt-1.5">
+                                                            {research.keywords.slice(0, 2).map((keyword) => (
                                                                 <span
                                                                     key={keyword}
-                                                                    className="inline-block px-2 py-1 rounded text-xs font-medium text-foreground bg-muted border border-border"
+                                                                    className="inline-block px-2 py-0.5 rounded-md bg-primary/5 text-primary text-xs"
                                                                 >
                                   {keyword}
                                 </span>
                                                             ))}
-                                                        </div>
-
-                                                        <div className="flex items-center justify-between pt-4 border-t border-border">
-                                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                                <Eye className="h-4 w-4" />
-                                                                <span className="text-xs">{research.views.toLocaleString()} views</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1 text-foreground group-hover:text-primary transition-colors">
-                                                                <span className="text-xs font-medium">View</span>
-                                                                <ExternalLink className="h-3 w-3" />
-                                                            </div>
                                                         </div>
                                                     </div>
                                                 </Card>
@@ -714,17 +689,15 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                     </div>
                                 </div>
 
-                                <div className="flex justify-center mt-8 relative z-20">
-                                    <Link href="/explore">
-                                        <Button
-                                            size="lg"
-                                            className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg shadow-primary/25"
-                                        >
-                                            Browse All Research
-                                            <ExternalLink className="ml-2 h-4 w-4" />
-                                        </Button>
-                                    </Link>
-                                </div>
+                                <Link href="/browse" className="block mt-6 flex justify-center">
+                                    <Button
+                                        size="lg"
+                                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg shadow-primary/25  text-base rounded-lg"
+                                    >
+                                        Browse All Research
+                                        <ExternalLink className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -735,78 +708,76 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
             <section className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 bg-background">
                 <RepositoryShowcase />
 
+                {/* Features section remains */}
+                <section id="features" className="relative pb-16 sm:pb-24 z-40">
+                    <div className="px-6 lg:px-12">
+                        <div className="text-center mb-12 max-w-3xl mx-auto">
+                            <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">
+                                Powerful Features for Academic Excellence
+                            </h2>
+                            <p className="text-muted-foreground text-lg">
+                                Everything you need to manage, share, and discover academic research
+                            </p>
+                        </div>
 
-
-            {/* Features section remains */}
-            <section id="features" className="relative pb-16 sm:pb-24 z-40">
-                <div className="px-6 lg:px-12">
-                    <div className="text-center mb-12 max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">
-                            Powerful Features for Academic Excellence
-                        </h2>
-                        <p className="text-muted-foreground text-lg">
-                            Everything you need to manage, share, and discover academic research
-                        </p>
-                    </div>
-
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-                        {[
-                            {
-                                icon: FileText,
-                                title: "Easy Submission",
-                                description: "Upload your thesis with support for PDF, presentations, videos, and audio files.",
-                                color: "emerald",
-                            },
-                            {
-                                icon: Search,
-                                title: "Smart Search",
-                                description: "Find relevant research by department, year, keywords, and custom filters.",
-                                color: "teal",
-                            },
-                            {
-                                icon: Shield,
-                                title: "Secure Review",
-                                description: "Supervisors can review, approve, or request changes with detailed feedback.",
-                                color: "cyan",
-                            },
-                            {
-                                icon: BookOpen,
-                                title: "Role-Based Access",
-                                description: "Customized dashboards for students, supervisors, and administrators.",
-                                color: "emerald",
-                            },
-                            {
-                                icon: Video,
-                                title: "Multimedia Support",
-                                description: "Store and access theses in multiple formats for comprehensive research.",
-                                color: "teal",
-                            },
-                            {
-                                icon: BarChart3,
-                                title: "Analytics",
-                                description: "Track submissions, approvals, and repository growth with detailed insights.",
-                                color: "cyan",
-                            },
-                        ].map((feature, idx) => {
-                            const Icon = feature.icon
-                            return (
-                                <Card
-                                    key={idx}
-                                    className="border border-border bg-card/70 shadow-xl backdrop-blur-md p-6 hover:border-primary/50 transition-all hover:shadow-2xl group"
-                                >
-                                    <div
-                                        className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform`}
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+                            {[
+                                {
+                                    icon: FileText,
+                                    title: "Easy Submission",
+                                    description: "Upload your thesis with support for PDF, presentations, videos, and audio files.",
+                                    color: "emerald",
+                                },
+                                {
+                                    icon: Search,
+                                    title: "Smart Search",
+                                    description: "Find relevant research by department, year, keywords, and custom filters.",
+                                    color: "teal",
+                                },
+                                {
+                                    icon: Shield,
+                                    title: "Secure Review",
+                                    description: "Supervisors can review, approve, or request changes with detailed feedback.",
+                                    color: "cyan",
+                                },
+                                {
+                                    icon: BookOpen,
+                                    title: "Role-Based Access",
+                                    description: "Customized dashboards for students, supervisors, and administrators.",
+                                    color: "emerald",
+                                },
+                                {
+                                    icon: Video,
+                                    title: "Multimedia Support",
+                                    description: "Store and access theses in multiple formats for comprehensive research.",
+                                    color: "teal",
+                                },
+                                {
+                                    icon: BarChart3,
+                                    title: "Analytics",
+                                    description: "Track submissions, approvals, and repository growth with detailed insights.",
+                                    color: "cyan",
+                                },
+                            ].map((feature, idx) => {
+                                const Icon = feature.icon
+                                return (
+                                    <Card
+                                        key={idx}
+                                        className="border border-border bg-card/70 shadow-xl backdrop-blur-md p-6 hover:border-primary/50 transition-all hover:shadow-2xl group"
                                     >
-                                        <Icon className="h-6 w-6" />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                                </Card>
-                            )
-                        })}
+                                        <div
+                                            className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform`}
+                                        >
+                                            <Icon className="h-6 w-6" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+                                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                                    </Card>
+                                )
+                            })}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
             </section>
 
             <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
