@@ -705,7 +705,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
             </section>
 
             {/* 3D Repository Showcase Section */}
-            <section className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 bg-background">
+            <section className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 rounded-4xl bg-background">
                 <RepositoryShowcase />
 
                 {/* Features section remains */}
