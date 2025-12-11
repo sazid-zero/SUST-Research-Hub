@@ -142,7 +142,7 @@ export function RepositoryShowcase() {
     }
 
     return (
-        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-background">
+        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden ">
             {/* Background effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent z-0" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse z-0" />
@@ -164,7 +164,7 @@ export function RepositoryShowcase() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12 space-y-4"
+                    className="text-center mb-25 space-y-4"
                 >
                     <h2 className="text-4xl md:text-5xl font-bold text-foreground">
                         Explore{" "}

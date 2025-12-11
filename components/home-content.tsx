@@ -732,13 +732,13 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
             </section>
 
             {/* 3D Repository Showcase Section */}
-            <section className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 z-40 bg-background">
+            <section className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 bg-background">
                 <RepositoryShowcase />
-            </section>
+
 
 
             {/* Features section remains */}
-            <section id="features" className="relative py-16 sm:py-20 bg-transparent z-30">
+            <section id="features" className="relative pb-16 sm:pb-24 z-40">
                 <div className="px-6 lg:px-12">
                     <div className="text-center mb-12 max-w-3xl mx-auto">
                         <h2 className="text-3xl font-bold text-foreground sm:text-4xl mb-4">
@@ -806,6 +806,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                         })}
                     </div>
                 </div>
+            </section>
             </section>
 
             <section className="relative z-30 border-t border-border overflow-hidden py-16 sm:py-24 bg-green-900 dark:bg-green-950 backdrop-blur-md">
