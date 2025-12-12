@@ -181,7 +181,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                     className="text-center mb-20 space-y-4"
                 >
@@ -200,7 +200,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
                     className="relative"
                 >
@@ -239,7 +239,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="flex justify-center mt-10"
                 >
@@ -286,7 +286,7 @@ export function RepositoryShowcase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="flex justify-center mt-12"
                 >

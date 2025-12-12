@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {scrollToExplore} from "@/components/scroll-to-section";
+import {DetailsShowcase} from "@/components/details-showcase";
 import {
     BookOpen,
     Zap,
@@ -721,13 +722,15 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
             {/* 3D Repository Showcase Section */}
             <section
-                id="explore"
+                id="repository-showcase"
                 className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
             >
                 <RepositoryShowcase />
-
+                <DetailsShowcase />
                 <FeaturesSection />
             </section>
+
+
 
             <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background">
                 {/* Subtle gradient overlays for depth */}

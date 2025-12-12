@@ -1,11 +1,5 @@
-import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import ProjectDetailContent from "@/components/project-detail-content"
-
-export const metadata: Metadata = {
-    title: "Project Details",
-    description: "View detailed information about research projects",
-}
 
 interface ProjectDetailsPageProps {
     params: {
@@ -14,7 +8,7 @@ interface ProjectDetailsPageProps {
 }
 
 // Mock project data - will be replaced with database queries later
-const mockProjects = [
+export const mockProjects = [
     {
         id: 1,
         title: "AI Lab Research Initiative - Advanced Machine Learning Systems",
