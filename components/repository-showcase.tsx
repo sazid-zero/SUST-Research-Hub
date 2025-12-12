@@ -158,6 +158,8 @@ export function RepositoryShowcase() {
         }
     }
 
+    // @ts-ignore
+    // @ts-ignore
     return (
         <section ref={containerRef} className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden  ">
             {/* Background effects */}

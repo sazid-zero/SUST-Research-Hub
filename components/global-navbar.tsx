@@ -159,7 +159,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
             </nav>
 
             {/* Spacer for fixed navbar */}
-            <div className="h-24" />
+            <div className="h-16" />
 
         </>
     )

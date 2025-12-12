@@ -1,8 +1,16 @@
 import { getCurrentUser } from "@/lib/auth"
-import { PapersContent } from "@/components/papers-content"
+import { PapersContentBackend } from "@/components/papers-content-backend"
+import { getAllPublications } from "@/lib/db/publications"
 
 export default async function PapersRepositoryPage() {
     const user = await getCurrentUser()
 
-    return <PapersContent user={user} />
+    let papers = []
+    try {
+        papers = await getAllPublications()
+    } catch (error) {
+        console.error("[v0] Error loading papers:", error)
+    }
+
+    return <PapersContentBackend user={user} papers={papers} />
 }
