@@ -245,7 +245,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             {/* HERO SECTION */}
             <section
                 ref={setHeroRef}
-                className="hero-section w-full fixed top-0 h-screen bg-background overflow-hidden z-0 transition-all duration-300 ease-out"
+                className="hero-section w-full lg:fixed lg:top-0 lg:h-screen relative bg-background overflow-hidden z-0 transition-all duration-300 ease-out "
             >
                 <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 opacity-[0.03]">
@@ -298,7 +298,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
                 </div>
 
-                <div className="relative z-10 w-full px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 lg:items-center justify-center">
+                <div className="relative z-10 w-full px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
                     {/* Left: Main Content */}
                     <div className="w-1/2 flex flex-col justify-center space-y-6 lg:space-y-8">
                         <div className="md:hidden flex items-center gap-3 mb-2">
@@ -413,7 +413,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             </section>
 
             {/* Spacer to account for the fixed hero section's height */}
-            <div className="h-screen bg-transparent" />
+            <div className="lg:h-screen bg-transparent h-0" />
 
             {/* Explore Section */}
             <section id="explore-section" className="relative z-10 bg-transparent" data-scroll>
