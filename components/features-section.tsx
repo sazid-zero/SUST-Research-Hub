@@ -215,28 +215,20 @@ export function FeaturesSection() {
             <ScatteredCubes isDark={isDark} />
 
             <div className="relative z-10 max-w-6xl mx-auto text-center">
-                <motion.h2
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+                <h2
                     className="text-4xl sm:text-5xl font-bold mb-4 leading-tight"
                 >
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Powerful Features
           </span>{" "}
                     <span className={isDark ? "text-white" : "text-foreground"}>for Research Excellence</span>
-                </motion.h2>
+                </h2>
 
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
+                <p
                     className="text-lg mb-16 max-w-3xl mx-auto leading-relaxed text-muted-foreground"
                 >
                     Everything you need to manage, share, and discover academic research
-                </motion.p>
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
                     {features.map((feature, index) => (

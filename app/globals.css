@@ -157,19 +157,112 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    html {
+        /* Enable native smooth scrolling */
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        overflow-x: hidden;
+        overscroll-behavior-y: none;
+    }
+
+    /* Optimize GPU layers only for hero elements being animated by GSAP */
+    .hero-section {
+        will-change: transform, opacity;
+        transform: translate3d(0,0,0);
+        backface-visibility: hidden;
+    }
+
+
+    /* Instant load CSS animation for cards */
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Simplified blob animation for instant appearance */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Apply quick fade-in to blobs */
+    .blob-1,
+    .blob-2,
+    .blob-3 {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    /* Stagger blob animations for visual interest */
+    .blob-1 {
+        animation-delay: 0.05s;
+    }
+
+    .blob-2 {
+        animation-delay: 0.1s;
+    }
+
+    .blob-3 {
+        animation-delay: 0.15s;
+    }
+
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
 }
 
-/* Adding custom gradient utilities for mesh background */
+/* Add custom scrollbar styling for better UX on detail pages */
 @layer utilities {
-  .bg-gradient-radial {
-    background-image: radial-gradient(circle, var(--tw-gradient-stops));
-  }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: oklch(var(--muted-foreground) / 0.3);
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: oklch(var(--muted-foreground) / 0.5);
+    }
+
+    /* Firefox scrollbar */
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: oklch(var(--muted-foreground) / 0.3) transparent;
+    }
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -179,7 +272,6 @@
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none;    /* Firefox */
     }
-}
 
 .scrollbar-hide {
     scrollbar-width: none;
@@ -188,4 +280,13 @@
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
+}}
+
+@keyframes rotateCube {
+    0% {
+        transform: rotateX(0deg) rotateY(0deg);
+    }
+    100% {
+        transform: rotateX(360deg) rotateY(360deg);
+    }
 }

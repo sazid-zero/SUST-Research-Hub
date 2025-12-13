@@ -151,3 +151,10 @@ html {
 body {
   overflow-y: scroll;
 }
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

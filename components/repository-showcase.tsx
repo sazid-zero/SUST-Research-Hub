@@ -157,7 +157,6 @@ export function RepositoryShowcase() {
                 return <DatasetsContent user={null} />
         }
     }
-
     // @ts-ignore
     // @ts-ignore
     return (
@@ -178,11 +177,7 @@ export function RepositoryShowcase() {
 
             <div className="relative z-10 max-w-7xl mx-auto">
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+                <div
                     className="text-center mb-20 space-y-4"
                 >
                     <h2 className="text-4xl md:text-5xl font-bold text-foreground">
@@ -194,14 +189,10 @@ export function RepositoryShowcase() {
                     <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
                         Discover our comprehensive collection of research resources with advanced filtering and organization
                     </p>
-                </motion.div>
+                </div>
 
                 {/* Large Browser Window */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
+                <div
                     className="relative"
                 >
                     {/* Glowing aura behind window */}
@@ -234,13 +225,9 @@ export function RepositoryShowcase() {
 
                     {/* Shadow effect */}
                     <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-10 bg-black/20 dark:bg-white/10 blur-3xl rounded-full" />
-                </motion.div>
+                </div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
+                <div
                     className="flex justify-center mt-10"
                 >
                     <div className="relative inline-flex items-center gap-1 p-1.5 rounded-full border border-border/50 bg-muted/30 dark:bg-white/10 backdrop-blur-sm shadow-lg">
@@ -280,26 +267,20 @@ export function RepositoryShowcase() {
                             count="12"
                         />
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Explore Button */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
+                <div
                     className="flex justify-center mt-12"
                 >
                     <Link href={getRepoHref(activeRepo)}>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                        <button
                             className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r ${getRepoColor(activeRepo)} text-white text-lg font-semibold shadow-lg hover:shadow-2xl transition-all`}
                         >
                             Explore {getRepoTitle(activeRepo)}
-                        </motion.button>
+                        </button>
                     </Link>
-                </motion.div>
+                </div>
             </div>
         </section>
     )
@@ -383,10 +364,7 @@ function TabButton({
     })()
 
     return (
-        <motion.button
-            onClick={onClick}
-            whileHover={{ scale: 1.05, y: -1 }}
-            whileTap={{ scale: 0.98 }}
+        <button
             className={`relative px-4 py-2.5 rounded-full font-medium transition-all duration-300 ${
                 active ? `bg-gradient-to-r ${tabColor} text-white shadow-lg` : "text-muted-foreground hover:text-foreground"
             }`}
@@ -398,6 +376,6 @@ function TabButton({
           {count}
         </span>
             </div>
-        </motion.button>
+        </button>
     )
 }

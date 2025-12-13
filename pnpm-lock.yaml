@@ -11,6 +11,9 @@ importers:
       '@emotion/is-prop-valid':
         specifier: latest
         version: 1.4.0
+      '@gsap/react':
+        specifier: ^2.1.2
+        version: 2.1.2(gsap@3.14.1)(react@19.2.0)
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.68.0(react@19.2.0))
@@ -134,9 +137,15 @@ importers:
       framer-motion:
         specifier: latest
         version: 12.23.25(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      gsap:
+        specifier: ^3.14.1
+        version: 3.14.1
       input-otp:
         specifier: 1.4.1
         version: 1.4.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      lenis:
+        specifier: ^1.3.16
+        version: 1.3.16(react@19.2.0)
       lucide-react:
         specifier: ^0.454.0
         version: 0.454.0(react@19.2.0)
@@ -179,6 +188,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.17)
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
       vaul:
         specifier: ^0.9.9
         version: 0.9.9(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -250,6 +262,12 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@gsap/react@2.1.2':
+    resolution: {integrity: sha512-JqliybO1837UcgH2hVOM4VO+38APk3ECNrsuSM4MuXp+rbf+/2IG2K1YJiqfTcXQHH7XlA0m3ykniFYstfq0Iw==}
+    peerDependencies:
+      gsap: ^3.12.5
+      react: '>=17'
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -1595,6 +1613,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  gsap@3.14.1:
+    resolution: {integrity: sha512-nOFRJpVu+U0IPgKzfC5MEdZrJ1iVidGaOuxK0+Un+7vMOHa5rw/SKOaMaRRyHZiJKaeAEALTBwnj6R3gifyGBw==}
+
   hls.js@1.6.15:
     resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==}
 
@@ -1638,6 +1659,20 @@ packages:
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
     hasBin: true
+
+  lenis@1.3.16:
+    resolution: {integrity: sha512-KULpna+5TgRCDMSPx4SzJwtsjlz7EeoFCp4IDCXrlM73rLBAj34Egcl7GCLz/6+hXFOYt3DTBeTtJvTu45dJNA==}
+    peerDependencies:
+      '@nuxt/kit': '>=3.0.0'
+      react: '>=17.0.0'
+      vue: '>=3.0.0'
+    peerDependenciesMeta:
+      '@nuxt/kit':
+        optional: true
+      react:
+        optional: true
+      vue:
+        optional: true
 
   lie@3.3.0:
     resolution: {integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==}
@@ -2055,6 +2090,9 @@ packages:
   tunnel-rat@0.1.2:
     resolution: {integrity: sha512-lR5VHmkPhzdhrM092lI2nACsLO4QubF0/yoOhzX7c+wIpbN1GjHNzCc91QlpxBi+cnx8vVJ+Ur6vL5cEoQPFpQ==}
 
+  tw-animate-css@1.4.0:
+    resolution: {integrity: sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ==}
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -2201,6 +2239,11 @@ snapshots:
       react-dom: 19.2.0(react@19.2.0)
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@gsap/react@2.1.2(gsap@3.14.1)(react@19.2.0)':
+    dependencies:
+      gsap: 3.14.1
+      react: 19.2.0
 
   '@hookform/resolvers@3.10.0(react-hook-form@7.68.0(react@19.2.0))':
     dependencies:
@@ -3485,6 +3528,8 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
+  gsap@3.14.1: {}
+
   hls.js@1.6.15: {}
 
   iceberg-js@0.8.1: {}
@@ -3516,6 +3561,10 @@ snapshots:
       - '@types/react'
 
   jiti@2.6.1: {}
+
+  lenis@1.3.16(react@19.2.0):
+    optionalDependencies:
+      react: 19.2.0
 
   lie@3.3.0:
     dependencies:
@@ -3903,6 +3952,8 @@ snapshots:
       - '@types/react'
       - immer
       - react
+
+  tw-animate-css@1.4.0: {}
 
   typescript@5.9.3: {}
 

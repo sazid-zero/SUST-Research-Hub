@@ -1,12 +1,10 @@
 "use client"
 
-import type React from "react"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import {scrollToExplore} from "@/components/scroll-to-section";
-import {DetailsShowcase} from "@/components/details-showcase";
+import { scrollToExplore } from "@/components/scroll-to-section"
+import { DetailsShowcase } from "@/components/details-showcase"
 import {
     BookOpen,
     Zap,
@@ -20,11 +18,10 @@ import {
     Mail,
     ArrowRight,
 } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import {useState, useEffect, useRef} from "react"
 import { useInView } from "react-intersection-observer"
 import { useTheme } from "next-themes"
-import type { Thesis, User } from "@/lib/data/theses" // Assuming User type is here
+import type { Thesis, User } from "@/lib/data/theses"
 import { GlobalNavbar } from "@/components/global-navbar"
 import { AnimatedParticles, RepositoryShowcase } from "@/components/repository-showcase"
 import { FeaturesSection } from "@/components/features-section"
@@ -33,32 +30,25 @@ interface HomeContentProps {
     user: User | null
     allTheses: Thesis[]
     recentTheses: Thesis[]
+    currentRecentIndex: number
 }
 
-export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps) {
+export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }: HomeContentProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [featuredIndex, setFeaturedIndex] = useState(0)
-    const [currentRecentIndex, setCurrentRecentIndex] = useState(0)
-    const [displayedResearch, setDisplayedResearch] = useState<Thesis[]>([]) // This line is now removed due to linting issues.
-    const heroRef = useRef<HTMLDivElement>(null)
-    const [heroZIndex, setHeroZIndex] = useState(50)
+
     const [browseRef, browseInView] = useInView({
         threshold: 0.3,
         triggerOnce: false,
         rootMargin: "0px 0px -200px 0px",
     })
+
+    const [heroRef, setHeroRef] = useState<HTMLElement | null>(null)
+
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const [isDesktop, setIsDesktop] = useState(false)
-
-    const [scrollPosition, setScrollPosition] = useState(0)
-    const { scrollY } = useScroll()
-
-    const heroSectionHeight = 300 // reduced from 800 to 400 to make scroll animation 2x faster
-    const textScale = useTransform(scrollY, [0, heroSectionHeight], [1, 0.8])
-    const textOpacity = useTransform(scrollY, [0, heroSectionHeight], [1, 0])
-    const buttonsOpacity = useTransform(scrollY, [0, 150], [1, 0]) // reduced from 300 to 150 for faster button fade
 
     useEffect(() => {
         setMounted(true)
@@ -71,17 +61,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
         window.addEventListener("resize", handleResize)
         return () => window.removeEventListener("resize", handleResize)
     }, [])
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrollPosition(window.scrollY)
-            setHeroZIndex(window.scrollY < 100 ? 50 : 10)
-        }
-        window.addEventListener("scroll", handleScroll)
-        return () => window.removeEventListener("scroll", handleScroll)
-    }, [])
-
-    const isHeroInteractive = scrollPosition < 100
 
     const researchCategories = [
         { id: "all", label: "All Fields", icon: BookOpen, count: allTheses.length },
@@ -226,38 +205,17 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
     const displayedCategoryResearchMobile = filteredResearch.slice(0, 2)
     const displayedCategoryResearchDesktop = filteredResearch.slice(0, 4)
-    const recentResearch = recentTheses.slice(featuredIndex, featuredIndex + 3) // Renamed from displayedResearch to avoid redeclaration
+    const recentResearch = recentTheses.slice(currentRecentIndex, currentRecentIndex + 3)
 
-    // Featured carousel - cycles through recent theses
     useEffect(() => {
         const interval = setInterval(() => {
             setFeaturedIndex((prev) => (prev + 3 >= recentTheses.length ? 0 : prev + 3))
-        }, 3500)
+        }, 5000) // Increased for less distraction
         return () => clearInterval(interval)
     }, [recentTheses.length])
 
-    // Recent dots animation
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentRecentIndex((prev) => (prev + 1) % 3)
-        }, 5000)
-        return () => clearInterval(interval)
-    }, [])
 
-    // Category shuffle effect
-    useEffect(() => {
-        if (!browseInView) return
-
-        const ids = researchCategories.map((c) => c.id)
-        const interval = setInterval(() => {
-            setSelectedCategory((prev) => {
-                const i = ids.indexOf(prev)
-                return ids[(i + 1) % ids.length]
-            })
-        }, 2000)
-
-        return () => clearInterval(interval)
-    }, [browseInView])
+    // Users can manually click categories instead
 
     const navItems = [
         { label: "Browse", href: "/browse" },
@@ -265,27 +223,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
         { label: "About", href: "/#about" },
         { label: "Help", href: "/help" },
     ]
-
-    // Animation variants for the explore repositories section
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-            },
-        },
-    }
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" },
-        },
-    }
 
     const getDashboardRoute = (user: User | null) => {
         if (!user) return "/register"
@@ -302,28 +239,69 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            <GlobalNavbar user={user} />
+        <div className="bg-background">
+            <GlobalNavbar user={user}/>
 
+            {/* HERO SECTION */}
             <section
-                ref={heroRef}
-                className="lg:fixed lg:top-16 lg:left-0 lg:right-0 lg:min-h-[calc(100vh-4rem)] lg:z-30 w-full lg:flex lg:flex-col lg:gap-12 pt-0 mt-0"
-                style={{
-                    pointerEvents: scrollPosition < 50 ? "auto" : "none",
-                    zIndex: heroZIndex,
-                }}
+                ref={setHeroRef}
+                className="hero-section w-full fixed top-0 h-screen bg-background overflow-hidden z-0 transition-all duration-300 ease-out"
             >
                 <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-                    <img
-                        src="https://cdn.pixabay.com/animation/2023/01/26/04/01/04-01-09-576_512.gif"
-                        alt="Rotating cube"
-                        className="absolute object-cover -z-10 pointer-events-none top-2 left-16 w-32 h-32 "
-                        draggable={false}
-                    />
+                    <div className="absolute inset-0 opacity-[0.03]">
+                        <div className="absolute inset-0 bg-grid-pattern [background-size:50px_50px] [background-image:linear-gradient(0deg,transparent_24%,#10b981_25%,#10b981_26%,transparent_27%,transparent_74%,#10b981_75%,#10b981_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,#10b981_25%,#10b981_26%,transparent_27%,transparent_74%,#10b981_75%,#10b981_76%,transparent_77%,transparent)]" />
+                    </div>
+                    <div className="blob-1 absolute top-20 right-1/3 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-transparent rounded-full animate-fadeIn" />
+                    <div className="blob-2 absolute bottom-1/3 left-1/4 w-96 h-96 bg-gradient-to-tl from-teal-400/10 to-transparent rounded-full animate-fadeIn [animation-delay:0.2s]" />
+                    <div className="blob-3 absolute top-1/2 right-1/4 w-72 h-72 bg-gradient-to-bl from-cyan-400/10 to-transparent rounded-full animate-fadeIn [animation-delay:0.4s]" />
                 </div>
-                <div className="w-full mt-4 px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 lg:items-center py-12 lg:py-24">
-                    <div className="flex-1 flex flex-col justify-center space-y-8">
-                        <div className="md:hidden flex items-center gap-3 mb-4">
+
+                <div className="hero-cube absolute top-[17.5%] left-[10%] w-32 h-32 pointer-events-none" style={{ perspective: "800px" }}>
+                    <div
+                        className="w-full h-full "
+                        style={{
+                            transformStyle: "preserve-3d",
+                            animation: "rotateCube 20s linear infinite",
+
+                        }}
+                    >
+                        {/* Front */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/20 to-accent/30" style={{ transform: "translateZ(64px)" }} />
+                        {/* Back */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-accent/30 to-primary/20" style={{ transform: "translateZ(-64px) rotateY(180deg)" }} />
+                        {/* Left */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/10 to-accent/20" style={{ transform: "rotateY(-90deg) translateZ(64px)" }} />
+                        {/* Right */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-accent/20 to-primary/10" style={{ transform: "rotateY(90deg) translateZ(64px)" }} />
+                        {/* Top */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-white/10 to-primary/10" style={{ transform: "rotateX(90deg) translateZ(64px)" }} />
+                        {/* Bottom */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/10 to-white/10" style={{ transform: "rotateX(-90deg) translateZ(64px)" }} />
+                    </div>
+                </div>
+
+                <div className="hero-cube-2 absolute bottom-[12%] right-[8%] w-20 h-20 pointer-events-none" style={{ perspective: "800px" }}>
+                    <div
+                        className="w-full h-full"
+                        style={{
+                            transformStyle: "preserve-3d",
+                            animation: "rotateCube 30s linear infinite",
+                        }}
+                    >
+                        {/* Cube faces — same gradient logic as first cube */}
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/20 to-accent/30" style={{ transform: "translateZ(40px)" }} />
+                        <div className="absolute w-full h-full bg-gradient-to-br from-accent/30 to-primary/20" style={{ transform: "translateZ(-40px) rotateY(180deg)" }} />
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/10 to-accent/20" style={{ transform: "rotateY(-90deg) translateZ(40px)" }} />
+                        <div className="absolute w-full h-full bg-gradient-to-br from-accent/20 to-primary/10" style={{ transform: "rotateY(90deg) translateZ(40px)" }} />
+                        <div className="absolute w-full h-full bg-gradient-to-br from-white/10 to-primary/10" style={{ transform: "rotateX(90deg) translateZ(40px)" }} />
+                        <div className="absolute w-full h-full bg-gradient-to-br from-primary/10 to-white/10" style={{ transform: "rotateX(-90deg) translateZ(40px)" }} />
+                    </div>
+                </div>
+
+                <div className="relative z-10 w-full px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 lg:items-center justify-center">
+                    {/* Left: Main Content */}
+                    <div className="w-1/2 flex flex-col justify-center space-y-6 lg:space-y-8">
+                        <div className="md:hidden flex items-center gap-3 mb-2">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
                                 <BookOpen className="h-6 w-6 text-primary-foreground" />
                             </div>
@@ -331,14 +309,10 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 Research Hub
               </span>
                         </div>
-                        <motion.div
-                            style={{
-                                scale: textScale,
-                                opacity: textOpacity,
-                            }}
-                            className="space-y-6 max-md:!opacity-100 max-md:!scale-100"
-                        >
-                            <div className="inline-flex items-center gap-2 px-3 mt-12 lg:mt-0 py-1 rounded-full border border-primary/30 bg-background text-xs font-medium text-primary w-fit">
+
+                        {/* Title + Description — GSAP Target */}
+                        <div className="hero-title space-y-6 lg:space-y-8 text-center lg:text-left max-w-2xl">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-transparent text-xs font-medium text-primary w-fit">
                                 <Zap className="h-3 w-3" />
                                 Next-Gen Research Repository
                             </div>
@@ -352,24 +326,15 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 A centralized platform for managing, sharing and discovering academic research at Shahjalal University
                                 of Science and Technology.
                             </p>
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                                duration: 0.5,
-                                delay: 0.2,
-                            }}
-                            style={{
-                                opacity: isDesktop ? buttonsOpacity : 1,
-                            }}
-                            className="flex flex-col sm:flex-row gap-4 relative z-50 pointer-events-auto max-lg:!opacity-100"
-                        >
+                        </div>
+
+                        {/* Buttons — GSAP Target */}
+                        <div className="hero-buttons flex flex-col sm:flex-row gap-4 relative z-50">
                             {(!user || user.role === "student") && (
                                 <Link href={getDashboardRoute(user)} className="w-full sm:w-auto">
                                     <Button
                                         size="lg"
-                                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-110"
+                                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-105 transition-transform"
                                     >
                                         Start Publishing
                                         <ExternalLink className="ml-2 h-4 w-4" />
@@ -380,23 +345,17 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="w-full border-green-600 text-foreground hover:text-white bg-white hover:bg-green-600 hover:scale-110"
+                                    className="w-full border-green-600 text-foreground hover:text-white bg-white hover:bg-green-600 hover:scale-105 transition-transform"
                                 >
                                     Explore Repository
                                 </Button>
                             </Link>
-                        </motion.div>
+                        </div>
                     </div>
 
-                    <div className="flex-1 h-full flex flex-col justify-center py-12 lg:py-0">
-                        <motion.div
-                            className="space-y-5 relative max-lg:!opacity-100 max-lg:!scale-100 max-lg:pointer-events-auto"
-                            style={{
-                                scale: isDesktop ? textScale : 1,
-                                opacity: isDesktop ? textOpacity : 1,
-                                pointerEvents: isDesktop ? (isHeroInteractive ? "auto" : "none") : "auto",
-                            }}
-                        >
+                    {/* Right: Recent Research — GSAP Target */}
+                    <div className="hero-recent-cards w-1/2 h-full flex flex-col justify-center py-8 lg:py-0">
+                        <div className="space-y-5 relative">
                             <h3 className="text-lg font-bold text-foreground">Recent Research</h3>
                             {recentResearch.map((research, idx) => (
                                 <Link
@@ -405,27 +364,25 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                     className="block relative pointer-events-auto"
                                     prefetch={true}
                                 >
-                                    <motion.div
+                                    <div
                                         className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-2xl hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer mb-4"
-                                        initial={{ opacity: 0, x: 100 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -100 }}
-                                        transition={{
-                                            duration: 1.2,
-                                            ease: [0.25, 0.1, 0.25, 1],
-                                            delay: idx * 0.2,
+                                        style={{
+                                            opacity: 0,
+                                            transform: "translateX(100px)",
+                                            animation: `slideInRight 0.5s ease-out ${idx * 0.1}s forwards`,
                                         }}
                                     >
+                                        {/* Card content */}
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="text-sm font-semibold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
                                                     {research.title}
                                                 </h4>
                                                 <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                                                    {research.authors?.map((author: any, idx: number) => (
-                                                        <span key={author.id || idx}>
+                                                    {research.authors?.map((author: any, aIdx: number) => (
+                                                        <span key={author.id || aIdx}>
                               {author.full_name}
-                                                            {idx < research.authors.length - 1 && ", "}
+                                                            {aIdx < research.authors.length - 1 && ", "}
                             </span>
                                                     )) || research.author}
                                                 </p>
@@ -436,42 +393,31 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                             <Eye className="h-3 w-3" />
                                             {research.views.toLocaleString()} views
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 </Link>
                             ))}
+                            {/* Dots */}
                             <div className="flex items-center justify-center gap-2 mt-8 pt-4 border-t border-border">
                                 {[0, 1, 2].map((index) => (
-                                    <motion.div
+                                    <div
                                         key={index}
-                                        className={`h-2 rounded-full transition-all ${
+                                        className={`h-2 rounded-full transition-all duration-300 ${
                                             currentRecentIndex === index ? "bg-primary w-6" : "bg-muted-foreground/30 w-2"
                                         }`}
-                                        animate={{
-                                            width: currentRecentIndex === index ? "24px" : "8px",
-                                        }}
-                                        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                                     />
                                 ))}
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
-
-                <div className="absolute inset-0 opacity-[0.03] -z-10">
-                    <div className="absolute inset-0 bg-grid-pattern [background-size:50px_50px] [background-image:linear-gradient(0deg,transparent_24%,#10b981_25%,#10b981_26%,transparent_27%,transparent_74%,#10b981_75%,#10b981_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,#10b981_25%,#10b981_26%,transparent_27%,transparent_74%,#10b981_75%,#10b981_76%,transparent_77%,transparent)]" />
-                </div>
-
-                <div className="absolute top-20 right-1/3 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl -z-10" />
-                <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl -z-10" />
-                <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl -z-10" />
             </section>
 
+            {/* Spacer to account for the fixed hero section's height */}
+            <div className="h-screen bg-transparent" />
+
             {/* Explore Section */}
-            <section id="browse"
-                     ref={browseRef}
-                     className="relative md:mt-[100vh] pt-6 md:pt-10 pb-10 overflow-hidden z-40 bg-transparent"
-                     style={{ pointerEvents: "auto" }}>
-                <div className="px-6 lg:px-12 ">
+            <section id="explore-section" className="relative z-10 bg-transparent" data-scroll>
+                <div className="px-6 lg:px-12 py-12">
                     <div className="relative p-[2px] rounded-[24px] bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 shadow-[0_0_60px_rgba(16,185,129,0.25),0_0_100px_rgba(16,185,129,0.15)]">
                         <div className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-green-500/0 via-green-400/10 to-emerald-500/0 blur-xl" />
                         <div className="relative rounded-[21px] overflow-hidden border border-border/50 bg-card">
@@ -482,12 +428,12 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                         style={{
                                             background: `
                         radial-gradient(ellipse 800px 400px at 50% 50%,
-                          rgba(34, 197, 94, 0.32) 0%,
-                          rgba(22, 163, 74, 0.22) 30%,
-                          rgba(21, 128, 61, 0.14) 60%,
+                          rgba(34, 197, 94, 0.25) 0%,
+                          rgba(21, 128, 61, 0.15) 30%,
+                          rgba(21, 128, 61, 0.08) 60%,
                           transparent 100%)
                       `,
-                                            filter: "blur(70px)",
+                                            filter: "blur(35px)", // Reduced from blur(70px)
                                         }}
                                     />
                                 </div>
@@ -498,11 +444,11 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                         style={{
                                             background: `
                         radial-gradient(ellipse 600px 500px at 100% 0%,
-                          rgba(34, 197, 94, 0.38) 0%,
-                          rgba(21, 128, 61, 0.25) 40%,
+                          rgba(34, 197, 94, 0.28) 0%,
+                          rgba(21, 128, 61, 0.18) 40%,
                           transparent 80%)
                       `,
-                                            filter: "blur(80px)",
+                                            filter: "blur(40px)", // Reduced from blur(80px)
                                         }}
                                     />
                                 </div>
@@ -513,52 +459,11 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                         style={{
                                             background: `
                         radial-gradient(ellipse 600px 500px at 0% 100%,
-                          rgba(34, 197, 94, 0.38) 0%,
-                          rgba(21, 128, 61, 0.25) 40%,
+                          rgba(34, 197, 94, 0.28) 0%,
+                          rgba(21, 128, 61, 0.18) 40%,
                           transparent 80%)
                       `,
-                                            filter: "blur(80px)",
-                                        }}
-                                    />
-                                </div>
-                                <div className="absolute inset-0">
-                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.05)_0%,transparent_50%)]" />
-                                </div>
-                                <div className="absolute inset-0">
-                                    <div
-                                        className="absolute w-48 h-48 top-20 left-20"
-                                        style={{
-                                            background: "radial-gradient(circle, rgba(34, 197, 94, 0.20) 0%, transparent 70%)",
-                                            filter: "blur(50px)",
-                                        }}
-                                    />
-                                    <div
-                                        className="absolute w-40 h-40 top-1/2 left-32 -translate-y-1/2"
-                                        style={{
-                                            background: "radial-gradient(circle, rgba(22, 163, 74, 0.18) 0%, transparent 70%)",
-                                            filter: "blur(45px)",
-                                        }}
-                                    />
-                                    <div
-                                        className="absolute w-64 h-64 bottom-16 left-16"
-                                        style={{
-                                            background:
-                                                "radial-gradient(ellipse 500px 400px at 0% 100%, rgba(21, 128, 61, 0.26) 0%, transparent 75%)",
-                                            filter: "blur(70px)",
-                                        }}
-                                    />
-                                    <div
-                                        className="absolute w-56 h-56 bottom-24 right-28"
-                                        style={{
-                                            background: "radial-gradient(circle, rgba(22, 163, 74, 0.16) 0%, transparent 70%)",
-                                            filter: "blur(55px)",
-                                        }}
-                                    />
-                                    <div
-                                        className="absolute w-32 h-32 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                                        style={{
-                                            background: "radial-gradient(circle, rgba(34, 197, 94, 0.34) 0%, transparent 60%)",
-                                            filter: "blur(40px)",
+                                            filter: "blur(40px)", // Reduced from blur(80px)
                                         }}
                                     />
                                 </div>
@@ -566,7 +471,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
 
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/[0.02] rounded-full blur-3xl pointer-events-none" />
                             <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-accent/[0.02] rounded-full blur-3xl pointer-events-none" />
 
                             <div className="relative z-10 p-4 sm:p-8">
@@ -589,9 +493,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                                         ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent shadow-lg shadow-primary/25"
                                                         : "border-border text-foreground hover:border-primary/50 hover:bg-accent"
                                                 }`}
-                                                style={{
-                                                    animation: selectedCategory === cat.id ? "pulse 2s ease-in-out infinite" : "none",
-                                                }}
                                             >
                                                 <Icon className="h-3.5 w-3.5" />
                                                 <span>{cat.label}</span>
@@ -708,7 +609,7 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                                 <Link href="/browse" className="block mt-6 flex justify-center">
                                     <Button
                                         size="lg"
-                                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg shadow-primary/25  text-base rounded-lg"
+                                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 px-8"
                                     >
                                         Browse All Research
                                         <ExternalLink className="ml-2 h-4 w-4" />
@@ -729,8 +630,6 @@ export function HomeContent({ user, allTheses, recentTheses }: HomeContentProps)
                 <DetailsShowcase />
                 <FeaturesSection />
             </section>
-
-
 
             <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background">
                 {/* Subtle gradient overlays for depth */}

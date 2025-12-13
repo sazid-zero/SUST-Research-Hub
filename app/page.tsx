@@ -2,6 +2,8 @@ import { BookOpen, Zap, Microscope, TrendingUp, Github, BarChart3 } from "lucide
 import { getRecentThesesForDisplay, getPublishedThesesForDisplay } from "@/lib/data/theses-real"
 import { HomeContent } from "@/components/home-content"
 import { getCurrentUser } from "@/lib/auth"
+import HomePageWrapper from "@/components/HomePageWrapper"
+
 
 export const revalidate = 3600 // Revalidate every hour
 
@@ -47,7 +49,12 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <HomeContent user={user} allTheses={allTheses} recentTheses={recentTheses} />
+        <HomePageWrapper
+            user={user}
+            allTheses={allTheses}
+            recentTheses={recentTheses}
+        />
+
     </div>
   )
 }
