@@ -239,7 +239,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
     }
 
     return (
-        <div className="bg-background">
+        <div className="bg-background ">
             <GlobalNavbar user={user}/>
 
             {/* HERO SECTION */}
@@ -256,7 +256,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     <div className="blob-3 absolute top-1/2 right-1/4 w-72 h-72 bg-gradient-to-bl from-cyan-400/10 to-transparent rounded-full animate-fadeIn [animation-delay:0.4s]" />
                 </div>
 
-                <div className="hero-cube absolute top-[17.5%] left-[10%] w-32 h-32 pointer-events-none" style={{ perspective: "800px" }}>
+                <div className="hero-cube absolute top-[17.5%] left-[5%] w-32 h-32 pointer-events-none" style={{ perspective: "800px" }}>
                     <div
                         className="w-full h-full "
                         style={{
@@ -280,7 +280,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
                 </div>
 
-                <div className="hero-cube-2 absolute bottom-[12%] right-[8%] w-20 h-20 pointer-events-none" style={{ perspective: "800px" }}>
+                <div className="hero-cube-2 absolute bottom-[12%] right-[5%] w-20 h-20 pointer-events-none" style={{ perspective: "800px" }}>
                     <div
                         className="w-full h-full"
                         style={{
@@ -298,7 +298,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
                 </div>
 
-                <div className="relative z-10 w-full px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
+                <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
                     {/* Left: Main Content */}
                     <div className="w-1/2 flex flex-col justify-center space-y-6 lg:space-y-8">
                         <div className="md:hidden flex items-center gap-3 mb-2">
@@ -416,8 +416,8 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             <div className="lg:h-screen bg-transparent h-0" />
 
             {/* Explore Section */}
-            <section id="explore-section" className="relative z-10 bg-transparent" data-scroll>
-                <div className="px-6 lg:px-12 py-12">
+            <section id="explore-section" className="relative z-10 bg-transparent " data-scroll>
+                <div className="px-6 lg:px-12 py-12  max-w-7xl mx-auto ">
                     <div className="relative p-[2px] rounded-[24px] bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 shadow-[0_0_60px_rgba(16,185,129,0.25),0_0_100px_rgba(16,185,129,0.15)]">
                         <div className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-green-500/0 via-green-400/10 to-emerald-500/0 blur-xl" />
                         <div className="relative rounded-[21px] overflow-hidden border border-border/50 bg-card">
@@ -626,12 +626,15 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 id="repository-showcase"
                 className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
             >
-                <RepositoryShowcase />
-                <DetailsShowcase />
-                <FeaturesSection />
+                <div className="max-w-7xl mx-auto">
+                    <RepositoryShowcase />
+                    <DetailsShowcase />
+                    <FeaturesSection />
+                </div>
+
             </section>
 
-            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background">
+            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background max-w-7xl mx-auto">
                 {/* Subtle gradient overlays for depth */}
                 <AnimatedParticles />
                 <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
@@ -709,7 +712,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 </div>
             </section>
 
-            <footer className="relative border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
+            <footer className="relative max-w-7xl mx-auto border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
                 <div className="px-6 lg:px-12 py-16">
                     {/* Main footer content */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
