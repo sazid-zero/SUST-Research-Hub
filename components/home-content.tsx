@@ -255,7 +255,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     <div className="blob-2 absolute bottom-1/3 left-1/4 w-96 h-96 bg-gradient-to-tl from-teal-400/10 to-transparent rounded-full animate-fadeIn [animation-delay:0.2s]" />
                     <div className="blob-3 absolute top-1/2 right-1/4 w-72 h-72 bg-gradient-to-bl from-cyan-400/10 to-transparent rounded-full animate-fadeIn [animation-delay:0.4s]" />
                 </div>
-
+                <div className="max-w-8xl mx-auto">
                 <div className="hero-cube absolute top-[17.5%] left-[5%] w-32 h-32 pointer-events-none" style={{ perspective: "800px" }}>
                     <div
                         className="w-full h-full "
@@ -280,6 +280,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
                 </div>
 
+
                 <div className="hero-cube-2 absolute bottom-[12%] right-[5%] w-20 h-20 pointer-events-none" style={{ perspective: "800px" }}>
                     <div
                         className="w-full h-full"
@@ -296,6 +297,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                         <div className="absolute w-full h-full bg-gradient-to-br from-white/10 to-primary/10" style={{ transform: "rotateX(90deg) translateZ(40px)" }} />
                         <div className="absolute w-full h-full bg-gradient-to-br from-primary/10 to-white/10" style={{ transform: "rotateX(-90deg) translateZ(40px)" }} />
                     </div>
+                </div>
                 </div>
 
                 <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
@@ -626,21 +628,22 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 id="repository-showcase"
                 className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
             >
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto ">
                     <RepositoryShowcase />
                     <DetailsShowcase />
+                </div>
+                <div className="max-w-8xl mx-auto ">
                     <FeaturesSection />
                 </div>
-
             </section>
 
-            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background max-w-7xl mx-auto">
+            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background ">
                 {/* Subtle gradient overlays for depth */}
                 <AnimatedParticles />
                 <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
 
-                <div className="max-w-5xl px-6 lg:px-12 mx-auto relative z-10">
+                <div className="max-w-7xl px-6 lg:px-12 mx-auto relative z-10">
                     <div className="text-center space-y-8">
                         {/* Small eyebrow text */}
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
@@ -712,8 +715,8 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 </div>
             </section>
 
-            <footer className="relative max-w-7xl mx-auto border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
-                <div className="px-6 lg:px-12 py-16">
+            <footer className="relative border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
+                <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
                     {/* Main footer content */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
                         {/* Brand section */}

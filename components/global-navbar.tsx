@@ -38,7 +38,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     return (
         <>
             <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 border-b border-border/50">
-                <div className="max-w-full px-4 lg:px-8">
+                <div className="max-w-8xl mx-auto px-4 lg:px-8">
                     <div className="flex h-16 items-center justify-between gap-4">
                         {/* Logo and Title */}
                         <Link href="/" className="flex items-center gap-2 flex-shrink-0">

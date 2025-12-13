@@ -75,13 +75,12 @@ function ScatteredCubes({ isDark }: { isDark: boolean }) {
         { size: 80, x: "85%", y: "20%", rotateX: 35, rotateY: -25, delay: 0.3 },
         { size: 50, x: "90%", y: "65%", rotateX: -30, rotateY: 60, delay: 0.7 },
         { size: 35, x: "50%", y: "4%", rotateX: 40, rotateY: -40, delay: 0.2 },
-        { size: 55, x: "25%", y: "85%", rotateX: -15, rotateY: 50, delay: 0.6 },
-        { size: 40, x: "75%", y: "80%", rotateX: 20, rotateY: -35, delay: 0.4 },
-        { size: 70, x: "8%", y: "45%", rotateX: -25, rotateY: 20, delay: 0.8 },
-        { size: 30, x: "92%", y: "40%", rotateX: 30, rotateY: 55, delay: 0.1 },
-        { size: 50, x: "60%", y: "90%", rotateX: -35, rotateY: -20, delay: 0.9 },
-    ]
-
+      { size: 55, x: "25%", y: "85%", rotateX: -15, rotateY: 50, delay: 0.6 },
+      { size: 40, x: "75%", y: "80%", rotateX: 20, rotateY: -35, delay: 0.4 },
+      { size: 70, x: "8%", y: "45%", rotateX: -25, rotateY: 20, delay: 0.8 },
+     { size: 30, x: "92%", y: "40%", rotateX: 30, rotateY: 55, delay: 0.1 },                                                                                                 
+      { size: 50, x: "60%", y: "90%", rotateX: -35, rotateY: -20, delay: 0.9 },
+]
     const colors = isDark
         ? {
             front: "from-gray-200 to-gray-400",
@@ -194,7 +193,7 @@ export function FeaturesSection() {
     if (!mounted) {
         return (
             <section className="relative bg-background py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen">
-                <div className="relative z-10 max-w-6xl mx-auto text-center">
+                <div className="relative z-10 max-w-7xl mx-auto text-center">
                     <h2 className="text-4xl sm:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Powerful Features
