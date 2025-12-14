@@ -193,7 +193,7 @@ export function RepositoryShowcase() {
 
                 {/* Large Browser Window */}
                 <div
-                    className="relative"
+                    className="relative lg:mx-10"
                 >
                     {/* Glowing aura behind window */}
                     <div

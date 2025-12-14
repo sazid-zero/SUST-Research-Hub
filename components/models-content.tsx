@@ -428,7 +428,7 @@ export default function ModelsContent({ user }: ModelsContentProps) {
         <div className="min-h-screen bg-background">
             <GlobalNavbar user={user} />
 
-            <div className="mx-auto lg:mx-20 px-4 lg:px-8 pb-12 mt-8">
+            <div className="mx-auto lg:mx-16 px-4 lg:px-8 pb-12 mt-8">
                 <div className="grid gap-6 lg:gap-8 lg:grid-cols-[400px_1fr]">
                     {/* Desktop Sidebar Filters */}
                     <div className="hidden lg:block">

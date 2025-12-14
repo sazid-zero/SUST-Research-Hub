@@ -628,8 +628,10 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 id="repository-showcase"
                 className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
             >
-                <div className="max-w-7xl mx-auto ">
+                <div className="max-w-8xl mx-auto ">
                     <RepositoryShowcase />
+                </div>
+                    <div className="max-w-8xl mx-auto ">
                     <DetailsShowcase />
                 </div>
                 <div className="max-w-8xl mx-auto ">
