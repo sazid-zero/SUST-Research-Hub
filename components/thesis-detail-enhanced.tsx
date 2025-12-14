@@ -119,7 +119,7 @@ export function ThesisDetailEnhanced({
         <div className="h-screen bg-background flex flex-col">
             <GlobalNavbar user={user} />
 
-            <div className="container mx-auto px-4 py-6 max-w-7xl flex-1 overflow-hidden flex flex-col">
+            <div className="container mx-auto px-4 py-6 max-w-[83.5rem] flex-1 overflow-hidden flex flex-col">
                 <div className="lg:grid lg:grid-cols-3 gap-8 h-full">
                     <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-4 no-scrollbar">
                         {/* Header Card */}

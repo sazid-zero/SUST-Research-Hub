@@ -34,7 +34,7 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
     <div className="min-h-screen bg-background">
       <GlobalNavbar user={user} />
 
-      <div className="lg:mx-20 mx-auto px-4 lg:px-8 pb-12 mt-8">
+      <div className="max-w-[83.5rem] mx-auto px-4 lg:px-8 pb-12 mt-8">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-4">
           {/* Desktop Sidebar Filters */}
           <div className="hidden lg:block lg:col-span-1">
