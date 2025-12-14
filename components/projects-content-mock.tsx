@@ -12,64 +12,67 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-interface PapersContentProps {
+interface ProjectsContentProps {
     user: any
 }
 
-const samplePapers = [
+const sampleProjects = [
     {
         id: 1,
-        title: "Deep Learning for Medical Image Analysis: A Comprehensive Survey",
+        title: "AI Lab Research Initiative - Advanced Machine Learning Systems",
         authors: [
-            { id: 1, full_name: "Dr. Ahmed Hassan", student_id: "author1" },
-            { id: 2, full_name: "Sarah Mohamed", student_id: "author2" },
+            { id: 1, full_name: "Dr. Ahmed Hassan", student_id: "supervisor1" },
+            { id: 2, full_name: "Team Lead: Sarah Mohamed", student_id: "lead1" },
         ],
         abstract:
-            "This paper presents a comprehensive survey of deep learning techniques applied to medical image analysis. We explore various architectures including CNNs, transformers, and hybrid models, discussing their applications in disease detection, segmentation, and diagnosis.",
-        journal: "IEEE Transactions on Medical Imaging",
+            "Our research initiative focuses on developing state-of-the-art machine learning systems for real-world applications. The project encompasses multiple research areas including computer vision, natural language processing, and reinforcement learning.",
+        department: "Computer Science & Engineering",
+        field: "Machine Learning",
         year: 2024,
-        type: "journal",
-        keywords: ["Deep Learning", "Medical Imaging", "Computer Vision", "Healthcare AI", "Neural Networks"],
-        views: 1250,
-        downloads: 342,
+        keywords: ["Machine Learning", "Deep Learning", "AI Research", "Computer Vision", "NLP"],
+        views: 2341,
+        downloads: 567,
+        updated: "2 days ago",
     },
     {
         id: 2,
-        title: "Optimization Methods in Machine Learning: Recent Advances and Applications",
+        title: "Biomedical Engineering Group - Medical Device Innovation",
         authors: [
-            { id: 3, full_name: "Dr. Sarah Ibrahim", student_id: "author3" },
-            { id: 4, full_name: "Youssef Ali", student_id: "author4" },
+            { id: 3, full_name: "Dr. Sarah Ibrahim", student_id: "supervisor2" },
+            { id: 4, full_name: "Team Lead: Youssef Ali", student_id: "lead2" },
         ],
         abstract:
-            "We present recent advances in optimization methods for machine learning, focusing on adaptive learning rate algorithms, second-order methods, and distributed optimization techniques for large-scale problems.",
-        journal: "NeurIPS 2024",
+            "A collaborative research project aimed at developing innovative biomedical devices and diagnostic tools. We combine engineering principles with medical science to create solutions for healthcare challenges.",
+        department: "Biochemistry",
+        field: "Biomedical",
         year: 2024,
-        type: "conference",
-        keywords: ["Optimization", "Machine Learning", "Gradient Descent", "Deep Learning", "Algorithms"],
-        views: 890,
-        downloads: 256,
+        keywords: ["Biomedical", "Medical Devices", "Healthcare", "Diagnostics", "Innovation"],
+        views: 1876,
+        downloads: 423,
+        updated: "5 days ago",
     },
     {
         id: 3,
-        title: "Transformer Architectures for Natural Language Processing",
+        title: "Robotics Lab Projects - Autonomous Systems Development",
         authors: [
-            { id: 5, full_name: "Prof. Mohamed Khaled", student_id: "author5" },
-            { id: 6, full_name: "Fatima Ahmed", student_id: "author6" },
+            { id: 5, full_name: "Prof. Hassan Khaled", student_id: "supervisor3" },
+            { id: 6, full_name: "Team Lead: Fatima Ahmed", student_id: "lead3" },
         ],
         abstract:
-            "An in-depth analysis of transformer architectures and their impact on NLP tasks. We cover attention mechanisms, positional encoding, and recent variations like BERT, GPT, and their applications in text understanding and generation.",
-        journal: "ACL 2024",
+            "Research and development of autonomous robotic systems with applications in manufacturing, logistics, and service industries. The project explores navigation, manipulation, and human-robot interaction.",
+        department: "Mechanical Engineering",
+        field: "Robotics",
         year: 2024,
-        type: "conference",
-        keywords: ["NLP", "Transformers", "Attention Mechanism", "BERT", "Language Models"],
-        views: 2340,
-        downloads: 678,
+        keywords: ["Robotics", "Autonomous Systems", "Navigation", "Control Systems", "AI"],
+        views: 3421,
+        downloads: 789,
+        updated: "1 day ago",
     },
 ]
 
-export function PapersContent({ user }: PapersContentProps) {
+export default function ProjectsContentMock({ user }: ProjectsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    const [selectedType, setSelectedType] = useState("All Types")
+    const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
     const [selectedYear, setSelectedYear] = useState("All")
     const [selectedField, setSelectedField] = useState("All Fields")
     const [sortBy, setSortBy] = useState("trending")
@@ -79,34 +82,37 @@ export function PapersContent({ user }: PapersContentProps) {
         setMounted(true)
     }, [])
 
-    const types = ["All Types", ...new Set(samplePapers.map((p) => p.type))]
-    const years = ["All", ...new Set(samplePapers.map((p) => p.year).sort((a, b) => b - a))]
-    const fields = ["All Fields", ...new Set(samplePapers.flatMap((p) => p.keywords))]
+    const departments = ["All Departments", ...new Set(sampleProjects.map((p) => p.department))]
+    const years = ["All", ...new Set(sampleProjects.map((p) => p.year).sort((a, b) => b - a))]
+    const fields = ["All Fields", ...new Set(sampleProjects.flatMap((p) => p.keywords))]
 
-    const filteredPapers = samplePapers.filter((paper) => {
+    const filteredProjects = sampleProjects.filter((project) => {
         const matchesSearch =
-            paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            paper.authors?.some((author: any) => author.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            paper.keywords.some((k: string) => k.toLowerCase().includes(searchQuery.toLowerCase()))
+            project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            project.authors?.some((author: any) => author.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            project.keywords.some((k: string) => k.toLowerCase().includes(searchQuery.toLowerCase()))
 
-        const matchesType = selectedType === "All Types" || paper.type === selectedType
-        const matchesYear = selectedYear === "All" || paper.year === Number.parseInt(selectedYear)
+        const matchesDepartment = selectedDepartment === "All Departments" || project.department === selectedDepartment
+        const matchesYear = selectedYear === "All" || project.year === Number.parseInt(selectedYear)
         const matchesField =
             selectedField === "All Fields" ||
-            paper.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
+            project.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
 
-        return matchesSearch && matchesType && matchesYear && matchesField
+        return matchesSearch && matchesDepartment && matchesYear && matchesField
     })
 
     const clearFilters = () => {
         setSearchQuery("")
-        setSelectedType("All Types")
+        setSelectedDepartment("All Departments")
         setSelectedYear("All")
         setSelectedField("All Fields")
     }
 
     const hasActiveFilters =
-        searchQuery !== "" || selectedType !== "All Types" || selectedYear !== "All" || selectedField !== "All Fields"
+        searchQuery !== "" ||
+        selectedDepartment !== "All Departments" ||
+        selectedYear !== "All" ||
+        selectedField !== "All Fields"
 
     if (!mounted) return null
 
@@ -114,7 +120,7 @@ export function PapersContent({ user }: PapersContentProps) {
         <div className="min-h-screen bg-background">
             <GlobalNavbar user={user} />
 
-            <div className="max-w-[83.5rem] mx-auto px-4 lg:px-8 pb-12 mt-8">
+            <div className="lg:mx-16 mx-auto px-4 lg:px-8 pb-12 mt-8">
                 <div className="grid gap-6 lg:gap-8 lg:grid-cols-4">
                     {/* Desktop Sidebar Filters */}
                     <div className="hidden lg:block lg:col-span-1">
@@ -134,15 +140,15 @@ export function PapersContent({ user }: PapersContentProps) {
 
                             <div className="space-y-4">
                                 <div>
-                                    <Label className="text-xs text-foreground font-medium mb-2 block">Type</Label>
-                                    <Select value={selectedType} onValueChange={setSelectedType}>
-                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                                    <Label className="text-xs text-foreground font-medium mb-2 block">Department</Label>
+                                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            {types.map((type) => (
-                                                <SelectItem key={type} value={type}>
-                                                    {type}
+                                            {departments.map((dept) => (
+                                                <SelectItem key={dept} value={dept}>
+                                                    {dept}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -152,7 +158,7 @@ export function PapersContent({ user }: PapersContentProps) {
                                 <div>
                                     <Label className="text-xs text-foreground font-medium mb-2 block">Field</Label>
                                     <Select value={selectedField} onValueChange={setSelectedField}>
-                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
@@ -203,8 +209,8 @@ export function PapersContent({ user }: PapersContentProps) {
 
                                 <div className="pt-4 border-t border-border">
                                     <p className="text-xs text-muted-foreground">
-                                        Showing <span className="font-semibold text-foreground">{filteredPapers.length}</span> of{" "}
-                                        <span className="font-semibold text-foreground">{samplePapers.length}</span>
+                                        Showing <span className="font-semibold text-foreground">{filteredProjects.length}</span> of{" "}
+                                        <span className="font-semibold text-foreground">{sampleProjects.length}</span>
                                     </p>
                                 </div>
                             </div>
@@ -215,14 +221,14 @@ export function PapersContent({ user }: PapersContentProps) {
                     <div className="lg:col-span-3 space-y-4">
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                             <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground whitespace-nowrap mr-2">
-                                <p className="font-semibold text-lg">Papers </p>
-                                {filteredPapers.length}
+                                <p className="font-semibold text-lg">Projects </p>
+                                {filteredProjects.length}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="relative">
                                     <Zap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
                                     <Input
-                                        placeholder="Search papers..."
+                                        placeholder="Search projects..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/50 border-2 border-border text-sm text-muted-foreground dark:text-foreground dark:text-foreground focus:outline-none focus:border-primary/50 focus:bg-background transition-colors"
@@ -243,11 +249,11 @@ export function PapersContent({ user }: PapersContentProps) {
                             </Select>
                         </div>
 
-                        {filteredPapers.length > 0 ? (
+                        {filteredProjects.length > 0 ? (
                             <motion.div className="space-y-3">
-                                {filteredPapers.map((paper, index) => (
+                                {filteredProjects.map((project, index) => (
                                     <motion.div
-                                        key={paper.id}
+                                        key={project.id}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -256,42 +262,42 @@ export function PapersContent({ user }: PapersContentProps) {
                                             <div className="space-y-3">
                                                 {/* Title and Meta */}
                                                 <div>
-                                                    <Link href={`/paper/${paper.id}`}>
+                                                    <Link href={`/project/${project.id}`}>
                                                         <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                                                            {paper.title}
+                                                            {project.title}
                                                         </h3>
                                                     </Link>
                                                     <p className="text-xs text-muted-foreground mt-1">
                                                         By{" "}
-                                                        {paper.authors?.map((author: any, idx: number) => (
+                                                        {project.authors?.map((author: any, idx: number) => (
                                                             <span key={author.id || idx}>
                                 <Link
-                                    href={`/author/profile/${author.student_id}`}
+                                    href={`/project/member/${author.student_id}`}
                                     className="font-medium hover:text-primary transition-colors"
                                 >
                                   {author.full_name}
                                 </Link>
-                                                                {idx < paper.authors.length - 1 && ", "}
+                                                                {idx < project.authors.length - 1 && ", "}
                               </span>
                                                         ))}
                                                         {" • "}
-                                                        {paper.journal} • {paper.year}
+                                                        {project.department} • {project.year}
                                                     </p>
                                                 </div>
 
                                                 {/* Abstract */}
-                                                <p className="text-xs text-foreground leading-relaxed line-clamp-2">{paper.abstract}</p>
+                                                <p className="text-xs text-foreground leading-relaxed line-clamp-2">{project.abstract}</p>
 
                                                 {/* Keywords */}
                                                 <div className="flex flex-wrap gap-2">
-                                                    {paper.keywords.slice(0, 3).map((keyword, idx) => (
+                                                    {project.keywords.slice(0, 3).map((keyword, idx) => (
                                                         <Badge key={idx} className="bg-primary/10 text-primary border border-primary/20 text-xs">
                                                             {keyword}
                                                         </Badge>
                                                     ))}
-                                                    {paper.keywords.length > 3 && (
+                                                    {project.keywords.length > 3 && (
                                                         <Badge className="bg-muted text-muted-foreground border border-border text-xs">
-                                                            +{paper.keywords.length - 3} more
+                                                            +{project.keywords.length - 3} more
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -301,15 +307,15 @@ export function PapersContent({ user }: PapersContentProps) {
                                                     <div className="flex gap-4 text-xs text-muted-foreground">
                                                         <div className="flex items-center gap-2">
                                                             <Eye className="h-4 w-4" />
-                                                            <span>{paper.views} views</span>
+                                                            <span>{project.views} views</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <Zap className="h-4 w-4" />
-                                                            <span>{paper.downloads} downloads</span>
+                                                            <span>{project.downloads} downloads</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2 w-full sm:w-auto">
-                                                        <Link href={`/paper/${paper.id}`} className="flex-1 sm:flex-none">
+                                                        <Link href={`/project/${project.id}`} className="flex-1 sm:flex-none">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
@@ -336,7 +342,7 @@ export function PapersContent({ user }: PapersContentProps) {
                         ) : (
                             <Card className="border border-border bg-card p-8 text-center">
                                 <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                                <h3 className="text-sm font-semibold text-foreground mb-1">No papers found</h3>
+                                <h3 className="text-sm font-semibold text-foreground mb-1">No projects found</h3>
                                 <p className="text-xs text-muted-foreground">Try adjusting your search or filters</p>
                             </Card>
                         )}

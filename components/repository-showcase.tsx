@@ -8,9 +8,9 @@ import { BookOpen, Database, Cpu, FileText, Folder, GraduationCap } from "lucide
 import { useEffect, useState, useRef } from "react"
 import { ThesisContentMock } from "@/components/thesis-content-mock"
 import { PapersContent } from "@/components/papers-content"
-import ProjectsContent from "@/components/projects-content"
-import ModelsContent from "@/components/models-content"
-import DatasetsContent from "@/components/datasets-content"
+import ProjectsContentMock from "@/components/projects-content-mock"
+import ModelsContentMock from "@/components/models-content-mock"
+import DatasetsContentMock from "@/components/datasets-content-mock"
 import { IconBrandUnity } from "@tabler/icons-react"
 
 const repositories = [
@@ -150,11 +150,11 @@ export function RepositoryShowcase() {
             case "papers":
                 return <PapersContent user={null} />
             case "projects":
-                return <ProjectsContent user={null} />
+                return <ProjectsContentMock user={null} />
             case "models":
-                return <ModelsContent user={null} />
+                return <ModelsContentMock user={null} />
             case "datasets":
-                return <DatasetsContent user={null} />
+                return <DatasetsContentMock user={null} />
         }
     }
     // @ts-ignore

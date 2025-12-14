@@ -3,253 +3,231 @@
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
 import {
-    Database,
     Search,
     X,
     ArrowUpDown,
-    Rows3,
-    Download,
-    Heart,
-    Box,
-    Mic,
-    FileText,
-    Map,
-    ImageIcon,
-    Table,
-    Type,
-    TrendingUp,
-    Video,
-    Sparkles,
-    Bot,
     MessageSquare,
-    Brain,
-    Wand2,
-    Grid3x3,
-    TableIcon,
+    ImageIcon,
+    FileText,
+    Languages,
+    Mic,
+    Ear,
     Link,
-    Ear, AudioLines, Layers, Network, Languages, Package, Globe, FileJson, FileSpreadsheet, Folder, Music, Eye, Filter,
+    Bot,
+    Video,
+    Layers,
+    Sparkles,
+    Eye,
+    Grid3x3,
+    Wand2,
+    AudioLines,
+    TableIcon,
+    Brain,
+    Network,
+    HardDrive,
+    Box,
+    Flame,
+    Zap,
+    Download,
+    Heart, Filter,
 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { motion } from "framer-motion"
-import { IconBrandDatabricks, IconChartBubble } from "@tabler/icons-react"
+import { Slider } from "@/components/ui/slider"
+import { IconBrandUnity } from "@tabler/icons-react"
 
-interface DatasetsContentProps {
-    user: any
-}
-
-const sampleDatasets = [
+const sampleModels = [
     {
         id: 1,
-        name: "Medical Imaging Dataset",
-        modality: "Image",
-        format: "dicom",
-        views: 3421,
-        downloads: 1203,
-        likes: 342,
-        updated: "2 days ago",
-    },
-    {
-        id: 2,
-        name: "Climate Data 2020-2024",
-        modality: "Tabular",
-        format: "csv",
-        views: 2156,
-        downloads: 876,
-        likes: 198,
-        updated: "5 days ago",
-    },
-    {
-        id: 3,
-        name: "Natural Language Corpus",
-        modality: "Text",
-        format: "json",
-        views: 4521,
-        downloads: 1567,
-        likes: 512,
+        name: "Vision Transformer v2.0",
+        framework: "PyTorch",
+        task: "image-classification" as keyof typeof taskCategories,
+        domain: "Computer Vision",
+        trainingType: "Fine-tuned",
+        size: 1876000000, // Added size in bytes
+        views: 5234,
+        downloads: 1876,
+        likes: 643,
         updated: "1 day ago",
     },
     {
-        id: 4,
-        name: "3D Point Cloud Objects",
-        modality: "3D",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
+        id: 2,
+        name: "BERT Fine-tuned for Domain",
+        framework: "TensorFlow",
+        task: "text-classification" as keyof typeof taskCategories,
+        domain: "Bangla NLP",
+        trainingType: "Fine-tuned",
+        size: 438000000, // Added size
+        views: 4156,
+        downloads: 1543,
+        likes: 489,
         updated: "3 days ago",
+    },
+    {
+        id: 3,
+        name: "ResNet-50 Backbone",
+        framework: "PyTorch",
+        task: "object-detection" as keyof typeof taskCategories,
+        domain: "Medical Imaging",
+        trainingType: "From Scratch",
+        size: 102400000, // Added size
+        views: 3876,
+        downloads: 1234,
+        likes: 367,
+        updated: "2 days ago",
+    },
+    {
+        id: 4,
+        name: "JAX Diffusion Model",
+        framework: "JAX",
+        task: "text-to-image" as keyof typeof taskCategories,
+        domain: "Generative AI",
+        trainingType: "Distilled",
+        size: 3200000000, // Added size
+        views: 2943,
+        downloads: 876,
+        likes: 256,
+        updated: "4 days ago",
     },
     {
         id: 5,
-        name: "TuringEnterprises/Turing-Open-Reasoning",
-        modality: "Audio",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
+        name: "GPT-2 Text Generator",
+        framework: "PyTorch",
+        task: "text-generation" as keyof typeof taskCategories,
+        domain: "Natural Language",
+        trainingType: "Fine-tuned",
+        size: 548000000, // Added size
+        views: 8543,
+        downloads: 3421,
+        likes: 1234,
+        updated: "5 days ago",
     },
     {
         id: 6,
-        name: "open-thoughts/OpenThoughts-Agent-v1-SFT",
-        modality: "Tabular",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
+        name: "BERT Question Answering",
+        framework: "TensorFlow",
+        task: "question-answering" as keyof typeof taskCategories,
+        domain: "Bangla NLP",
+        trainingType: "Fine-tuned",
+        size: 440000000, // Added size
+        views: 3214,
+        downloads: 987,
+        likes: 456,
+        updated: "1 week ago",
     },
     {
         id: 7,
-        name: "natolambert/GeneralThought-430K-filtered3D Point Cloud Objects",
-        modality: "Video",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
+        name: "T5 Summarization Model",
+        framework: "PyTorch",
+        task: "summarization" as keyof typeof taskCategories,
+        domain: "Natural Language",
+        trainingType: "Fine-tuned",
+        size: 892000000, // Added size
+        views: 2876,
+        downloads: 743,
+        likes: 321,
         updated: "3 days ago",
     },
     {
         id: 8,
-        name: "OSS-forge/Extended_Shellcode_IA323D Point Cloud Objects",
-        modality: "Geospatial",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
+        name: "MarianMT Bengali-English",
+        framework: "TensorFlow",
+        task: "translation" as keyof typeof taskCategories,
+        domain: "Bangla NLP",
+        trainingType: "From Scratch",
+        size: 312000000, // Added size
+        views: 4532,
+        downloads: 1654,
+        likes: 678,
+        updated: "2 weeks ago",
     },
     {
         id: 9,
-        name: "builddotai/Egocentric-100K",
-        modality: "Time Series",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 10,
-        name: "TeichAI/claude-4.5-opus-high-reasoning-250x",
-        modality: "Tabular",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 11,
-        name: "Satellite Imagery Dataset",
-        modality: "Image",
-        format: "parquet",
-        views: 2543,
-        downloads: 892,
-        likes: 267,
-        updated: "1 week ago",
-    },
-    {
-        id: 12,
-        name: "Financial Time Series Data",
-        modality: "Tabular",
-        format: "csv",
-        views: 1654,
+        name: "Tacotron2 TTS Model",
+        framework: "PyTorch",
+        task: "text-to-speech" as keyof typeof taskCategories,
+        domain: "Audio Processing",
+        trainingType: "Fine-tuned",
+        size: 267000000, // Added size
+        views: 1987,
         downloads: 543,
-        likes: 189,
+        likes: 234,
         updated: "4 days ago",
     },
     {
-        id: 13,
-        name: "Natural Language Corpus",
-        modality: "Text",
-        format: "json",
-        views: 4521,
-        downloads: 1567,
-        likes: 512,
+        id: 10,
+        name: "Whisper ASR Model",
+        framework: "PyTorch",
+        task: "speech-to-text" as keyof typeof taskCategories,
+        domain: "Audio Processing",
+        trainingType: "Fine-tuned",
+        size: 1420000000, // Added size
+        views: 6543,
+        downloads: 2345,
+        likes: 876,
         updated: "1 day ago",
     },
     {
-        id: 14,
-        name: "3D Point Cloud Objects",
-        modality: "3D",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
+        id: 11,
+        name: "SentenceTransformer Embeddings",
+        framework: "PyTorch",
+        task: "embedding" as keyof typeof taskCategories,
+        domain: "Natural Language",
+        trainingType: "Pre-trained",
+        size: 420000000, // Added size
+        views: 3421,
+        downloads: 1234,
+        likes: 543,
+        updated: "6 days ago",
     },
     {
-        id: 15,
-        name: "TuringEnterprises/Turing-Open-Reasoning",
-        modality: "Audio",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 16,
-        name: "open-thoughts/OpenThoughts-Agent-v1-SFT",
-        modality: "Tabular",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 17,
-        name: "natolambert/GeneralThought-430K-filtered3D Point Cloud Objects",
-        modality: "Video",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 18,
-        name: "OSS-forge/Extended_Shellcode_IA323D Point Cloud Objects",
-        modality: "Geospatial",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
+        id: 12,
+        name: "PPO Agent for CartPole",
+        framework: "PyTorch",
+        task: "reinforcement-learning" as keyof typeof taskCategories,
+        domain: "Robotics",
+        trainingType: "From Scratch",
+        size: 2048000, // Added size
+        views: 1654,
+        downloads: 432,
+        likes: 178,
+        updated: "1 week ago",
     },
 ]
-
-const formatNumber = (num: number) => {
-    if (num >= 1000) {
-        return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + "k"
+// Declare formatSize function
+const formatSize = (size: number | null | undefined) => {
+    if (size === undefined || size === null) return "N/A"
+    if (size >= 1e12) {
+        return `${(size / 1e12).toFixed(1)}TB`
+    } else if (size >= 1e9) {
+        return `${(size / 1e9).toFixed(1)}GB`
+    } else if (size >= 1e6) {
+        return `${(size / 1e6).toFixed(1)}MB`
+    } else if (size >= 1e3) {
+        return `${(size / 1e3).toFixed(1)}KB`
     }
-    return num.toString()
+    return `${size}B`
+}
+
+// Declare formatNumber function
+const formatNumber = (number: { toLocaleString: () => any } | null | undefined) => {
+    if (number === undefined || number === null) return "N/A"
+    return number.toLocaleString()
 }
 
 const allTasks = {
-    multimodal: [
+    Multimodal: [
         { key: "audio-text-to-text", label: "Audio-Text-to-Text", icon: AudioLines, color: "text-orange-600" },
         { key: "image-text-to-text", label: "Image-Text-to-Text", icon: ImageIcon, color: "text-orange-600" },
-        {
-            key: "visual-question-answering",
-            label: "Visual Question Answering",
-            icon: Eye,
-            color: "text-orange-600",
-        },
-        {
-            key: "document-question-answering",
-            label: "Document Question Answering",
-            icon: FileText,
-            color: "text-orange-600",
-        },
+        { key: "visual-qa", label: "Visual Question Answering", icon: Eye, color: "text-orange-600" },
+        { key: "document-qa", label: "Document Question Answering", icon: FileText, color: "text-orange-600" },
         { key: "video-text-to-text", label: "Video-Text-to-Text", icon: Video, color: "text-orange-600" },
-        { key: "visual-document-retrieval", label: "Visual Document Retrieval", icon: Search, color: "text-orange-600" },
+        { key: "visual-doc-retrieval", label: "Visual Document Retrieval", icon: Search, color: "text-orange-600" },
         { key: "any-to-any", label: "Any-to-Any", icon: Sparkles, color: "text-orange-600" },
     ],
-    "computer-vision": [
+    "Computer Vision": [
         { key: "depth-estimation", label: "Depth Estimation", icon: Layers, color: "text-blue-600" },
         { key: "image-classification", label: "Image Classification", icon: ImageIcon, color: "text-blue-600" },
         { key: "object-detection", label: "Object Detection", icon: Grid3x3, color: "text-blue-600" },
@@ -258,12 +236,7 @@ const allTasks = {
         { key: "image-to-text", label: "Image-to-Text", icon: FileText, color: "text-blue-600" },
         { key: "image-to-image", label: "Image-to-Image", icon: ImageIcon, color: "text-blue-600" },
         { key: "image-to-video", label: "Image-to-Video", icon: Video, color: "text-blue-600" },
-        {
-            key: "unconditional-image-generation",
-            label: "Unconditional Image Generation",
-            icon: Sparkles,
-            color: "text-blue-600",
-        },
+        { key: "unconditional-image-gen", label: "Unconditional Image Generation", icon: Sparkles, color: "text-blue-600" },
         { key: "video-classification", label: "Video Classification", icon: Video, color: "text-blue-600" },
         { key: "text-to-video", label: "Text-to-Video", icon: Video, color: "text-blue-600" },
         {
@@ -274,171 +247,147 @@ const allTasks = {
         },
         { key: "mask-generation", label: "Mask Generation", icon: Layers, color: "text-blue-600" },
         { key: "zero-shot-object-detection", label: "Zero-Shot Object Detection", icon: Grid3x3, color: "text-blue-600" },
-        { key: "text-to-3d", label: "Text-to-3D", icon: Box, color: "text-blue-600" },
-        { key: "image-to-3d", label: "Image-to-3D", icon: Box, color: "text-blue-600" },
+        { key: "text-to-3d", label: "Text-to-3D", icon: Box, color: "text-blue-600" }, // Using Box icon
+        { key: "image-to-3d", label: "Image-to-3D", icon: Box, color: "text-blue-600" }, // Using Box icon
         { key: "image-feature-extraction", label: "Image Feature Extraction", icon: Network, color: "text-blue-600" },
         { key: "keypoint-detection", label: "Keypoint Detection", icon: Grid3x3, color: "text-blue-600" },
         { key: "video-to-video", label: "Video-to-Video", icon: Video, color: "text-blue-600" },
     ],
-    nlp: [
+    "Natural Language Processing": [
         { key: "text-classification", label: "Text Classification", icon: FileText, color: "text-green-600" },
         { key: "token-classification", label: "Token Classification", icon: FileText, color: "text-green-600" },
-        { key: "table-question-answering", label: "Table Question Answering", icon: TableIcon, color: "text-green-600" },
+        { key: "table-qa", label: "Table Question Answering", icon: TableIcon, color: "text-green-600" },
         { key: "question-answering", label: "Question Answering", icon: MessageSquare, color: "text-green-600" },
         { key: "zero-shot-classification", label: "Zero-Shot Classification", icon: Sparkles, color: "text-green-600" },
         { key: "translation", label: "Translation", icon: Languages, color: "text-green-600" },
         { key: "summarization", label: "Summarization", icon: FileText, color: "text-green-600" },
-        { key: "feature-extraction", label: "Feature Extraction", icon: Network, color: "text-green-600" },
+        { key: "feature-extraction", icon: Network, color: "text-green-600" },
         { key: "text-generation", label: "Text Generation", icon: MessageSquare, color: "text-green-600" },
         { key: "fill-mask", label: "Fill-Mask", icon: FileText, color: "text-green-600" },
         { key: "sentence-similarity", label: "Sentence Similarity", icon: Link, color: "text-green-600" },
         { key: "text-ranking", label: "Text Ranking", icon: ArrowUpDown, color: "text-green-600" },
     ],
-    audio: [
+    Audio: [
         { key: "text-to-speech", label: "Text-to-Speech", icon: Mic, color: "text-purple-600" },
         { key: "text-to-audio", label: "Text-to-Audio", icon: AudioLines, color: "text-purple-600" },
-        { key: "automatic-speech-recognition", label: "Automatic Speech Recognition", icon: Ear, color: "text-purple-600" },
+        { key: "speech-to-text", label: "Automatic Speech Recognition", icon: Ear, color: "text-purple-600" },
         { key: "audio-to-audio", label: "Audio-to-Audio", icon: AudioLines, color: "text-purple-600" },
         { key: "audio-classification", label: "Audio Classification", icon: AudioLines, color: "text-purple-600" },
         { key: "voice-activity-detection", label: "Voice Activity Detection", icon: Mic, color: "text-purple-600" },
     ],
-    tabular: [
-        { key: "tabular-classification", label: "Tabular Classification", icon: TableIcon, color: "text-cyan-600" },
-        { key: "tabular-regression", label: "Tabular Regression", icon: TableIcon, color: "text-cyan-600" },
-        { key: "time-series-forecasting", label: "Time Series Forecasting", icon: ArrowUpDown, color: "text-cyan-600" },
+    Tabular: [
+        { key: "tabular-classification", label: "Tabular Classification", icon: TableIcon, color: "text-yellow-600" },
+        { key: "tabular-regression", label: "Tabular Regression", icon: TableIcon, color: "text-yellow-600" },
+        { key: "time-series-forecasting", label: "Time Series Forecasting", icon: ArrowUpDown, color: "text-yellow-600" },
     ],
-    rl: [
-        { key: "reinforcement-learning", label: "Reinforcement Learning", icon: Brain, color: "text-pink-600" },
-        { key: "robotics", label: "Robotics", icon: Bot, color: "text-pink-600" },
+    "Reinforcement Learning": [
+        { key: "reinforcement-learning", label: "Reinforcement Learning", icon: Bot, color: "text-pink-600" },
+        { key: "robotics", label: "Robotics", icon: Brain, color: "text-pink-600" },
     ],
-    other: [{ key: "graph-machine-learning", label: "Graph Machine Learning", icon: Network, color: "text-gray-600" }],
+    Other: [{ key: "graph-ml", label: "Graph Machine Learning", icon: Network, color: "text-gray-600" }],
 }
+
+const libraries = [
+    { key: "pytorch", label: "PyTorch", icon: Flame, color: "text-red-600" }, // Using Flame icon
+    { key: "tensorflow", label: "TensorFlow", icon: Zap, color: "text-orange-600" }, // Using Zap icon
+    { key: "jax", label: "JAX", icon: Sparkles, color: "text-blue-600" },
+    { key: "transformers", label: "Transformers", icon: Bot, color: "text-yellow-600" },
+    { key: "sentence-transformers", label: "sentence-transformers", icon: MessageSquare, color: "text-green-600" },
+    { key: "scikit-learn", label: "scikit-learn", icon: Brain, color: "text-blue-500" },
+    { key: "spacy", label: "spaCy", icon: FileText, color: "text-cyan-600" },
+    { key: "setfit", label: "SetFit", icon: Layers, color: "text-purple-600" },
+    { key: "diffusers", label: "Diffusers", icon: Wand2, color: "text-pink-600" },
+    { key: "onnx", label: "ONNX", icon: Network, color: "text-gray-600" },
+    { key: "gguf", label: "GGUF", icon: HardDrive, color: "text-indigo-600" },
+    { key: "bitsandbytes", label: "bitsandbytes", icon: Box, color: "text-teal-600" }, // Using Box icon
+]
 
 const featuredTaskKeys = [
     "text-generation",
     "image-text-to-text",
-    "image-to-image",
-    "text-to-video",
+    "image-classification",
+    "text-to-image",
+    "translation",
     "text-to-speech",
-    "any-to-any",
 ]
-
-const datasetLibraries = [
-    { key: "datasets", label: "Datasets", icon: Database, color: "text-yellow-600" },
-    { key: "croissant", label: "Croissant", icon: Package, color: "text-orange-600" },
-    { key: "polars", label: "Polars", icon: Sparkles, color: "text-blue-600" },
-    { key: "pandas", label: "pandas", icon: Table, color: "text-green-600" },
-    { key: "dask", label: "Dask", icon: Layers, color: "text-red-600" },
-    { key: "webdataset", label: "WebDataset", icon: Globe, color: "text-cyan-600" },
-    { key: "distilabel", label: "Distilabel", icon: Bot, color: "text-purple-600" },
-    { key: "argilla", label: "Argilla", icon: FileText, color: "text-orange-500" },
-    { key: "fiftyone", label: "FiftyOne", icon: ImageIcon, color: "text-blue-500" },
-]
-
-const modalities = [
-    { key: "3d", label: "3D", icon: Box, color: "text-blue-600" },
-    { key: "audio", label: "Audio", icon: Mic, color: "text-purple-600" },
-    { key: "document", label: "Document", icon: FileText, color: "text-red-600" },
-    { key: "geospatial", label: "Geospatial", icon: Map, color: "text-orange-600" },
-    { key: "image", label: "Image", icon: ImageIcon, color: "text-green-600" },
-    { key: "tabular", label: "Tabular", icon: Table, color: "text-gray-600" },
-    { key: "text", label: "Text", icon: Type, color: "text-red-700" },
-    { key: "time-series", label: "Time-series", icon: TrendingUp, color: "text-orange-700" },
-    { key: "video", label: "Video", icon: Video, color: "text-blue-700" },
-]
-
-const formats = [
-    { key: "json", label: "json", icon: FileJson },
-    { key: "csv", label: "csv", icon: FileSpreadsheet },
-    { key: "parquet", label: "parquet", icon: Package },
-    { key: "imagefolder", label: "imagefolder", icon: Folder },
-    { key: "soundfolder", label: "soundfolder", icon: Music },
-    { key: "webdataset", label: "webdataset", icon: Globe },
-    { key: "text", label: "text", icon: Type },
-    { key: "arrow", label: "arrow", icon: ArrowUpDown },
-]
-
-const modalityColors: Record<string, { icon: any; colorClass: string; bgClass: string; borderClass: string }> = {
-    "3D": {
-        icon: Box,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
-    },
-    Audio: {
-        icon: Music,
-        colorClass: "text-purple-600",
-        bgClass: "bg-purple-600/10",
-        borderClass: "border-purple-600/20",
-    },
-    Document: {
-        icon: FileText,
-        colorClass: "text-orange-600",
-        bgClass: "bg-orange-600/10",
-        borderClass: "border-orange-600/20",
-    },
-    Geospatial: {
-        icon: Map,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
-    },
-    Image: {
-        icon: ImageIcon,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
-    },
-    Tabular: {
-        icon: Table,
-        colorClass: "text-cyan-600",
-        bgClass: "bg-cyan-600/10",
-        borderClass: "border-cyan-600/20",
-    },
-    Text: {
-        icon: Type,
-        colorClass: "text-green-600",
-        bgClass: "bg-green-600/10",
-        borderClass: "border-green-600/20",
-    },
-    "Time Series": {
-        icon: TrendingUp,
-        colorClass: "text-cyan-600",
-        bgClass: "bg-cyan-600/10",
-        borderClass: "border-cyan-600/20",
-    },
-    Video: {
-        icon: Video,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
-    },
-}
 
 const domains = [
     { key: "computer-vision", label: "Computer Vision", icon: Eye, color: "text-blue-600" },
     { key: "natural-language", label: "Natural Language", icon: MessageSquare, color: "text-green-600" },
     { key: "audio-processing", label: "Audio Processing", icon: AudioLines, color: "text-purple-600" },
+    { key: "bangla-nlp", label: "Bangla NLP", icon: Languages, color: "text-cyan-600" },
     { key: "medical-imaging", label: "Medical Imaging", icon: Heart, color: "text-red-600" },
-    { key: "geospatial", label: "Geospatial Data", icon: Map, color: "text-orange-600" },
-    { key: "finance", label: "Finance", icon: TrendingUp, color: "text-yellow-600" },
-    { key: "climate", label: "Climate", icon: Globe, color: "text-cyan-600" },
-    { key: "biology", label: "Biology", icon: Bot, color: "text-pink-600" },
+    { key: "generative-ai", label: "Generative AI", icon: Sparkles, color: "text-pink-600" },
+    { key: "robotics", label: "Robotics", icon: Bot, color: "text-orange-600" },
 ]
 
-const featuredDomainKeys = ["computer-vision", "natural-language", "audio-processing", "medical-imaging"]
+const featuredDomainKeys = ["computer-vision", "natural-language", "audio-processing", "bangla-nlp"]
 
-export default function DatasetsContent({ user }: DatasetsContentProps) {
+interface ModelsContentProps {
+    user: any
+}
+
+const taskCategories = {
+    "text-generation": {
+        label: "Text Generation",
+        icon: MessageSquare,
+        color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    },
+    "text-classification": {
+        label: "Text Classification",
+        icon: FileText,
+        color: "bg-green-500/10 text-green-600 border-green-500/20",
+    },
+    "question-answering": {
+        label: "Question Answering",
+        icon: MessageSquare,
+        color: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+    },
+    summarization: {
+        label: "Summarization",
+        icon: FileText,
+        color: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+    },
+    translation: { label: "Translation", icon: Languages, color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20" },
+    "text-to-image": {
+        label: "Text-to-Image",
+        icon: ImageIcon,
+        color: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+    },
+    "image-classification": {
+        label: "Image Classification",
+        icon: ImageIcon,
+        color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+    },
+    "object-detection": {
+        label: "Object Detection",
+        icon: ImageIcon,
+        color: "bg-red-500/10 text-red-600 border-red-500/20",
+    },
+    "text-to-speech": {
+        label: "Text-to-Speech",
+        icon: Mic,
+        color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+    },
+    "speech-to-text": { label: "Speech-to-Text", icon: Ear, color: "bg-teal-500/10 text-teal-600 border-teal-500/20" },
+    embedding: { label: "Embedding", icon: Link, color: "bg-gray-500/10 text-gray-600 border-gray-500/20" },
+    "reinforcement-learning": {
+        label: "Reinforcement Learning",
+        icon: Bot,
+        color: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    },
+}
+
+export default function ModelsContentMock({ user }: ModelsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    const [filterModality, setFilterModality] = useState("all")
+    const [filterFramework, setFilterFramework] = useState("all")
     const [filterTask, setFilterTask] = useState("all")
-    const [filterLibrary, setFilterLibrary] = useState("all")
-    const [filterFormat, setFilterFormat] = useState("all")
     const [filterDomain, setFilterDomain] = useState("all")
     const [selectedYearFrom, setSelectedYearFrom] = useState("All")
     const [selectedYearTo, setSelectedYearTo] = useState("All")
     const [sortBy, setSortBy] = useState("trending")
     const [activeTab, setActiveTab] = useState<"main" | "tasks" | "libraries" | "domains">("main")
+    const [parameterRange, setParameterRange] = useState([0, 500])
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
     const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
@@ -447,49 +396,43 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
     const remainingTasks = totalTasks - featuredTaskKeys.length
     const remainingDomains = domains.length - featuredDomainKeys.length
 
-    const filteredDatasets = sampleDatasets.filter((dataset) => {
-        const matchesSearch = dataset.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesModality = filterModality === "all" || dataset.modality === filterModality
-        const matchesFormat = filterFormat === "all" || dataset.format === filterFormat
-        const matchesTask = filterTask === "all" || dataset.modality === filterTask
-        const matchesLibrary = filterLibrary === "all"
-        const matchesDomain = filterDomain === "all"
-        return matchesSearch && matchesModality && matchesFormat && matchesTask && matchesLibrary && matchesDomain
+    const filteredModels = sampleModels.filter((model) => {
+        const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesFramework = filterFramework === "all" || model.framework === filterFramework
+        const matchesTask = filterTask === "all" || model.task === filterTask
+        const matchesDomain = filterDomain === "all" || model.domain === filterDomain
+        return matchesSearch && matchesFramework && matchesTask && matchesDomain
     })
 
     const clearFilters = () => {
         setSearchQuery("")
-        setFilterModality("all")
+        setFilterFramework("all")
         setFilterTask("all")
-        setFilterLibrary("all")
-        setFilterFormat("all")
         setFilterDomain("all")
         setSelectedYearFrom("All")
         setSelectedYearTo("All")
+        setParameterRange([0, 500])
     }
 
     const hasActiveFilters =
         searchQuery !== "" ||
-        filterModality !== "all" ||
+        filterFramework !== "all" ||
         filterTask !== "all" ||
-        filterLibrary !== "all" ||
-        filterFormat !== "all" ||
         filterDomain !== "all" ||
         selectedYearFrom !== "All" ||
-        selectedYearTo !== "All"
+        selectedYearTo !== "All" ||
+        parameterRange[0] !== 0 ||
+        parameterRange[1] !== 500
 
     return (
-        <div className="min-h-screen bg-background overflow-x-hidden">
+        <div className="min-h-screen bg-background">
             <GlobalNavbar user={user} />
 
-            <div className="mx-auto max-w-[83.5rem] px-4 lg:px-8 pb-12 mt-8">
+            <div className="mx-auto lg:mx-16 px-4 lg:px-8 pb-12 mt-8">
                 <div className="grid gap-6 lg:gap-8 lg:grid-cols-[400px_1fr]">
                     {/* Desktop Sidebar Filters */}
                     <div className="hidden lg:block">
-                        <Card
-                            className="border border-border bg-card p-6 pt-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-scroll scrollbar-hide"
-                            style={{ scrollbarGutter: "stable" }}
-                        >
+                        <Card className="border border-border bg-card p-6 pt-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-scroll scrollbar-hide" style={{ scrollbarGutter: "stable" }}>
                             <div className="flex items-center justify-between gap-1">
                                 <div className="flex gap-1">
                                     <button
@@ -545,28 +488,42 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                 )}
                             </div>
 
+                            {/* Main tab: Show featured tasks, parameters, and libraries */}
                             {activeTab === "main" && (
                                 <div className="space-y-6">
+                                    {/* Tasks Section */}
                                     <div>
-                                        <h3 className="text-sm font-semibold mb-3">Modalities</h3>
+                                        <h3 className="text-sm font-semibold mb-3">Tasks</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            {modalities.map((modality) => {
-                                                const Icon = modality.icon
+                                            {featuredTaskKeys.map((taskKey) => {
+                                                const task = Object.values(allTasks)
+                                                    .flat()
+                                                    .find((t) => t.key === taskKey)
+                                                if (!task) return null
+                                                const Icon = task.icon
                                                 return (
                                                     <button
-                                                        key={modality.key}
-                                                        onClick={() => setFilterModality(modality.key)}
+                                                        key={task.key}
+                                                        onClick={() => setFilterTask(task.key)}
                                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
-                                                            filterModality === modality.key
+                                                            filterTask === task.key
                                                                 ? "bg-primary/10 text-primary border-primary/20"
                                                                 : "bg-background border-border hover:bg-muted"
                                                         }`}
                                                     >
-                                                        <Icon className={`h-3.5 w-3.5 ${modality.color}`} />
-                                                        {modality.label}
+                                                        <Icon className={`h-3.5 w-3.5 ${task.color}`} />
+                                                        {task.label}
                                                     </button>
                                                 )
                                             })}
+                                            {remainingTasks > 0 && (
+                                                <button
+                                                    onClick={() => setActiveTab("tasks")}
+                                                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border bg-background border-border hover:bg-muted"
+                                                >
+                                                    <span>+{remainingTasks} more</span>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -603,40 +560,78 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                         </div>
                                     </div>
 
+                                    {/* Parameters Section */}
                                     <div>
-                                        <h3 className="text-sm font-medium mb-3">Format</h3>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {formats.map((format) => {
-                                                const Icon = format.icon
+                                        <h3 className="text-sm font-semibold mb-3">Parameters</h3>
+                                        <div className="space-y-3">
+                                            <Slider
+                                                value={parameterRange}
+                                                onValueChange={setParameterRange}
+                                                max={500}
+                                                step={1}
+                                                className="w-full"
+                                            />
+                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                                <span>&lt; 1B</span>
+                                                <span>6B</span>
+                                                <span>12B</span>
+                                                <span>32B</span>
+                                                <span>128B</span>
+                                                <span>&gt; 500B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Libraries Section */}
+                                    <div>
+                                        <h3 className="text-sm font-semibold mb-3">Libraries</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {libraries.slice(0, 4).map((lib) => {
+                                                const Icon = lib.icon
                                                 return (
                                                     <button
-                                                        key={format.key}
-                                                        onClick={() => setFilterFormat(format.key)}
-                                                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border ${
-                                                            filterFormat === format.key
+                                                        key={lib.key}
+                                                        onClick={() => setFilterFramework(lib.key)}
+                                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
+                                                            filterFramework === lib.key
                                                                 ? "bg-primary/10 text-primary border-primary/20"
                                                                 : "bg-background border-border hover:bg-muted"
                                                         }`}
                                                     >
-                                                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                                                        {format.label}
+                                                        <Icon className={`h-3.5 w-3.5 ${lib.color}`} />
+                                                        {lib.label}
                                                     </button>
                                                 )
                                             })}
+                                            {libraries.length > 4 && (
+                                                <button
+                                                    onClick={() => setActiveTab("libraries")}
+                                                    className="px-3 py-1.5 rounded-md text-xs bg-background border border-border hover:bg-muted transition-colors"
+                                                >
+                                                    +{libraries.length - 4} more
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             )}
 
+                            {/* Tasks tab: Show all tasks organized by categories */}
                             {activeTab === "tasks" && (
-                                <div className="space-y-4">
-                                    <Input placeholder="Filter Tasks by name" className="text-xs h-9 bg-background" />
+                                <div className="space-y-6">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="Filter Tasks by name"
+                                            className="pl-9 h-9 text-sm"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                    </div>
 
                                     {Object.entries(allTasks).map(([category, tasks]) => (
                                         <div key={category}>
-                                            <h3 className="text-sm font-semibold text-foreground mb-2 capitalize">
-                                                {category.replace("-", " ")}
-                                            </h3>
+                                            <h3 className="text-sm font-semibold mb-3 text-foreground">{category}</h3>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {tasks.map((task) => {
                                                     const Icon = task.icon
@@ -664,21 +659,22 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                 </div>
                             )}
 
+                            {/* Libraries tab: Show all libraries */}
                             {activeTab === "libraries" && (
                                 <div className="space-y-4">
                                     <h3 className="text-sm font-semibold text-foreground">All Libraries</h3>
                                     <div className="grid grid-cols-2 gap-2">
-                                        {datasetLibraries.map((lib) => {
+                                        {libraries.map((lib) => {
                                             const Icon = lib.icon
                                             return (
                                                 <button
                                                     key={lib.key}
                                                     onClick={() => {
-                                                        setFilterLibrary(lib.key)
+                                                        setFilterFramework(lib.key)
                                                         setActiveTab("main")
                                                     }}
                                                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
-                                                        filterLibrary === lib.key
+                                                        filterFramework === lib.key
                                                             ? "bg-primary/10 text-primary border-primary/20"
                                                             : "bg-background border-border hover:bg-muted"
                                                     }`}
@@ -719,11 +715,10 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                     </div>
                                 </div>
                             )}
-
                             <div className="pt-4 border-t border-border">
                                 <p className="text-xs text-muted-foreground">
-                                    Showing <span className="font-semibold text-foreground">{filteredDatasets.length}</span> of{" "}
-                                    <span className="font-semibold text-foreground">{sampleDatasets.length}</span>
+                                    Showing <span className="font-medium text-foreground">{filteredModels.length}</span> of{" "}
+                                    <span className="font-medium text-foreground">{sampleModels.length}</span>
                                 </p>
                             </div>
                         </Card>
@@ -734,14 +729,14 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                         {/* Search and Sort Bar */}
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                             <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground dark:text-foreground whitespace-nowrap mr-2">
-                                <p className="font-semibold text-lg">Datasets </p>
-                                {sampleDatasets.length}
+                                <p className="font-semibold text-lg">Models </p>
+                                {sampleModels.length}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="relative">
-                                    <Database className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
                                     <Input
-                                        placeholder="Search datasets..."
+                                        placeholder="Search models..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/50 border-2 border-border text-sm text-muted-foreground dark:text-foreground focus:outline-none focus:border-primary/50 focus:bg-background transition-colors"
@@ -766,7 +761,8 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                 <SelectContent className="bg-popover border-border text-xs">
                                     <SelectItem value="trending">Trending</SelectItem>
                                     <SelectItem value="recent">Recent</SelectItem>
-                                    <SelectItem value="downloads">Most Downloaded</SelectItem>
+                                    <SelectItem value="most-downloads">Most Downloads</SelectItem>
+                                    <SelectItem value="most-likes">Most Likes</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -790,54 +786,58 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                     </div>
 
                                     <div className="space-y-6">
-                                        {/* Modalities */}
+                                        {/* Tasks */}
                                         <div>
-                                            <h3 className="text-sm font-semibold mb-3">Modalities</h3>
+                                            <h3 className="text-sm font-semibold mb-3">Tasks</h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {modalities.map((modality) => {
-                                                    const Icon = modality.icon
+                                                {featuredTaskKeys.map((taskKey) => {
+                                                    const task = Object.values(allTasks)
+                                                        .flat()
+                                                        .find((t) => t.key === taskKey)
+                                                    if (!task) return null
+                                                    const Icon = task.icon
                                                     return (
                                                         <button
-                                                            key={modality.key}
+                                                            key={task.key}
                                                             onClick={() => {
-                                                                setFilterModality(modality.key)
+                                                                setFilterTask(task.key)
                                                                 setIsMobileFilterOpen(false)
                                                             }}
                                                             className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
-                                                                filterModality === modality.key
+                                                                filterTask === task.key
                                                                     ? "bg-primary/10 text-primary border-primary/20"
                                                                     : "bg-background border-border hover:bg-muted"
                                                             }`}
                                                         >
-                                                            <Icon className={`h-3.5 w-3.5 ${modality.color}`} />
-                                                            {modality.label}
+                                                            <Icon className={`h-3.5 w-3.5 ${task.color}`} />
+                                                            {task.label}
                                                         </button>
                                                     )
                                                 })}
                                             </div>
                                         </div>
 
-                                        {/* Format */}
+                                        {/* Libraries */}
                                         <div>
-                                            <h3 className="text-sm font-semibold mb-3">Format</h3>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {formats.map((format) => {
-                                                    const Icon = format.icon
+                                            <h3 className="text-sm font-semibold mb-3">Libraries</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {libraries.map((lib) => {
+                                                    const Icon = lib.icon
                                                     return (
                                                         <button
-                                                            key={format.key}
+                                                            key={lib.key}
                                                             onClick={() => {
-                                                                setFilterFormat(format.key)
+                                                                setFilterFramework(lib.key)
                                                                 setIsMobileFilterOpen(false)
                                                             }}
-                                                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border ${
-                                                                filterFormat === format.key
+                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
+                                                                filterFramework === lib.key
                                                                     ? "bg-primary/10 text-primary border-primary/20"
                                                                     : "bg-background border-border hover:bg-muted"
                                                             }`}
                                                         >
-                                                            <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                                                            {format.label}
+                                                            <Icon className={`h-3.5 w-3.5 ${lib.color}`} />
+                                                            {lib.label}
                                                         </button>
                                                     )
                                                 })}
@@ -924,72 +924,66 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                             </div>
                         )}
 
-                        {filteredDatasets.length > 0 ? (
-                            <motion.div
-                                className="grid gap-x-4 gap-y-6 sm:grid-cols-1"
-                                /* slightly smaller min width to avoid reflow on small gutter changes */
-                                style={{ gridTemplateColumns: "repeat(auto-fit, minmax(412px, 1fr))" }}
-                            >
-                                {filteredDatasets.map((dataset, index) => (
+                        <div className="grid  gap-x-4 gap-y-6 sm:grid-cols-1"
+                             style={{ gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))" }}>
+                            {filteredModels.map((model, index) => {
+                                const taskConfig = taskCategories[model.task]
+                                const TaskIcon = taskConfig?.icon || FileText
+
+                                return (
                                     <motion.div
-                                        key={dataset.id}
-                                        initial={{ opacity: 0, y: 10 }}
+                                        key={model.id}
+                                        initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                                        /* ensure item can shrink and not force the grid wider */
-                                        className="group cursor-pointer min-w-0"
                                     >
-                                        <div className="space-y-2 border border-border rounded-lg p-4 hover:border-primary/50 transition-colors min-w-0">
-                                            <h3 className="text-sm font-semibold font-sans text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-nowrap min-w-0">
-                                                <IconBrandDatabricks className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
-                                                <span className="truncate">{dataset.name}</span>
-                                            </h3>
-                                            <div className="flex items-center flex-wrap gap-x-[5px] gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
-                                                {(() => {
-                                                    const modalityInfo = modalityColors[dataset.modality] || {
-                                                        icon: IconChartBubble,
-                                                        colorClass: "text-primary",
-                                                        bgClass: "bg-primary/10",
-                                                        borderClass: "border-primary/20",
-                                                    }
-                                                    const ModalityIcon = modalityInfo.icon
-                                                    return (
-                                                        <span
-                                                            className={`flex items-center gap-1 ${modalityInfo.bgClass} ${modalityInfo.colorClass} border ${modalityInfo.borderClass} px-2 py-0.5 rounded-md`}
-                                                        >
-                              <ModalityIcon className="h-3 w-3" />
-                                                            {dataset.modality}
-                            </span>
-                                                    )
-                                                })()}
-                                                <span>•</span>
-                                                <span>Updated {dataset.updated}</span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                          <Rows3 className="h-3 w-3" />
-                                                    {formatNumber(dataset.views)}
+                                        <Card className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+                                            {/* Line 1: Title */}
+                                            <div className="flex items-center gap-1">
+                                                <IconBrandUnity className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
+                                                <h3 className="text-base font-normal font-sans truncate">{model.name}</h3>
+                                            </div>
+                                            {/* Line 2: Task → Updated → Views → Downloads → Likes */}
+                                            <div className="flex items-center gap-2 flex-wrap text-xs">
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${taskConfig?.color || ""}`}>
+                          <TaskIcon className="h-3 w-3" />
+                            {taskConfig?.label}
                         </span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
+                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
+                          <HardDrive className="h-3 w-3" />
+                                                    {formatSize(model.size)}
+                        </span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">Updated {model.updated}</span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
                           <Download className="h-3 w-3" />
-                                                    {formatNumber(dataset.downloads)}
+                                                    {formatNumber(model.downloads)}
                         </span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                                                    {formatNumber(dataset.likes)}
+                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
+                          <span>❤</span>
+                                                    {formatNumber(model.likes)}
                         </span>
                                             </div>
-                                        </div>
+
+                                            {/* Line 3: Domain → Framework (libraries) - truncate if needed */}
+                                            <div className="flex items-center gap-2 text-xs truncate">
+                                                <span className="text-neutral-500 dark:text-neutral-400">{model.domain}</span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">{model.framework}</span>
+                                            </div>
+                                        </Card>
                                     </motion.div>
-                                ))}
-                            </motion.div>
-                        ) : (
-                            <Card className="border border-border bg-card p-8 text-center">
-                                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                                <h3 className="text-sm font-semibold text-foreground mb-1">No datasets found</h3>
-                                <p className="text-xs text-muted-foreground">Try adjusting your search</p>
-                            </Card>
+                                )
+                            })}
+                        </div>
+
+                        {filteredModels.length === 0 && (
+                            <div className="text-center py-12">
+                                <p className="text-muted-foreground">No models found matching your filters.</p>
+                            </div>
                         )}
                     </div>
                 </div>

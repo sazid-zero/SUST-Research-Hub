@@ -428,7 +428,7 @@ const domains = [
 
 const featuredDomainKeys = ["computer-vision", "natural-language", "audio-processing", "medical-imaging"]
 
-export default function DatasetsContent({ user }: DatasetsContentProps) {
+export default function DatasetsContentMock({ user }: DatasetsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [filterModality, setFilterModality] = useState("all")
     const [filterTask, setFilterTask] = useState("all")
@@ -482,7 +482,7 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
         <div className="min-h-screen bg-background overflow-x-hidden">
             <GlobalNavbar user={user} />
 
-            <div className="mx-auto max-w-[83.5rem] px-4 lg:px-8 pb-12 mt-8">
+            <div className="mx-auto lg:mx-16 px-4 lg:px-8 pb-12 mt-8">
                 <div className="grid gap-6 lg:gap-8 lg:grid-cols-[400px_1fr]">
                     {/* Desktop Sidebar Filters */}
                     <div className="hidden lg:block">
