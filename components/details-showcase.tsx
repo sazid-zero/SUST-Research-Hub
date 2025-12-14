@@ -8,13 +8,13 @@ import {AnimatedParticles} from "@/components/repository-showcase";
 
 export function DetailsShowcase() {
 
-
     return (
-        <section className="bg-background py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen">
+        <section className="relative bg-background py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen">
             <AnimatedParticles/>
-            <div className="relative z-10 container mx-auto text-center">
+            <div className="max-w-7xl mx-auto ">
+                <div className="relative z-10 container mx-auto text-center">
 
-                <div className="lg:grid lg:grid-cols-5 lg:gap-16 items-center">
+                 <div className="lg:grid lg:grid-cols-5 lg:gap-16 items-center">
                     <div className="lg:col-span-2 mb-12 lg:mb-0">
                         <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl mb-2">
                             A Hub for Academic
@@ -59,6 +59,7 @@ export function DetailsShowcase() {
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </section>
