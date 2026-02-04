@@ -33,6 +33,7 @@ import { GlobalNavbar } from "@/components/global-navbar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { User } from "@supabase/supabase-js"
 import { svgTextToDataUri } from "@/lib/utils"
+import { useContentTracking } from "@/hooks/use-content-tracking"
 
 interface PaperDetailContentProps {
     publication: any
@@ -42,6 +43,7 @@ interface PaperDetailContentProps {
 export function PaperDetailContent({ publication, user }: PaperDetailContentProps) {
     const [copied, setCopied] = useState(false)
     const [bookmarked, setBookmarked] = useState(false)
+    const { trackDownload } = useContentTracking("publication", publication.id)
 
     const handleCopyDOI = () => {
         if (publication.doi) {
@@ -182,22 +184,18 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    {publication.url && (
-                                        <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-                                            <a href={publication.url} target="_blank" rel="noopener noreferrer">
-                                                <ExternalLink className="h-4 w-4" />
-                                                View Full Paper
-                                            </a>
-                                        </Button>
-                                    )}
-                                    {publication.pdf_url && (
-                                        <Button variant="outline" className="gap-2 bg-transparent" asChild>
-                                            <a href={publication.pdf_url} target="_blank" rel="noopener noreferrer">
-                                                <Download className="h-4 w-4" />
-                                                Download PDF
-                                            </a>
-                                        </Button>
-                                    )}
+                                    <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
+                                        <a href={publication.url || "#"} target={publication.url ? "_blank" : undefined} rel={publication.url ? "noopener noreferrer" : undefined}>
+                                            <ExternalLink className="h-4 w-4" />
+                                            View Full Paper
+                                        </a>
+                                    </Button>
+                                    <Button variant="outline" className="gap-2 bg-transparent" asChild>
+                                        <a onClick={() => trackDownload()} href={publication.pdf_url || "#"} target={publication.pdf_url ? "_blank" : undefined} rel={publication.pdf_url ? "noopener noreferrer" : undefined}>
+                                            <Download className="h-4 w-4" />
+                                            Download PDF
+                                        </a>
+                                    </Button>
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}
@@ -676,22 +674,18 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    {publication.url && (
-                                        <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-                                            <a href={publication.url} target="_blank" rel="noopener noreferrer">
-                                                <ExternalLink className="h-4 w-4" />
-                                                View Full Paper
-                                            </a>
-                                        </Button>
-                                    )}
-                                    {publication.pdf_url && (
-                                        <Button variant="outline" className="gap-2 bg-transparent" asChild>
-                                            <a href={publication.pdf_url} target="_blank" rel="noopener noreferrer">
-                                                <Download className="h-4 w-4" />
-                                                Download PDF
-                                            </a>
-                                        </Button>
-                                    )}
+                                    <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
+                                        <a href={publication.url || "#"} target={publication.url ? "_blank" : undefined} rel={publication.url ? "noopener noreferrer" : undefined}>
+                                            <ExternalLink className="h-4 w-4" />
+                                            View Full Paper
+                                        </a>
+                                    </Button>
+                                    <Button variant="outline" className="gap-2 bg-transparent" asChild>
+                                        <a onClick={() => trackDownload()} href={publication.pdf_url || "#"} target={publication.pdf_url ? "_blank" : undefined} rel={publication.pdf_url ? "noopener noreferrer" : undefined}>
+                                            <Download className="h-4 w-4" />
+                                            Download PDF
+                                        </a>
+                                    </Button>
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}

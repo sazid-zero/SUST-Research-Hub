@@ -26,6 +26,8 @@ import type { Publication } from "@/lib/db/publications"
 import { FileIconBadge, getFileIcon } from "@/components/file-icon-helper"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { svgTextToDataUri } from "@/lib/utils"
+import { useContentTracking } from "@/hooks/use-content-tracking"
+import { useState } from "react"
 
 export function ThesisDetailEnhanced({
                                          thesis,
@@ -36,6 +38,21 @@ export function ThesisDetailEnhanced({
     user?: User | null
     publications?: Publication[]
 }) {
+    const [viewCount, setViewCount] = useState(thesis.views || 0)
+    const [downloadCount, setDownloadCount] = useState(thesis.downloads || 0)
+    
+    // Track view on mount and updating local state on success
+    const { trackDownload } = useContentTracking("thesis", thesis.id, {
+        onView: () => setViewCount(prev => prev + 1)
+    })
+
+    const handleDownload = async (fileSize?: number) => {
+        const success = await trackDownload(fileSize)
+        if (success) {
+            setDownloadCount(prev => prev + 1)
+        }
+    }
+
     const year = thesis.year || new Date(thesis.created_at).getFullYear()
 
     const getStatusBadge = (status: string) => {
@@ -159,21 +176,21 @@ export function ThesisDetailEnhanced({
                   </span>
                                     <span className="flex items-center gap-1.5">
                     <Eye className="h-4 w-4" />
-                    <span className="font-medium text-foreground">{thesis.views || 0}</span> views
+                    <span className="font-medium text-foreground">{viewCount}</span> views
                   </span>
                                     <span className="flex items-center gap-1.5">
                     <Download className="h-4 w-4" />
-                    <span className="font-medium text-foreground">{thesis.downloads || 0}</span> downloads
+                    <span className="font-medium text-foreground">{downloadCount}</span> downloads
                   </span>
                                 </div>
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    <Button className="gap-2 bg-primary hover:bg-primary/90">
+                                    <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => {}}>
                                         <FileText className="h-4 w-4" />
                                         View Full Thesis
                                     </Button>
-                                    <Button variant="outline" className="gap-2 bg-transparent">
+                                    <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleDownload()}>
                                         <Download className="h-4 w-4" />
                                         Download PDF
                                     </Button>
@@ -446,7 +463,16 @@ export function ThesisDetailEnhanced({
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <Button variant="ghost" size="sm" className="h-8 shrink-0 hover:bg-primary/10">
+                                                            <Button
+                                                                variant="ghost" 
+                                                                size="sm" 
+                                                                className="h-8 shrink-0 hover:bg-primary/10"
+                                                                onClick={() => {
+                                                                    if (!isExternal) {
+                                                                        handleDownload(file.file_size)
+                                                                    }
+                                                                }}
+                                                            >
                                                                 {isExternal ? (
                                                                     <ExternalLink className="h-4 w-4 text-primary" />
                                                                 ) : (

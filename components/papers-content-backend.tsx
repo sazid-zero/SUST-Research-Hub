@@ -1,3 +1,5 @@
+"use client"
+
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import type { Publication } from "@/lib/db/publications"
+import { useState, useMemo } from "react"
 
 interface PapersContentBackendProps {
   user: any
@@ -15,8 +18,17 @@ interface PapersContentBackendProps {
 }
 
 export function PapersContentBackend({ user, papers }: PapersContentBackendProps) {
-  // Extract unique values for filters
   const safePapers = papers || []
+  
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedType, setSelectedType] = useState("All Types")
+  const [selectedField, setSelectedField] = useState("All Fields")
+  const [yearFrom, setYearFrom] = useState("All")
+  const [yearTo, setYearTo] = useState("All")
+  const [sortBy, setSortBy] = useState("recent")
+  
+  // Extract unique values for filters
   const types = ["All Types", ...new Set(safePapers.map((p) => p.publication_type).filter(Boolean))]
   const years = [
     "All",
@@ -29,6 +41,60 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
   ]
   const allKeywords = [...new Set(safePapers.flatMap((p) => p.keywords || []))]
   const fields = ["All Fields", ...allKeywords.slice(0, 20)]
+  
+  // Apply filters
+  const filteredPapers = useMemo(() => {
+    let filtered = [...safePapers]
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(paper => 
+        paper.title?.toLowerCase().includes(query) ||
+        paper.abstract?.toLowerCase().includes(query) ||
+        paper.keywords?.some(k => k.toLowerCase().includes(query)) ||
+        paper.authors?.some(a => a.author_name.toLowerCase().includes(query))
+      )
+    }
+    
+    // Type filter
+    if (selectedType !== "All Types") {
+      filtered = filtered.filter(paper => paper.publication_type === selectedType)
+    }
+    
+    // Field filter (by keywords)
+    if (selectedField !== "All Fields") {
+      filtered = filtered.filter(paper => paper.keywords?.includes(selectedField))
+    }
+    
+    // Year range filter
+    if (yearFrom !== "All") {
+      filtered = filtered.filter(paper => paper.year && paper.year >= Number(yearFrom))
+    }
+    if (yearTo !== "All") {
+      filtered = filtered.filter(paper => paper.year && paper.year <= Number(yearTo))
+    }
+    
+    // Sorting
+    if (sortBy === "recent") {
+      filtered.sort((a, b) => (b.year || 0) - (a.year || 0))
+    } else if (sortBy === "citations") {
+      filtered.sort((a, b) => (b.citations || 0) - (a.citations || 0))
+    } else if (sortBy === "impact") {
+      filtered.sort((a, b) => (b.impact_factor || 0) - (a.impact_factor || 0))
+    }
+    
+    return filtered
+  }, [safePapers, searchQuery, selectedType, selectedField, yearFrom, yearTo, sortBy])
+  
+  const handleClearFilters = () => {
+    setSearchQuery("")
+    setSelectedType("All Types")
+    setSelectedField("All Fields")
+    setYearFrom("All")
+    setYearTo("All")
+    setSortBy("recent")
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,18 +107,20 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
             <Card className="border border-border bg-card p-6 sticky top-20">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-sm font-bold text-foreground">Filters</h2>
-                <form action="/papers-backend">
-                  <button type="submit" className="text-xs text-primary hover:underline flex items-center gap-1">
-                    <X className="h-3 w-3" />
-                    Clear
-                  </button>
-                </form>
+                <button 
+                  type="button" 
+                  onClick={handleClearFilters}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Clear
+                </button>
               </div>
 
-              <form className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <Label className="text-xs text-foreground font-medium mb-2 block">Type</Label>
-                  <Select name="type" defaultValue="All Types">
+                  <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
@@ -68,7 +136,7 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
 
                 <div>
                   <Label className="text-xs text-foreground font-medium mb-2 block">Field</Label>
-                  <Select name="field" defaultValue="All Fields">
+                  <Select value={selectedField} onValueChange={setSelectedField}>
                     <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
@@ -87,7 +155,7 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
                   <div className="flex gap-4">
                     <div className="flex gap-1 items-center">
                       <p className="text-xs text-muted-foreground mb-1">From</p>
-                      <Select name="yearFrom" defaultValue="All">
+                      <Select value={yearFrom} onValueChange={setYearFrom}>
                         <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
@@ -102,7 +170,7 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
                     </div>
                     <div className="flex gap-1 items-center">
                       <p className="text-xs text-muted-foreground mb-1">To</p>
-                      <Select name="yearTo" defaultValue="All">
+                      <Select value={yearTo} onValueChange={setYearTo}>
                         <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
@@ -120,10 +188,10 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
 
                 <div className="pt-4 border-t border-border">
                   <p className="text-xs text-muted-foreground">
-                    Showing <span className="font-semibold text-foreground">{safePapers.length}</span> papers
+                    Showing <span className="font-semibold text-foreground">{filteredPapers.length}</span> papers
                   </p>
                 </div>
-              </form>
+              </div>
             </Card>
           </div>
 
@@ -132,20 +200,21 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
               <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground whitespace-nowrap mr-2">
                 <p className="font-semibold text-lg">Papers</p>
-                {safePapers.length}
+                {filteredPapers.length}
               </div>
               <div className="flex-1 min-w-0">
-                <form className="relative">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
                   <Input
-                    name="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search papers..."
                     className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/50 border-2 border-border text-sm text-muted-foreground dark:text-foreground focus:outline-none focus:border-primary/50 focus:bg-background transition-colors"
                   />
-                </form>
+                </div>
               </div>
 
-              <Select name="sort" defaultValue="recent">
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-44 bg-background border-border h-9 text-xs">
                   <ArrowUpDown className="h-3 w-3 mr-1" />
                   <SelectValue placeholder="Sort" />
@@ -158,9 +227,9 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
               </Select>
             </div>
 
-            {safePapers.length > 0 ? (
+            {filteredPapers.length > 0 ? (
               <div className="space-y-3">
-                {safePapers.map((paper) => (
+                {filteredPapers.map((paper) => (
                   <div
                     key={paper.id}
                     className="border border-border hover:border-primary/50 rounded-lg p-4 transition-all hover:shadow-sm group cursor-pointer"

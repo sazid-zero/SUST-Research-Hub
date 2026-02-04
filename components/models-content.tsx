@@ -507,6 +507,16 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                     <div>
                                         <h3 className="text-sm font-semibold mb-3">Tasks</h3>
                                         <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => setFilterTask("all")}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
+                                                    filterTask === "all"
+                                                        ? "bg-primary/10 text-primary border-primary/20"
+                                                        : "bg-background border-border hover:bg-muted"
+                                                }`}
+                                            >
+                                                All
+                                            </button>
                                             {featuredTaskKeys.map((taskKey) => {
                                                 const task = Object.values(allTasks)
                                                     .flat()
@@ -516,7 +526,7 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                                 return (
                                                     <button
                                                         key={task.key}
-                                                        onClick={() => setFilterTask(task.key)}
+                                                        onClick={() => setFilterTask(filterTask === task.key ? "all" : task.key)}
                                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
                                                             filterTask === task.key
                                                                 ? "bg-primary/10 text-primary border-primary/20"
@@ -542,6 +552,16 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                     <div>
                                         <h3 className="text-sm font-semibold mb-3">Domains</h3>
                                         <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => setFilterDomain("all")}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
+                                                    filterDomain === "all"
+                                                        ? "bg-primary/10 text-primary border-primary/20"
+                                                        : "bg-background border-border hover:bg-muted"
+                                                }`}
+                                            >
+                                                All
+                                            </button>
                                             {featuredDomainKeys.map((domainKey) => {
                                                 const domain = domains.find((d) => d.key === domainKey)
                                                 if (!domain) return null
@@ -549,7 +569,7 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                                 return (
                                                     <button
                                                         key={domain.key}
-                                                        onClick={() => setFilterDomain(domain.label)}
+                                                        onClick={() => setFilterDomain(filterDomain === domain.label ? "all" : domain.label)}
                                                         className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
                                                             filterDomain === domain.label
                                                                 ? "bg-primary/10 text-primary border-primary/20"
@@ -962,7 +982,7 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                             </div>
                                             {/* Line 2: Task → Updated → Views → Downloads → Likes */}
                                             <div className="flex items-center gap-2 flex-wrap text-xs">
-                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${taskConfig.color || ""}`}>
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 ${taskConfig.color || "text-primary"}`}>
                           <TaskIcon className="h-3 w-3" />
                             {taskConfig.label}
                         </span>

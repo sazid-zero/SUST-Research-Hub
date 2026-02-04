@@ -499,12 +499,22 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                     <div>
                                         <h3 className="text-sm font-semibold mb-3">Modalities</h3>
                                         <div className="flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => setFilterModality("all")}
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
+                                                    filterModality === "all"
+                                                        ? "bg-primary/10 text-primary border-primary/20"
+                                                        : "bg-background border-border hover:bg-muted"
+                                                }`}
+                                            >
+                                                All
+                                            </button>
                                             {modalities.map((modality) => {
                                                 const Icon = modality.icon
                                                 return (
                                                     <button
                                                         key={modality.key}
-                                                        onClick={() => setFilterModality(modality.key)}
+                                                        onClick={() => setFilterModality(filterModality === modality.key ? "all" : modality.key)}
                                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors border ${
                                                             filterModality === modality.key
                                                                 ? "bg-primary/10 text-primary border-primary/20"
@@ -522,6 +532,16 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                     <div>
                                         <h3 className="text-sm font-semibold mb-3">Domains</h3>
                                         <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => setFilterDomain("all")}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
+                                                    filterDomain === "all"
+                                                        ? "bg-primary/10 text-primary border-primary/20"
+                                                        : "bg-background border-border hover:bg-muted"
+                                                }`}
+                                            >
+                                                All
+                                            </button>
                                             {featuredDomainKeys.map((domainKey) => {
                                                 const domain = domains.find((d) => d.key === domainKey)
                                                 if (!domain) return null
@@ -529,7 +549,7 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                                 return (
                                                     <button
                                                         key={domain.key}
-                                                        onClick={() => setFilterDomain(domain.label)}
+                                                        onClick={() => setFilterDomain(filterDomain === domain.label ? "all" : domain.label)}
                                                         className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border text-left ${
                                                             filterDomain === domain.label
                                                                 ? "bg-primary/10 text-primary border-primary/20"
@@ -555,12 +575,22 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                     <div>
                                         <h3 className="text-sm font-medium mb-3">Format</h3>
                                         <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={() => setFilterFormat("all")}
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border ${
+                                                    filterFormat === "all"
+                                                        ? "bg-primary/10 text-primary border-primary/20"
+                                                        : "bg-background border-border hover:bg-muted"
+                                                }`}
+                                            >
+                                                All
+                                            </button>
                                             {formats.map((format) => {
                                                 const Icon = format.icon
                                                 return (
                                                     <button
                                                         key={format.key}
-                                                        onClick={() => setFilterFormat(format.key)}
+                                                        onClick={() => setFilterFormat(filterFormat === format.key ? "all" : format.key)}
                                                         className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition-colors border ${
                                                             filterFormat === format.key
                                                                 ? "bg-primary/10 text-primary border-primary/20"
