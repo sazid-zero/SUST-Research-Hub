@@ -14,3 +14,4 @@ export default function GlobalSmoothScroll({ children }) {
 
     return <div ref={container}>{children}</div>
 }
+

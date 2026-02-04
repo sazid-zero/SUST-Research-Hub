@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-        <body className={`min-h-screen antialiased ${geist.className}`}>
+        <body className={`min-h-screen antialiased ${geist.className}`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             <GlobalSmoothScroll
             >

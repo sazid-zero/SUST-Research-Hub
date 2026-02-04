@@ -2,6 +2,7 @@
 
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
+import NextLink from "next/link"
 import {
     Search,
     X,
@@ -212,9 +213,12 @@ const formatSize = (size: number | null | undefined) => {
 }
 
 // Declare formatNumber function
-const formatNumber = (number: { toLocaleString: () => any } | null | undefined) => {
-    if (number === undefined || number === null) return "N/A"
-    return number.toLocaleString()
+const formatNumber = (number: number | null | undefined) => {
+    if (number === undefined || number === null) return "0"
+    if (number >= 1000) {
+        return (number / 1000).toFixed(number % 1000 === 0 ? 0 : 1) + "k"
+    }
+    return number.toString()
 }
 
 const allTasks = {
@@ -325,6 +329,7 @@ const featuredDomainKeys = ["computer-vision", "natural-language", "audio-proces
 
 interface ModelsContentProps {
     user: any
+    initialModels?: any[]
 }
 
 const taskCategories = {
@@ -378,7 +383,7 @@ const taskCategories = {
     },
 }
 
-export default function ModelsContent({ user }: ModelsContentProps) {
+export default function ModelsContent({ user, initialModels }: ModelsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [filterFramework, setFilterFramework] = useState("all")
     const [filterTask, setFilterTask] = useState("all")
@@ -390,17 +395,24 @@ export default function ModelsContent({ user }: ModelsContentProps) {
     const [parameterRange, setParameterRange] = useState([0, 500])
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
+    // Use real models if provided, otherwise fallback to sample data
+    const models = initialModels && initialModels.length > 0 ? initialModels : sampleModels
+
     const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
 
     const totalTasks = Object.values(allTasks).flat().length
     const remainingTasks = totalTasks - featuredTaskKeys.length
     const remainingDomains = domains.length - featuredDomainKeys.length
 
-    const filteredModels = sampleModels.filter((model) => {
-        const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesFramework = filterFramework === "all" || model.framework === filterFramework
-        const matchesTask = filterTask === "all" || model.task === filterTask
-        const matchesDomain = filterDomain === "all" || model.domain === filterDomain
+    const filteredModels = models.filter((model) => {
+        const name = model.name || model.title || ""
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase())
+        const framework = model.framework || ""
+        const matchesFramework = filterFramework === "all" || framework === filterFramework
+        const task = model.task || ""
+        const matchesTask = filterTask === "all" || task === filterTask
+        const domain = model.domain || ""
+        const matchesDomain = filterDomain === "all" || domain === filterDomain
         return matchesSearch && matchesFramework && matchesTask && matchesDomain
     })
 
@@ -924,11 +936,15 @@ export default function ModelsContent({ user }: ModelsContentProps) {
                             </div>
                         )}
 
-                        <div className="grid  gap-x-4 gap-y-6 sm:grid-cols-1"
-                             style={{ gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))" }}>
+                        <div className="grid grid-cols-1 gap-4">
                             {filteredModels.map((model, index) => {
-                                const taskConfig = taskCategories[model.task]
-                                const TaskIcon = taskConfig?.icon || FileText
+                                const taskKey = model.task || model.model_type || "unknown"
+                                const taskConfig = taskCategories[taskKey] || {
+                                    label: taskKey,
+                                    icon: FileText,
+                                    color: "text-gray-500",
+                                }
+                                const TaskIcon = taskConfig.icon
 
                                 return (
                                     <motion.div
@@ -937,25 +953,26 @@ export default function ModelsContent({ user }: ModelsContentProps) {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: index * 0.05 }}
                                     >
+                                        <NextLink href={`/model/${model.id}`}>
                                         <Card className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
                                             {/* Line 1: Title */}
                                             <div className="flex items-center gap-1">
                                                 <IconBrandUnity className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
-                                                <h3 className="text-base font-normal font-sans truncate">{model.name}</h3>
+                                                <h3 className="text-base font-normal font-sans truncate">{model.name || model.title}</h3>
                                             </div>
                                             {/* Line 2: Task → Updated → Views → Downloads → Likes */}
                                             <div className="flex items-center gap-2 flex-wrap text-xs">
-                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${taskConfig?.color || ""}`}>
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded ${taskConfig.color || ""}`}>
                           <TaskIcon className="h-3 w-3" />
-                            {taskConfig?.label}
+                            {taskConfig.label}
                         </span>
                                                 <span className="text-neutral-500 dark:text-neutral-400">•</span>
                                                 <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
                           <HardDrive className="h-3 w-3" />
-                                                    {formatSize(model.size)}
+                                                    {formatSize(model.size || (model.model_size_mb ? model.model_size_mb * 1024 * 1024 : undefined))}
                         </span>
                                                 <span className="text-neutral-500 dark:text-neutral-400">•</span>
-                                                <span className="text-neutral-500 dark:text-neutral-400">Updated {model.updated}</span>
+                                                <span className="text-neutral-500 dark:text-neutral-400">Updated {model.updated || (model.updated_at ? new Date(model.updated_at).toLocaleDateString() : "")}</span>
                                                 <span className="text-neutral-500 dark:text-neutral-400">•</span>
                                                 <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
                           <Download className="h-3 w-3" />
@@ -963,18 +980,25 @@ export default function ModelsContent({ user }: ModelsContentProps) {
                         </span>
                                                 <span className="text-neutral-500 dark:text-neutral-400">•</span>
                                                 <span className="flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
-                          <span>❤</span>
-                                                    {formatNumber(model.likes)}
+                          <Eye className="h-3 w-3" />
+                                                    {formatNumber(model.views)}
                         </span>
                                             </div>
 
                                             {/* Line 3: Domain → Framework (libraries) - truncate if needed */}
                                             <div className="flex items-center gap-2 text-xs truncate">
-                                                <span className="text-neutral-500 dark:text-neutral-400">{model.domain}</span>
-                                                <span className="text-neutral-500 dark:text-neutral-400">•</span>
-                                                <span className="text-neutral-500 dark:text-neutral-400">{model.framework}</span>
+                                                {(model.domain || (model.keywords && model.keywords[0])) && (
+                                                    <>
+                                                        <span className="text-neutral-500 dark:text-neutral-400">
+                                                            {model.domain || model.keywords[0]}
+                                                        </span>
+                                                        <span className="text-neutral-500 dark:text-neutral-400">•</span>
+                                                    </>
+                                                )}
+                                                <span className="text-neutral-500 dark:text-neutral-400">{model.framework || ""}</span>
                                             </div>
                                         </Card>
+                                        </NextLink>
                                     </motion.div>
                                 )
                             })}

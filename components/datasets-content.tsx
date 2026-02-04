@@ -2,12 +2,13 @@
 
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
+// Components
+import NextLink from "next/link"
 import {
     Database,
     Search,
     X,
     ArrowUpDown,
-    Rows3,
     Download,
     Heart,
     Box,
@@ -37,6 +38,7 @@ import { IconBrandDatabricks, IconChartBubble } from "@tabler/icons-react"
 
 interface DatasetsContentProps {
     user: any
+    initialDatasets?: any[]
 }
 
 const sampleDatasets = [
@@ -160,69 +162,10 @@ const sampleDatasets = [
         likes: 189,
         updated: "4 days ago",
     },
-    {
-        id: 13,
-        name: "Natural Language Corpus",
-        modality: "Text",
-        format: "json",
-        views: 4521,
-        downloads: 1567,
-        likes: 512,
-        updated: "1 day ago",
-    },
-    {
-        id: 14,
-        name: "3D Point Cloud Objects",
-        modality: "3D",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 15,
-        name: "TuringEnterprises/Turing-Open-Reasoning",
-        modality: "Audio",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 16,
-        name: "open-thoughts/OpenThoughts-Agent-v1-SFT",
-        modality: "Tabular",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 17,
-        name: "natolambert/GeneralThought-430K-filtered3D Point Cloud Objects",
-        modality: "Video",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
-    {
-        id: 18,
-        name: "OSS-forge/Extended_Shellcode_IA323D Point Cloud Objects",
-        modality: "Geospatial",
-        format: "parquet",
-        views: 1876,
-        downloads: 634,
-        likes: 156,
-        updated: "3 days ago",
-    },
 ]
 
-const formatNumber = (num: number) => {
+const formatNumber = (num: number | undefined | null) => {
+    if (num === undefined || num === null) return "0"
     if (num >= 1000) {
         return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + "k"
     }
@@ -428,7 +371,7 @@ const domains = [
 
 const featuredDomainKeys = ["computer-vision", "natural-language", "audio-processing", "medical-imaging"]
 
-export default function DatasetsContent({ user }: DatasetsContentProps) {
+export default function DatasetsContent({ user, initialDatasets }: DatasetsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [filterModality, setFilterModality] = useState("all")
     const [filterTask, setFilterTask] = useState("all")
@@ -441,17 +384,23 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
     const [activeTab, setActiveTab] = useState<"main" | "tasks" | "libraries" | "domains">("main")
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
 
+    // Use real datasets if provided, otherwise fallback to sample data
+    const datasets = initialDatasets && initialDatasets.length > 0 ? initialDatasets : sampleDatasets
+
     const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i)
 
     const totalTasks = Object.values(allTasks).flat().length
     const remainingTasks = totalTasks - featuredTaskKeys.length
     const remainingDomains = domains.length - featuredDomainKeys.length
 
-    const filteredDatasets = sampleDatasets.filter((dataset) => {
-        const matchesSearch = dataset.name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchesModality = filterModality === "all" || dataset.modality === filterModality
-        const matchesFormat = filterFormat === "all" || dataset.format === filterFormat
-        const matchesTask = filterTask === "all" || dataset.modality === filterTask
+    const filteredDatasets = datasets.filter((dataset) => {
+        const name = dataset.name || dataset.title || ""
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase())
+        const datasetType = dataset.modality || dataset.dataset_type || ""
+        const matchesModality = filterModality === "all" || datasetType === filterModality
+        const format = dataset.format || dataset.file_format || ""
+        const matchesFormat = filterFormat === "all" || format === filterFormat
+        const matchesTask = filterTask === "all" || datasetType === filterTask
         const matchesLibrary = filterLibrary === "all"
         const matchesDomain = filterDomain === "all"
         return matchesSearch && matchesModality && matchesFormat && matchesTask && matchesLibrary && matchesDomain
@@ -939,14 +888,16 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                         /* ensure item can shrink and not force the grid wider */
                                         className="group cursor-pointer min-w-0"
                                     >
+                                        <NextLink href={`/dataset/${dataset.id}`}>
                                         <div className="space-y-2 border border-border rounded-lg p-4 hover:border-primary/50 transition-colors min-w-0">
                                             <h3 className="text-sm font-semibold font-sans text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-nowrap min-w-0">
                                                 <IconBrandDatabricks className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
-                                                <span className="truncate">{dataset.name}</span>
+                                                <span className="truncate">{dataset.name || dataset.title}</span>
                                             </h3>
                                             <div className="flex items-center flex-wrap gap-x-[5px] gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
                                                 {(() => {
-                                                    const modalityInfo = modalityColors[dataset.modality] || {
+                                                    const modality = dataset.modality || dataset.dataset_type
+                                                    const modalityInfo = modalityColors[modality] || {
                                                         icon: IconChartBubble,
                                                         colorClass: "text-primary",
                                                         bgClass: "bg-primary/10",
@@ -958,15 +909,15 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                                                             className={`flex items-center gap-1 ${modalityInfo.bgClass} ${modalityInfo.colorClass} border ${modalityInfo.borderClass} px-2 py-0.5 rounded-md`}
                                                         >
                               <ModalityIcon className="h-3 w-3" />
-                                                            {dataset.modality}
+                                                            {modality}
                             </span>
                                                     )
                                                 })()}
                                                 <span>•</span>
-                                                <span>Updated {dataset.updated}</span>
+                                                <span>Updated {dataset.updated || (dataset.updated_at ? new Date(dataset.updated_at).toLocaleDateString() : "")}</span>
                                                 <span>•</span>
                                                 <span className="flex items-center gap-1">
-                          <Rows3 className="h-3 w-3" />
+                          <Eye className="h-3 w-3" />
                                                     {formatNumber(dataset.views)}
                         </span>
                                                 <span>•</span>
@@ -974,13 +925,9 @@ export default function DatasetsContent({ user }: DatasetsContentProps) {
                           <Download className="h-3 w-3" />
                                                     {formatNumber(dataset.downloads)}
                         </span>
-                                                <span>•</span>
-                                                <span className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                                                    {formatNumber(dataset.likes)}
-                        </span>
                                             </div>
                                         </div>
+                                        </NextLink>
                                     </motion.div>
                                 ))}
                             </motion.div>
