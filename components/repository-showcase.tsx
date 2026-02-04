@@ -4,13 +4,9 @@ import type React from "react"
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import Image from "next/image"
 import { BookOpen, Database, Cpu, FileText, Folder, GraduationCap } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
-import { ThesisContentMock } from "@/components/thesis-content-mock"
-import { PapersContent } from "@/components/papers-content"
-import ProjectsContentMock from "@/components/projects-content-mock"
-import ModelsContentMock from "@/components/models-content-mock"
-import DatasetsContentMock from "@/components/datasets-content-mock"
 import { IconBrandUnity } from "@tabler/icons-react"
 
 const repositories = [
@@ -144,18 +140,19 @@ export function RepositoryShowcase() {
     }
 
     const renderContent = () => {
-        switch (activeRepo) {
-            case "theses":
-                return <ThesisContentMock user={null} />
-            case "papers":
-                return <PapersContent user={null} />
-            case "projects":
-                return <ProjectsContentMock user={null} />
-            case "models":
-                return <ModelsContentMock user={null} />
-            case "datasets":
-                return <DatasetsContentMock user={null} />
-        }
+        const imageSrc = `/${activeRepo === "theses" ? "thesis" : activeRepo}.png`
+        
+        return (
+            <div className="relative w-full h-full">
+                <Image
+                    src={imageSrc}
+                    alt={`${activeRepo} repository preview`}
+                    fill
+                    className="object-cover object-top"
+                    priority
+                />
+            </div>
+        )
     }
     // @ts-ignore
     // @ts-ignore
@@ -217,8 +214,8 @@ export function RepositoryShowcase() {
                             </div>
 
                             {/* Content Window */}
-                            <div className="h-[500px] overflow-hidden bg-background">
-                                <div className="scale-[0.65] origin-top-left w-[154%] h-[154%]">{renderContent()}</div>
+                            <div className="h-[500px] overflow-hidden bg-background relative">
+                                {renderContent()}
                             </div>
                         </div>
                     </div>
