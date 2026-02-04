@@ -94,49 +94,10 @@ const TAB_ROTATION_ORDER: Array<"theses" | "papers" | "projects" | "models" | "d
 }
 
 export function RepositoryShowcase() {
-    const [activeRepo, setActiveRepo] = useState<"theses" | "papers" | "projects" | "models" | "datasets">("models")
-    const [isAutoRotating, setIsAutoRotating] = useState(true)
-    const [isInViewport, setIsInViewport] = useState(true)
-    const containerRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsInViewport(entry.isIntersecting)
-            },
-            { threshold: 0.3 },
-        )
-
-        if (containerRef.current) {
-            observer.observe(containerRef.current)
-        }
-
-        return () => observer.disconnect()
-    }, [])
-
-    useEffect(() => {
-        if (!isAutoRotating || !isInViewport) return
-
-        const interval = setInterval(() => {
-            setActiveRepo((current) => {
-                const currentIndex = TAB_ROTATION_ORDER.indexOf(current)
-                const nextIndex = (currentIndex + 1) % TAB_ROTATION_ORDER.length
-                return TAB_ROTATION_ORDER[nextIndex]
-            })
-        }, 2000)
-
-        return () => clearInterval(interval)
-    }, [isAutoRotating, isInViewport])
+    const [activeRepo, setActiveRepo] = useState<"theses" | "papers" | "projects" | "models" | "datasets">("projects")
 
     const handleTabClick = (tab: "theses" | "papers" | "projects" | "models" | "datasets") => {
         setActiveRepo(tab)
-        setIsAutoRotating(false)
-
-        const resumeTimer = setTimeout(() => {
-            setIsAutoRotating(true)
-        }, 4000)
-
-        return () => clearTimeout(resumeTimer)
     }
 
     const renderContent = () => {
@@ -157,7 +118,7 @@ export function RepositoryShowcase() {
     // @ts-ignore
     // @ts-ignore
     return (
-        <section ref={containerRef} className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden  ">
+        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden  ">
             {/* Background effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent z-0" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse z-0" />
@@ -198,7 +159,7 @@ export function RepositoryShowcase() {
                     />
 
                     {/* Browser Window with glowing border */}
-                    <div className="relative">
+                    <div className="relative max-w-5xl mx-auto">
                         <div
                             className={`absolute -inset-[2px] bg-gradient-to-r ${getRepoColor(activeRepo)} rounded-2xl opacity-75 blur-sm`}
                         />
@@ -233,35 +194,30 @@ export function RepositoryShowcase() {
                             onClick={() => handleTabClick("theses")}
                             icon={GraduationCap}
                             label="Theses"
-                            count="38"
                         />
                         <TabButton
                             active={activeRepo === "papers"}
                             onClick={() => handleTabClick("papers")}
                             icon={FileText}
                             label="Papers"
-                            count="3"
                         />
                         <TabButton
                             active={activeRepo === "projects"}
                             onClick={() => handleTabClick("projects")}
                             icon={Folder}
                             label="Projects"
-                            count="3"
                         />
                         <TabButton
                             active={activeRepo === "models"}
                             onClick={() => handleTabClick("models")}
                             icon={IconBrandUnity}
                             label="Models"
-                            count="12"
                         />
                         <TabButton
                             active={activeRepo === "datasets"}
                             onClick={() => handleTabClick("datasets")}
                             icon={Database}
                             label="Datasets"
-                            count="12"
                         />
                     </div>
                 </div>
@@ -335,13 +291,11 @@ function TabButton({
                        onClick,
                        icon: Icon,
                        label,
-                       count,
                    }: {
     active: boolean
     onClick: () => void
     icon: React.ElementType
     label: string
-    count: string
 }) {
     const tabColor = (() => {
         switch (label) {
@@ -362,6 +316,7 @@ function TabButton({
 
     return (
         <button
+            onClick={onClick}
             className={`relative px-4 py-2.5 rounded-full font-medium transition-all duration-300 ${
                 active ? `bg-gradient-to-r ${tabColor} text-white shadow-lg` : "text-muted-foreground hover:text-foreground"
             }`}
@@ -369,9 +324,6 @@ function TabButton({
             <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4" />
                 <span className="text-sm">{label}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${active ? "bg-white/20" : "bg-muted/50"}`}>
-          {count}
-        </span>
             </div>
         </button>
     )
