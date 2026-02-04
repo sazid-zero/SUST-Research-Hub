@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, Database, Cpu, FileText, Folder, GraduationCap } from "lucide-react"
@@ -104,15 +104,24 @@ export function RepositoryShowcase() {
         const imageSrc = `/${activeRepo === "theses" ? "thesis" : activeRepo}.png`
         
         return (
-            <div className="relative w-full h-full">
-                <Image
-                    src={imageSrc}
-                    alt={`${activeRepo} repository preview`}
-                    fill
-                    className="object-cover object-top"
-                    priority
-                />
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div 
+                    key={activeRepo}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="relative w-full h-full"
+                >
+                    <Image
+                        src={imageSrc}
+                        alt={`${activeRepo} repository preview`}
+                        fill
+                        className="object-cover object-top"
+                        priority
+                    />
+                </motion.div>
+            </AnimatePresence>
         )
     }
     // @ts-ignore
