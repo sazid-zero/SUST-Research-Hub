@@ -914,34 +914,6 @@ chore: Dependencies, build
 
 ---
 
-## 📈 Roadmap
-
-### Q1 2025
-- ✅ Core platform launch
-- ✅ Thesis submission system
-- ✅ Supervisor review workflow
-- ✅ Publication integration
-
-### Q2 2025
-- 🔄 Mobile application (React Native)
-- 🔄 Advanced AI recommendations
-- 🔄 Citation impact tracking
-- 🔄 Collaboration tools enhancement
-
-### Q3 2025
-- 🔜 Multi-institutional federation
-- 🔜 Open Access compliance tracking
-- 🔜 Research funding integration
-- 🔜 Conference submission tracker
-
-### Q4 2025
-- 🔜 Machine learning ranking
-- 🔜 Blockchain for verification
-- 🔜 International expansion
-- 🔜 Mobile push notifications
-
----
-
 ## 📞 Support & Contact
 
 **Email:** support@sust-research-hub.edu.bd  
