@@ -322,15 +322,15 @@ const modalityColors: Record<string, { icon: any; colorClass: string; bgClass: s
     },
     Geospatial: {
         icon: Map,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
+        colorClass: "text-emerald-600",
+        bgClass: "bg-emerald-600/10",
+        borderClass: "border-emerald-600/20",
     },
     Image: {
         icon: ImageIcon,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
+        colorClass: "text-pink-600",
+        bgClass: "bg-pink-600/10",
+        borderClass: "border-pink-600/20",
     },
     Tabular: {
         icon: Table,
@@ -346,15 +346,15 @@ const modalityColors: Record<string, { icon: any; colorClass: string; bgClass: s
     },
     "Time Series": {
         icon: TrendingUp,
-        colorClass: "text-cyan-600",
-        bgClass: "bg-cyan-600/10",
-        borderClass: "border-cyan-600/20",
+        colorClass: "text-amber-600",
+        bgClass: "bg-amber-600/10",
+        borderClass: "border-amber-600/20",
     },
     Video: {
         icon: Video,
-        colorClass: "text-blue-600",
-        bgClass: "bg-blue-600/10",
-        borderClass: "border-blue-600/20",
+        colorClass: "text-indigo-600",
+        bgClass: "bg-indigo-600/10",
+        borderClass: "border-indigo-600/20",
     },
 }
 
@@ -396,11 +396,16 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
     const filteredDatasets = datasets.filter((dataset) => {
         const name = dataset.name || dataset.title || ""
         const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase())
-        const datasetType = dataset.modality || dataset.dataset_type || ""
-        const matchesModality = filterModality === "all" || datasetType === filterModality
-        const format = dataset.format || dataset.file_format || ""
-        const matchesFormat = filterFormat === "all" || format === filterFormat
-        const matchesTask = filterTask === "all" || datasetType === filterTask
+        
+        // Normalize modality for comparison (handle case and hyphen vs space)
+        const datasetType = (dataset.modality || dataset.dataset_type || "").toLowerCase().replace(/\s+/g, "-")
+        const normalizedFilterModality = filterModality.toLowerCase().replace(/\s+/g, "-")
+        const matchesModality = filterModality === "all" || datasetType === normalizedFilterModality
+        
+        const format = (dataset.format || dataset.file_format || "").toLowerCase()
+        const matchesFormat = filterFormat === "all" || format === filterFormat.toLowerCase()
+        
+        const matchesTask = filterTask === "all" || datasetType === filterTask.toLowerCase().replace(/\s+/g, "-")
         const matchesLibrary = filterLibrary === "all"
         const matchesDomain = filterDomain === "all"
         return matchesSearch && matchesModality && matchesFormat && matchesTask && matchesLibrary && matchesDomain
@@ -927,11 +932,25 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                             <div className="flex items-center flex-wrap gap-x-[5px] gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
                                                 {(() => {
                                                     const modality = dataset.modality || dataset.dataset_type
-                                                    const modalityInfo = modalityColors[modality] || {
-                                                        icon: IconChartBubble,
-                                                        colorClass: "text-primary",
-                                                        bgClass: "bg-primary/10",
-                                                        borderClass: "border-primary/20",
+                                                    // Try exact match first, then try to find a case-insensitive match
+                                                    let modalityInfo = modalityColors[modality]
+                                                    if (!modalityInfo) {
+                                                        // Case-insensitive lookup
+                                                        const modalityKey = Object.keys(modalityColors).find(
+                                                            key => key.toLowerCase() === modality?.toLowerCase()
+                                                        )
+                                                        if (modalityKey) {
+                                                            modalityInfo = modalityColors[modalityKey]
+                                                        }
+                                                    }
+                                                    // Fallback to default
+                                                    if (!modalityInfo) {
+                                                        modalityInfo = {
+                                                            icon: IconChartBubble,
+                                                            colorClass: "text-primary",
+                                                            bgClass: "bg-primary/10",
+                                                            borderClass: "border-primary/20",
+                                                        }
                                                     }
                                                     const ModalityIcon = modalityInfo.icon
                                                     return (

@@ -30,7 +30,9 @@ import {
     Flame,
     Zap,
     Download,
-    Heart, Filter,
+    Heart,
+    Filter,
+    TrendingUp,
 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -381,6 +383,32 @@ const taskCategories = {
         icon: Bot,
         color: "bg-violet-500/10 text-violet-600 border-violet-500/20",
     },
+    // Additional model types from database
+    regression: {
+        label: "Regression",
+        icon: TrendingUp,
+        color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    },
+    classification: {
+        label: "Classification",
+        icon: Grid3x3,
+        color: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+    },
+    neural_network: {
+        label: "Neural Network",
+        icon: Network,
+        color: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20",
+    },
+    "neural-network": {
+        label: "Neural Network",
+        icon: Network,
+        color: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20",
+    },
+    reinforcement_learning: {
+        label: "Reinforcement Learning",
+        icon: Bot,
+        color: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    },
 }
 
 export default function ModelsContent({ user, initialModels }: ModelsContentProps) {
@@ -407,12 +435,18 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
     const filteredModels = models.filter((model) => {
         const name = model.name || model.title || ""
         const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase())
-        const framework = model.framework || ""
-        const matchesFramework = filterFramework === "all" || framework === filterFramework
-        const task = model.task || ""
-        const matchesTask = filterTask === "all" || task === filterTask
-        const domain = model.domain || ""
-        const matchesDomain = filterDomain === "all" || domain === filterDomain
+        
+        const framework = (model.framework || "").toLowerCase()
+        const matchesFramework = filterFramework === "all" || framework === filterFramework.toLowerCase()
+        
+        const task = (model.task || "").toLowerCase().replace(/\s+/g, "-")
+        const matchesTask = filterTask === "all" || task === filterTask.toLowerCase().replace(/\s+/g, "-")
+        
+        // Normalize domain for comparison (handle case and hyphen vs space)
+        const domain = (model.domain || "").toLowerCase().replace(/\s+/g, "-")
+        const normalizedFilterDomain = filterDomain.toLowerCase().replace(/\s+/g, "-")
+        const matchesDomain = filterDomain === "all" || domain === normalizedFilterDomain
+        
         return matchesSearch && matchesFramework && matchesTask && matchesDomain
     })
 
@@ -959,10 +993,24 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                         <div className="grid grid-cols-1 gap-4">
                             {filteredModels.map((model, index) => {
                                 const taskKey = model.task || model.model_type || "unknown"
-                                const taskConfig = taskCategories[taskKey] || {
-                                    label: taskKey,
-                                    icon: FileText,
-                                    color: "text-gray-500",
+                                // Try exact match first, then case-insensitive
+                                let taskConfig = taskCategories[taskKey]
+                                if (!taskConfig) {
+                                    // Case-insensitive lookup
+                                    const foundKey = Object.keys(taskCategories).find(
+                                        key => key.toLowerCase() === taskKey?.toLowerCase()
+                                    )
+                                    if (foundKey) {
+                                        taskConfig = taskCategories[foundKey]
+                                    }
+                                }
+                                // Fallback to default
+                                if (!taskConfig) {
+                                    taskConfig = {
+                                        label: taskKey,
+                                        icon: FileText,
+                                        color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
+                                    }
                                 }
                                 const TaskIcon = taskConfig.icon
 
@@ -982,7 +1030,7 @@ export default function ModelsContent({ user, initialModels }: ModelsContentProp
                                             </div>
                                             {/* Line 2: Task → Updated → Views → Downloads → Likes */}
                                             <div className="flex items-center gap-2 flex-wrap text-xs">
-                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 ${taskConfig.color || "text-primary"}`}>
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded border ${taskConfig.color}`}>
                           <TaskIcon className="h-3 w-3" />
                             {taskConfig.label}
                         </span>
