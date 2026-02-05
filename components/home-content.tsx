@@ -343,7 +343,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                     </Button>
                                 </Link>
                             )}
-                            <Link href="#explore-section" onClick={scrollToExplore} className="w-full sm:w-auto">
+                            <Link href="/theses" className="w-full sm:w-auto">
                                 <Button
                                     size="lg"
                                     variant="outline"
