@@ -236,6 +236,71 @@
             scroll-behavior: auto !important;
         }
     }
+
+    /* Mobile-only text size reductions (phones only, not tablets) */
+    @media (max-width: 640px) {
+        /* Base font size reduction */
+        html {
+            font-size: 14px;
+        }
+
+        /* Headings */
+        h1 {
+            font-size: 1.5rem !important;
+        }
+        
+        h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        h3 {
+            font-size: 1.1rem !important;
+        }
+        
+        h4 {
+            font-size: 1rem !important;
+        }
+        
+        h5, h6 {
+            font-size: 0.9rem !important;
+        }
+
+        /* Paragraphs and general text */
+        p, span, div {
+            font-size: 0.875rem;
+        }
+
+        /* Buttons */
+        button, .button, [role="button"] {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Links */
+        a {
+            font-size: 0.875rem;
+        }
+
+        /* Form inputs */
+        input, textarea, select {
+            font-size: 0.875rem;
+        }
+
+        /* Labels */
+        label {
+            font-size: 0.8rem;
+        }
+
+        /* Repository showcase overflow on mobile */
+        #repository-showcase {
+            overflow-x: hidden;
+        }
+
+        /* Ensure parent allows overflow */
+        body {
+            overflow-x: hidden;
+        }
+    }
 }
 
 /* Add custom scrollbar styling for better UX on detail pages */

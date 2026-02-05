@@ -203,7 +203,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 }
             })
 
-    const displayedCategoryResearchMobile = filteredResearch.slice(0, 2)
+    const displayedCategoryResearchMobile = filteredResearch.slice(0, 4)
     const displayedCategoryResearchDesktop = filteredResearch.slice(0, 4)
     const recentResearch = recentTheses.slice(currentRecentIndex, currentRecentIndex + 3)
 
@@ -245,7 +245,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             {/* HERO SECTION */}
             <section
                 ref={setHeroRef}
-                className="hero-section w-full lg:fixed lg:top-0 lg:h-screen relative bg-background overflow-hidden z-0 transition-all duration-300 ease-out "
+                className="hero-section w-full lg:fixed lg:top-0 lg:h-screen relative bg-background overflow-hidden z-0 transition-all duration-300 ease-out py-8 sm:py-12 md:py-16 lg:py-0"
             >
                 <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 opacity-[0.03]">
@@ -300,10 +300,10 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 </div>
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
+                <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 h-full flex flex-col lg:flex-row lg:gap-12 items-center justify-center">
                     {/* Left: Main Content */}
-                    <div className="w-1/2 flex flex-col justify-center space-y-6 lg:space-y-8">
-                        <div className="md:hidden flex items-center gap-3 mb-2">
+                    <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8">
+                        <div className="md:hidden flex items-center justify-center gap-3 mb-2">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
                                 <BookOpen className="h-6 w-6 text-primary-foreground" />
                             </div>
@@ -313,33 +313,33 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                         </div>
 
                         {/* Title + Description — GSAP Target */}
-                        <div className="hero-title space-y-6 lg:space-y-8 text-center lg:text-left max-w-2xl">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-transparent text-xs font-medium text-primary w-fit">
+                        <div className="hero-title space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-8 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-transparent text-xs font-medium text-primary w-fit mx-auto lg:mx-0">
                                 <Zap className="h-3 w-3" />
                                 Next-Gen Research Repository
                             </div>
-                            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl text-balance leading-tight text-foreground">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-balance leading-tight text-foreground">
                                 Discover Academic
                                 <span className="block bg-gradient-to-r from-primary via-accent to-blue-500 bg-clip-text text-transparent">
                   Innovation
                 </span>
                             </h1>
-                            <p className="text-base text-muted-foreground leading-relaxed max-w-md">
+                            <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
                                 A centralized platform for managing, sharing and discovering academic research at Shahjalal University
                                 of Science and Technology.
                             </p>
                         </div>
 
                         {/* Buttons — GSAP Target */}
-                        <div className="hero-buttons flex flex-col sm:flex-row gap-4 relative z-50">
+                        <div className="hero-buttons flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 relative z-50 justify-center lg:justify-start">
                             {(!user || user.role === "student") && (
                                 <Link href={getDashboardRoute(user)} className="w-full sm:w-auto">
                                     <Button
                                         size="lg"
-                                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-105 transition-transform"
+                                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-105 transition-transform text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
                                     >
                                         Start Publishing
-                                        <ExternalLink className="ml-2 h-4 w-4" />
+                                        <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                 </Link>
                             )}
@@ -347,7 +347,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="w-full border-green-600 text-foreground hover:text-white bg-white hover:bg-green-600 hover:scale-105 transition-transform"
+                                    className="w-full border-green-600 text-foreground hover:text-white bg-white hover:bg-green-600 hover:scale-105 transition-transform text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
                                 >
                                     Explore Repository
                                 </Button>
@@ -356,9 +356,9 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
 
                     {/* Right: Recent Research — GSAP Target */}
-                    <div className="hero-recent-cards w-1/2 h-full flex flex-col justify-center py-8 lg:py-0">
-                        <div className="space-y-5 relative">
-                            <h3 className="text-lg font-bold text-foreground">Recent Research</h3>
+                    <div className="hero-recent-cards w-full lg:w-1/2 h-full flex flex-col justify-center py-4 sm:py-6 md:py-8 lg:py-0">
+                        <div className="space-y-2 sm:space-y-3 md:space-y-5 relative">
+                            <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-foreground">Recent Research</h3>
                             {recentResearch.map((research, idx) => (
                                 <Link
                                     key={research.id}
@@ -367,7 +367,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                     prefetch={true}
                                 >
                                     <div
-                                        className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-2xl hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer mb-4"
+                                        className="group relative overflow-hidden rounded-xl border border-border bg-card p-2 sm:p-3 md:p-4 shadow-2xl hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer mb-2 sm:mb-3 md:mb-4"
                                         style={{
                                             opacity: 0,
                                             transform: "translateX(100px)",
@@ -377,10 +377,10 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                         {/* Card content */}
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-semibold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                                                <h4 className="text-[8px] sm:text-xs md:text-xs font-semibold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
                                                     {research.title}
                                                 </h4>
-                                                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                                <p className="text-xs md:text-xs text-muted-foreground mt-1 line-clamp-1">
                                                     {research.authors?.map((author: any, aIdx: number) => (
                                                         <span key={author.id || aIdx}>
                               {author.full_name}
@@ -389,10 +389,10 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                                     )) || research.author}
                                                 </p>
                                             </div>
-                                            <Star className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0" />
+                                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0" />
                                         </div>
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <Eye className="h-3 w-3" />
+                                        <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                                            <Eye className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3" />
                                             {research.views.toLocaleString()} views
                                         </div>
                                     </div>
@@ -419,7 +419,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
 
             {/* Explore Section */}
             <section id="explore-section" className="relative z-10 bg-transparent " data-scroll>
-                <div className="px-6 lg:px-12 py-12  max-w-7xl mx-auto ">
+                <div className="px-3 sm:px-4 md:px-6 lg:px-12 py-6 sm:py-8 md:py-10 lg:py-12  max-w-7xl mx-auto ">
                     <div className="relative p-[2px] rounded-[24px] bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 shadow-[0_0_60px_rgba(16,185,129,0.25),0_0_100px_rgba(16,185,129,0.15)]">
                         <div className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-green-500/0 via-green-400/10 to-emerald-500/0 blur-xl" />
                         <div className="relative rounded-[21px] overflow-hidden border border-border/50 bg-card">
@@ -475,28 +475,28 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
 
                             <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-accent/[0.02] rounded-full blur-3xl pointer-events-none" />
 
-                            <div className="relative z-10 p-4 sm:p-8">
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-bold text-foreground sm:text-3xl mb-2">Browse by Field</h2>
-                                    <p className="text-muted-foreground text-sm sm:text-base">
+                            <div className="relative z-10 p-2 sm:p-4 md:p-6 lg:p-8">
+                                <div className="mb-4 sm:mb-6 md:mb-8">
+                                    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2">Browse by Field</h2>
+                                    <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
                                         Explore research across different academic disciplines
                                     </p>
                                 </div>
 
-                                <div className="flex flex-wrap gap-2 mb-8 z-30">
+                                <div className="flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 mb-4 sm:mb-6 md:mb-8 z-30">
                                     {researchCategories.map((cat) => {
                                         const Icon = cat.icon
                                         return (
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setSelectedCategory(cat.id)}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-sm transition-all border bg-card relative z-30 ${
+                                                className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all border bg-card relative z-30 ${
                                                     selectedCategory === cat.id
                                                         ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent shadow-lg shadow-primary/25"
                                                         : "border-border text-foreground hover:border-primary/50 hover:bg-accent"
                                                 }`}
                                             >
-                                                <Icon className="h-3.5 w-3.5" />
+                                                <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5" />
                                                 <span>{cat.label}</span>
                                                 <span className="text-xs opacity-75">({cat.count})</span>
                                             </button>
@@ -504,47 +504,47 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                     })}
                                 </div>
 
-                                <div className="grid gap-4 md:grid-cols-2">
+                                <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-2">
                                     {/* Mobile view - 2 items */}
                                     <div className="md:hidden contents">
                                         {displayedCategoryResearchMobile.map((research) => (
                                             <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
-                                                <Card className="relative overflow-hidden border-border bg-card p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
-                                                    <div className="space-y-3">
+                                                <Card className="relative overflow-hidden border-border bg-card p-1.5 sm:p-2 md:p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
+                                                    <div className="space-y-1 sm:space-y-1.5 md:space-y-3">
                                                         <div>
-                                                            <div className="flex items-start justify-between mb-1.5">
-                                <span className="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
+                                                            <div className="flex items-start justify-between mb-0.5 sm:mb-1 md:mb-1.5">
+                                <span className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] sm:text-[10px] md:text-xs font-medium">
                                   {research.year}
                                 </span>
-                                                                <div className="flex items-center gap-1 text-muted-foreground">
-                                                                    <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                                                                    <span className="text-xs font-medium">{research.downloads}</span>
+                                                                <div className="flex items-center gap-0.5 sm:gap-1 text-muted-foreground">
+                                                                    <Star className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3.5 md:w-3.5 fill-primary text-primary" />
+                                                                    <span className="text-[9px] sm:text-[10px] md:text-xs font-medium">{research.downloads}</span>
                                                                 </div>
                                                             </div>
-                                                            <h3 className="text-base font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
+                                                            <p className="text-sm md:text-base font-bold text-card-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
                                                                 {research.title}
-                                                            </h3>
+                                                            </p>
                                                         </div>
 
                                                         <div className="space-y-0.5">
                                                             <p className="text-xs text-foreground font-medium line-clamp-1">
                                                                 {research.authors?.map((author: any, idx: number) => (
-                                                                    <span key={author.id || idx}>
+                                                                    <span className="text-xs" key={author.id || idx}>
                                     {author.full_name}
                                                                         {idx < research.authors.length - 1 && ", "}
                                   </span>
                                                                 )) || research.author}
                                                             </p>
-                                                            <p className="text-xs text-muted-foreground line-clamp-1">{research.department}</p>
+                                                            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-clamp-1">{research.department}</p>
                                                         </div>
 
-                                                        <p className="text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
+                                                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
 
-                                                        <div className="flex flex-wrap gap-1.5 pt-1.5">
+                                                        <div className="flex flex-wrap gap-0.5 sm:gap-1 md:gap-1.5 pt-0.5 sm:pt-1 md:pt-1.5">
                                                             {research.keywords.slice(0, 2).map((keyword) => (
                                                                 <span
                                                                     key={keyword}
-                                                                    className="inline-block px-2 py-0.5 rounded-md bg-primary/5 text-primary text-xs"
+                                                                    className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded-md bg-primary/5 text-primary text-[8px] sm:text-[9px] md:text-xs"
                                                                 >
                                   {keyword}
                                 </span>
@@ -626,7 +626,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             {/* 3D Repository Showcase Section */}
             <section
                 id="repository-showcase"
-                className="relative py-4 px-4 sm:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
+                className="relative py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
             >
                 <div className="max-w-8xl mx-auto ">
                     <RepositoryShowcase />
@@ -639,7 +639,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 </div>
             </section>
 
-            <section className="relative z-30 overflow-hidden py-32 sm:py-40 bg-background ">
+            <section className="relative z-30 overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32 xl:py-40 bg-background ">
                 {/* Subtle gradient overlays for depth */}
                 <AnimatedParticles />
                 <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
@@ -657,50 +657,50 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                         </div>
 
                         {/* Main headline with text-balance for optimal line breaks */}
-                        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-balance">
                             Share your research.
                             <br />
                             <span className="text-muted-foreground">Inspire the world.</span>
                         </h2>
 
                         {/* Supporting text */}
-                        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
                             Be part of a growing community of researchers and academics at SUST contributing to the advancement of
                             knowledge.
                         </p>
 
                         {/* CTA buttons with refined spacing */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center items-center pt-2 sm:pt-3 md:pt-4">
                             <Button
                                 asChild
                                 size="lg"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 px-4 sm:px-6 md:px-8 text-xs sm:text-sm md:text-base"
                             >
                                 <Link href="/register">
                                     Get Started
-                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                    <ExternalLink className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                                 </Link>
                             </Button>
                             <Button
                                 asChild
                                 size="lg"
                                 variant="ghost"
-                                className="text-foreground hover:text-foreground hover:bg-muted/50 px-8"
+                                className="text-foreground hover:text-foreground hover:bg-muted/50 px-4 sm:px-6 md:px-8 text-xs sm:text-sm md:text-base"
                             >
                                 <Link href="/theses">
                                     Explore Theses
-                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                    <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                                 </Link>
                             </Button>
                         </div>
 
                         {/* Social proof / stats bar */}
-                        <div className="pt-12 flex flex-col sm:flex-row gap-8 sm:gap-12 justify-center items-center text-sm">
+                        <div className="pt-6 sm:pt-8 md:pt-10 lg:pt-12 flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-12 justify-center items-center text-xs sm:text-sm">
                             <div className="flex items-center gap-2">
                                 <div className="flex -space-x-2">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background" />
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-primary border-2 border-background" />
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background" />
+                                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background" />
+                                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-accent to-primary border-2 border-background" />
+                                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background" />
                                 </div>
                                 <span className="text-muted-foreground">
                   <span className="font-semibold text-foreground">1,200+</span> researchers
@@ -718,21 +718,21 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
             </section>
 
             <footer className="relative border-t border-border/50 z-30 bg-gradient-to-b from-background via-background to-muted/30 backdrop-blur-sm">
-                <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-12 py-8 sm:py-10 md:py-12 lg:py-16">
                     {/* Main footer content */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 mb-8 sm:mb-10 md:mb-12 lg:mb-16">
                         {/* Brand section */}
-                        <div className="lg:col-span-4 space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
-                                    <BookOpen className="h-5 w-5 text-white" />
+                        <div className="lg:col-span-4 space-y-2 sm:space-y-3 md:space-y-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
+                                    <BookOpen className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-foreground">SUST Research Hub</h3>
-                                    <p className="text-xs text-muted-foreground">Academic Excellence</p>
+                                    <h3 className="font-bold text-foreground text-sm sm:text-base">SUST Research Hub</h3>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">Academic Excellence</p>
                                 </div>
                             </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xs">
                                 Empowering academic innovation through a centralized platform for research discovery and collaboration
                                 at SUST.
                             </p>

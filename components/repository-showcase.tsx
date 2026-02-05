@@ -127,7 +127,7 @@ export function RepositoryShowcase() {
     // @ts-ignore
     // @ts-ignore
     return (
-        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden  ">
+        <section className="relative py-8 sm:py-12 md:py-16 lg:py-24 px-2 sm:px-4 md:px-6 lg:px-8 overflow-hidden  ">
             {/* Background effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent z-0" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse z-0" />
@@ -145,22 +145,22 @@ export function RepositoryShowcase() {
             <div className="relative z-10 max-w-7xl mx-auto">
                 {/* Header */}
                 <div
-                    className="text-center mb-20 space-y-4"
+                    className="text-center mb-8 sm:mb-12 md:mb-16 lg:mb-20 space-y-2 sm:space-y-3 md:space-y-4"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
                         Explore{" "}
                         <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               All Repositories
             </span>
                     </h2>
-                    <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
                         Discover our comprehensive collection of research resources with advanced filtering and organization
                     </p>
                 </div>
 
                 {/* Large Browser Window */}
                 <div
-                    className="relative lg:mx-10"
+                    className="relative lg:mx-10 -mr-2 ml-2 sm:mx-0"
                 >
                     {/* Glowing aura behind window */}
                     <div
@@ -168,23 +168,23 @@ export function RepositoryShowcase() {
                     />
 
                     {/* Browser Window with glowing border */}
-                    <div className="relative max-w-5xl mx-auto">
+                    <div className="relative max-w-5xl mx-auto overflow-visible">
                         <div
                             className={`absolute -inset-[2px] bg-gradient-to-r ${getRepoColor(activeRepo)} rounded-2xl opacity-75 blur-sm`}
                         />
-                        <div className="relative rounded-2xl overflow-hidden border-2 border-border bg-background shadow-2xl">
+                        <div className="relative rounded-2xl overflow-hidden border-2 border-border bg-background shadow-2xl min-w-[800px]">
                             {/* Browser Chrome */}
-                            <div className="border-b border-border px-4 py-3 bg-muted/30 flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-                                <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-                                <div className="ml-4 px-4 py-1 rounded-md bg-background/50 text-xs text-muted-foreground flex-1 max-w-md">
+                            <div className="border-b border-border px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 bg-muted/30 flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-red-500 shadow-sm"></div>
+                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 shadow-sm"></div>
+                                <div className="ml-2 sm:ml-3 md:ml-4 px-2 sm:px-3 md:px-4 py-0.5 sm:py-1 rounded-md bg-background/50 text-[10px] sm:text-xs text-muted-foreground flex-1 max-w-md">
                                     sust-research-hub.vercel.app/{activeRepo}
                                 </div>
                             </div>
 
                             {/* Content Window */}
-                            <div className="h-[500px] overflow-hidden bg-background relative">
+                            <div className="h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] overflow-hidden bg-background relative">
                                 {renderContent()}
                             </div>
                         </div>
@@ -195,9 +195,9 @@ export function RepositoryShowcase() {
                 </div>
 
                 <div
-                    className="flex justify-center mt-10"
+                    className="flex justify-center mt-4 sm:mt-6 md:mt-8 lg:mt-10"
                 >
-                    <div className="relative inline-flex items-center gap-1 p-1.5 rounded-full border border-border/50 bg-muted/30 dark:bg-white/10 backdrop-blur-sm shadow-lg">
+                    <div className="relative inline-flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 md:p-1.5 rounded-full border border-border/50 bg-muted/30 dark:bg-white/10 backdrop-blur-sm shadow-lg overflow-x-auto max-w-full scrollbar-hide">
                         <TabButton
                             active={activeRepo === "theses"}
                             onClick={() => handleTabClick("theses")}
@@ -233,11 +233,11 @@ export function RepositoryShowcase() {
 
                 {/* Explore Button */}
                 <div
-                    className="flex justify-center mt-12"
+                    className="flex justify-center mt-6 sm:mt-8 md:mt-10 lg:mt-12"
                 >
                     <Link href={getRepoHref(activeRepo)}>
                         <button
-                            className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r ${getRepoColor(activeRepo)} text-white text-lg font-semibold shadow-lg hover:shadow-2xl transition-all`}
+                            className={`inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-xl bg-gradient-to-r ${getRepoColor(activeRepo)} text-white text-sm sm:text-base md:text-lg font-semibold shadow-lg hover:shadow-2xl transition-all`}
                         >
                             Explore {getRepoTitle(activeRepo)}
                         </button>
@@ -326,13 +326,13 @@ function TabButton({
     return (
         <button
             onClick={onClick}
-            className={`relative px-4 py-2.5 rounded-full font-medium transition-all duration-300 ${
+            className={`relative px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-2.5 rounded-full font-medium transition-all duration-300 ${
                 active ? `bg-gradient-to-r ${tabColor} text-white shadow-lg` : "text-muted-foreground hover:text-foreground"
             }`}
         >
-            <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4" />
-                <span className="text-sm">{label}</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                <span className="text-xs sm:text-sm">{label}</span>
             </div>
         </button>
     )
