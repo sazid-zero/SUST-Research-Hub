@@ -307,7 +307,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
                                 <BookOpen className="h-6 w-6 text-primary-foreground" />
                             </div>
-                            <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Research Hub
               </span>
                         </div>
@@ -320,11 +320,11 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                             </div>
                             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-balance leading-tight text-foreground">
                                 Discover Academic
-                                <span className="block bg-gradient-to-r from-primary via-accent to-blue-500 bg-clip-text text-transparent">
+                                <span className="text-2xl block bg-gradient-to-r from-primary via-accent to-blue-500 bg-clip-text text-transparent">
                   Innovation
                 </span>
                             </h1>
-                            <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
+                            <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
                                 A centralized platform for managing, sharing and discovering academic research at Shahjalal University
                                 of Science and Technology.
                             </p>
