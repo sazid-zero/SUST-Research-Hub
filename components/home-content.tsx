@@ -509,7 +509,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                     <div className="md:hidden contents">
                                         {displayedCategoryResearchMobile.map((research) => (
                                             <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
-                                                <Card className="relative overflow-hidden border-border bg-card p-1.5 sm:p-2 md:p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
+                                                <Card className="relative overflow-hidden border-border bg-card p-2 md:p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
                                                     <div className="space-y-1 sm:space-y-1.5 md:space-y-3">
                                                         <div>
                                                             <div className="flex items-start justify-between mb-0.5 sm:mb-1 md:mb-1.5">
