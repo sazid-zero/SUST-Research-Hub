@@ -608,7 +608,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                     </div>
                                 </div>
 
-                                <Link href="/browse" className="block mt-6 flex justify-center">
+                                <Link href="/theses" className="block mt-6 flex justify-center">
                                     <Button
                                         size="lg"
                                         className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 px-8"
