@@ -260,7 +260,7 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
             <GlobalNavbar user={null} />
 
             <div className="container mx-auto px-4 py-6 max-w-7xl flex-1 overflow-hidden flex flex-col">
-                <div className="lg:grid lg:grid-cols-3 gap-8 h-full">
+                <div className="hidden lg:grid lg:grid-cols-3 gap-8 h-full">
                     <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-4 no-scrollbar">
                         {/* Header Card */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -513,6 +513,245 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                     </div>
 
                     <div className="hidden lg:block space-y-6 overflow-y-auto pl-2 no-scrollbar">
+                        <Button className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
+                            <Download className="h-5 w-5" />
+                            Download All Files
+                        </Button>
+                        {renderResources()}
+                    </div>
+                </div>
+
+                {/* Mobile Layout */}
+                <div className="lg:hidden space-y-6 overflow-y-auto h-full">
+                    {/* Header Card */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                        <Card className="p-6 border-border bg-card">
+                            {/* Badges */}
+                            <div className="flex items-center gap-2 mb-4 flex-wrap">
+                                <Badge
+                                    variant={project.status === "active" ? "default" : "secondary"}
+                                    className="capitalize text-xs font-medium"
+                                >
+                                    {project.status}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs font-medium border-primary/30 text-primary bg-primary/5">
+                                    {project.field}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                    {project.department}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                    {new Date(project.startDate).getFullYear()}
+                                    {project.endDate && ` - ${new Date(project.endDate).getFullYear()}`}
+                                </Badge>
+                            </div>
+
+                            {/* Title */}
+                            <h1 className="text-3xl font-bold text-foreground mb-4 leading-tight">{project.title}</h1>
+
+                            {/* Meta Information */}
+                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" />
+                  {new Date(project.startDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                  })}
+                  {project.endDate &&
+                      ` - ${new Date(project.endDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                      })}`}
+              </span>
+                                <span className="flex items-center gap-1.5">
+                <Building2 className="h-4 w-4" />
+                                    {project.department}
+              </span>
+                                <span className="flex items-center gap-1.5">
+                <Eye className="h-4 w-4" />
+                <span className="font-medium text-foreground">{project.views || 0}</span> views
+              </span>
+                                <span className="flex items-center gap-1.5">
+                <Download className="h-4 w-4" />
+                <span className="font-medium text-foreground">0</span> downloads
+              </span>
+                            </div>
+
+                            {/* Funding Badge (if applicable) */}
+                            {project.funding && (
+                                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg mb-6">
+                                    <DollarSign className="h-5 w-5 text-primary" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-foreground">
+                                            Funded Project - {project.funding.toLocaleString()} USD
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Supported by institutional and external funding</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-wrap gap-2">
+                                <Button className="gap-2 bg-primary hover:bg-primary/90">
+                                    <ExternalLink className="h-4 w-4" />
+                                    View Project Details
+                                </Button>
+                                <Button variant="outline" className="gap-2 bg-transparent">
+                                    <Download className="h-4 w-4" />
+                                    Download Resources
+                                </Button>
+                                <Button variant="outline" className="gap-2 bg-transparent">
+                                    <Bookmark className="h-4 w-4" />
+                                    Save
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="gap-2 bg-transparent"
+                                    onClick={() => navigator.share?.({ title: project.title, url: window.location.href })}
+                                >
+                                    <Share2 className="h-4 w-4" />
+                                    Share
+                                </Button>
+                            </div>
+                        </Card>
+                    </motion.div>
+
+                    {/* Description */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                        <Card className="p-6 border-border bg-card">
+                            <h2 className="text-xl font-bold text-foreground mb-4">Project Description</h2>
+                            <p className="text-foreground/90 leading-relaxed text-base">{project.description}</p>
+                        </Card>
+                    </motion.div>
+
+                    {/* Keywords */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        <Card className="p-6 border-border bg-card">
+                            <h2 className="text-xl font-bold text-foreground mb-4">Keywords</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {project.keywords.map((keyword, idx) => (
+                                    <Badge
+                                        key={idx}
+                                        variant="outline"
+                                        className="border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1 text-sm font-medium"
+                                    >
+                                        {keyword}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </Card>
+                    </motion.div>
+
+                    {/* Project Team */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                        <Card className="p-6 border-border bg-card">
+                            <h2 className="text-xl font-bold text-foreground mb-4">Project Team</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {project.team.map((member) => (
+                                    <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors">
+                                        <Avatar className="h-10 w-10">
+                                            {member.profile_pic ? (
+                                                <AvatarImage
+                                                    src={svgTextToDataUri(member.profile_pic) || "/placeholder.svg"}
+                                                    alt={member.full_name}
+                                                />
+                                            ) : null}
+                                            <AvatarFallback className="bg-primary/10">
+                                                <User className="h-5 w-5 text-primary" />
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-medium text-foreground text-sm">{member.full_name}</p>
+                                            <p className="text-xs text-muted-foreground">{member.role}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+                    </motion.div>
+
+                    {/* Research Outputs */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                        <Card className="p-6 border-border bg-card relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-primary/60 to-primary/40"></div>
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                    <BookOpen className="h-5 w-5 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold">Research Outputs</h3>
+                            </div>
+                            <div className="space-y-6">
+                                <div>
+                                    <h4 className="font-semibold text-md mb-3 flex items-center gap-2">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                                        Related Theses ({project.theses.length})
+                                    </h4>
+                                    {project.theses.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {project.theses.map((thesis) => (
+                                                <Link
+                                                    key={thesis.id}
+                                                    href={`/thesis/${thesis.id}`}
+                                                    className="block p-4 rounded-lg border border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 hover:bg-muted/30 transition-all group"
+                                                >
+                                                    <p className="font-medium mb-2 group-hover:text-primary transition-colors">
+                                                        {thesis.title}
+                                                    </p>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="capitalize text-xs border-primary/20 bg-primary/5 text-primary"
+                                                    >
+                                                        {thesis.status.replace("_", " ")}
+                                                    </Badge>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-xl w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                                                <BookOpen className="h-6 w-6 text-primary/60" />
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">No theses linked yet</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="pt-6 border-t border-primary/10">
+                                    <h4 className="font-semibold text-md mb-3 flex items-center gap-2">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                                        Publications ({project.publications.length})
+                                    </h4>
+                                    {project.publications.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {project.publications.map((pub) => (
+                                                <Link
+                                                    key={pub.id}
+                                                    href={`/paper/${pub.id}`}
+                                                    className="block p-4 rounded-lg border border-border hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 hover:bg-muted/30 transition-all group"
+                                                >
+                                                    <p className="font-medium mb-1 group-hover:text-primary transition-colors">{pub.title}</p>
+                                                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                                        <span className="text-primary/70">{pub.journal}</span>
+                                                        <span>•</span>
+                                                        <span>{pub.year}</span>
+                                                    </p>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-xl w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                                                <FileText className="h-6 w-6 text-primary/60" />
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">No publications yet</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Card>
+                    </motion.div>
+
+                    {/* Resources on Mobile */}
+                    <div className="space-y-6">
                         <Button className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
                             <Download className="h-5 w-5" />
                             Download All Files

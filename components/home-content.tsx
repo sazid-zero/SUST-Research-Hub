@@ -324,7 +324,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                   Innovation
                 </span>
                             </h1>
-                            <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
+                            <p className="text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
                                 A centralized platform for managing, sharing and discovering academic research at Shahjalal University
                                 of Science and Technology.
                             </p>
