@@ -76,6 +76,8 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                 return { icon: Brain, color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/20" }
             case "supplementary":
                 return { icon: FileBox, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20" }
+            case "result":
+                return { icon: FileBox, color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20" }
             default:
                 return { icon: FileText, color: "text-gray-500", bg: "bg-gray-500/10", border: "border-gray-500/20" }
         }
@@ -92,7 +94,11 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
         code: publication.files?.filter((f: any) => f.resource_type === "code") || [],
         datasets: publication.files?.filter((f: any) => f.resource_type === "dataset") || [],
         models: publication.files?.filter((f: any) => f.resource_type === "model") || [],
-        supplementary: publication.files?.filter((f: any) => f.resource_type === "supplementary") || [],
+        supplementary: publication.files?.filter((f: any) => 
+            f.resource_type === "supplementary" || 
+            f.resource_type === "result" || 
+            f.resource_type === "document"
+        ) || [],
     }
 
     return (
@@ -230,46 +236,62 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                         <h2 className="text-xl font-bold text-foreground">Authors</h2>
                                     </div>
                                     <div className="space-y-3">
-                                        {publication.authors.map((author: any) => (
-                                            <div key={author.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                                                <Avatar className="h-10 w-10 flex-shrink-0">
-                                                    {author.profile_pic ? (
-                                                        <AvatarImage
-                                                            src={svgTextToDataUri(author.profile_pic) || "/placeholder.svg"}
-                                                            alt={author.author_name}
-                                                            onError={(e) => {
-                                                                e.currentTarget.style.display = "none"
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <AvatarFallback className="bg-primary/10">
-                                                        <Users className="h-5 w-5 text-primary" />
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-semibold text-foreground">{author.author_name}</p>
-                                                        {author.corresponding_author && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                                                Corresponding Author
-                                                            </Badge>
+                                        {publication.authors.map((author: any) => {
+                                            const authorProfileLink = author.user_role === 'supervisor' 
+                                                ? `/supervisor/profile/${author.user_id}` 
+                                                : (author.student_id || author.user_id) 
+                                                    ? `/student/profile/${author.student_id || author.user_id}` 
+                                                    : null
+
+                                            const content = (
+                                                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 transition-colors group-hover:bg-muted/50">
+                                                    <Avatar className="h-10 w-10 shrink-0">
+                                                        {author.profile_pic ? (
+                                                            <AvatarImage
+                                                                src={svgTextToDataUri(author.profile_pic) || "/placeholder.svg"}
+                                                                alt={author.author_name}
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = "none"
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <AvatarFallback className="bg-primary/10">
+                                                            <Users className="h-5 w-5 text-primary" />
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{author.author_name}</p>
+                                                            {author.corresponding_author && (
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                                    Corresponding Author
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {author.affiliation && (
+                                                            <p className="text-sm text-muted-foreground mt-1">{author.affiliation}</p>
                                                         )}
                                                     </div>
-                                                    {author.affiliation && (
-                                                        <p className="text-sm text-muted-foreground mt-1">{author.affiliation}</p>
-                                                    )}
+                                                    <Badge className="text-xs">
+                                                        {author.author_order === 1
+                                                            ? "1st"
+                                                            : author.author_order === 2
+                                                                ? "2nd"
+                                                                : `${author.author_order}th`}{" "}
+                                                        Author
+                                                    </Badge>
                                                 </div>
-                                                <Badge  className="text-xs">
-                                                    {author.author_order === 1
-                                                        ? "1st"
-                                                        : author.author_order === 2
-                                                            ? "2nd"
-                                                            : `${author.author_order}th`}{" "}
-                                                    Author
-                                                </Badge>
-                                            </div>
-                                        ))}
+                                            )
+
+                                            return authorProfileLink ? (
+                                                <Link key={author.id} href={authorProfileLink} className="block group">
+                                                    {content}
+                                                </Link>
+                                            ) : (
+                                                <div key={author.id}>{content}</div>
+                                            )
+                                        })}
                                     </div>
                                 </Card>
                             </motion.div>
@@ -295,7 +317,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                         {publication.thesis ? (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                                 <Card className="p-6 border-border bg-card relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/60 to-primary/40" />
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-primary via-primary/60 to-primary/40" />
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                             <BookOpen className="h-5 w-5" />
@@ -358,7 +380,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                         ) : (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                                 <Card className="p-6 border-border bg-card relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/30 via-primary/20 to-transparent" />
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-primary/30 via-primary/20 to-transparent" />
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                                             <BookOpen className="h-5 w-5" />
@@ -384,11 +406,55 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                     </div>
 
                     <div className="space-y-6 overflow-y-auto pl-2 no-scrollbar">
+                        {/* Paper Thumbnail / Preview Card */}
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                            <Card className="overflow-hidden border-border bg-card/50 backdrop-blur-xl group cursor-pointer" onClick={() => publication.pdf_url && window.open(publication.pdf_url, '_blank')}>
+                                <div className="aspect-3/4 relative bg-linear-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-8 overflow-hidden">
+                                    {/* Glass Overlay Effect */}
+                                    <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-50" />
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl -mr-16 -mt-16 rounded-full" />
+                                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/10 blur-3xl -ml-16 -mb-16 rounded-full" />
+                                    
+                                    {/* Mock Document Visual */}
+                                    <div className="relative w-full h-full bg-background/90 shadow-2xl rounded-sm border border-border/50 p-6 flex flex-col transform group-hover:scale-[1.03] group-hover:-rotate-1 transition-all duration-500">
+                                        <div className="w-12 h-1 bg-primary/40 mb-4 rounded-full" />
+                                        <h4 className="text-[10px] font-bold text-foreground/80 leading-tight mb-2 uppercase tracking-tighter line-clamp-3">
+                                            {publication.title}
+                                        </h4>
+                                        <div className="space-y-1 mb-4">
+                                            <div className="w-full h-[2px] bg-muted/50" />
+                                            <div className="w-3/4 h-[2px] bg-muted/50" />
+                                            <div className="w-1/2 h-[2px] bg-muted/50" />
+                                        </div>
+                                        <div className="mt-auto flex justify-between items-end">
+                                            <div className="space-y-1">
+                                                <div className="w-16 h-1 bg-muted/40 rounded-full" />
+                                                <div className="w-12 h-1 bg-muted/40 rounded-full" />
+                                            </div>
+                                            <FileText className="h-8 w-8 text-primary/20" />
+                                        </div>
+                                    </div>
+
+                                    {/* Play/Download Overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/20 backdrop-blur-[2px]">
+                                        <div className="h-14 w-14 rounded-full bg-primary shadow-xl flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform">
+                                            <Download className="h-6 w-6 text-primary-foreground" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-muted/30 border-t border-border/50">
+                                    <p className="text-xs font-semibold text-center text-muted-foreground group-hover:text-primary transition-colors">
+                                        Click to view full publication
+                                    </p>
+                                </div>
+                            </Card>
+                        </motion.div>
+
                         {/* Publication Details */}
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-                            <Card className="p-6 border-border bg-card">
+                            <Card className="p-6 border-border bg-card/80 backdrop-blur-sm">
                                 <h3 className="text-lg font-bold text-foreground mb-4">Publication Details</h3>
-                                <div className="space-y-3 text-sm">
+                                <div className="space-y-4 text-sm">
                                     {publication.doi && (
                                         <div>
                                             <p className="text-muted-foreground mb-1">DOI</p>
@@ -516,7 +582,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                                                             </div>
                                                         </a>
                                                     )
@@ -722,7 +788,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                     <div className="space-y-3">
                                         {publication.authors.map((author: any) => (
                                             <div key={author.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                                                <Avatar className="h-10 w-10 flex-shrink-0">
+                                                <Avatar className="h-10 w-10 shrink-0">
                                                     {author.profile_pic ? (
                                                         <AvatarImage
                                                             src={svgTextToDataUri(author.profile_pic) || "/placeholder.svg"}
@@ -785,7 +851,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                         {publication.thesis ? (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                                 <Card className="p-6 border-border bg-card relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-primary/60 to-primary/40" />
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-primary via-primary/60 to-primary/40" />
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary-foreground">
                                             <BookOpen className="h-5 w-5" />
@@ -848,7 +914,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                         ) : (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                                 <Card className="p-6 border-border bg-card relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/60 to-primary/40" />
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-primary via-primary/60 to-primary/40" />
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                                             <BookOpen className="h-5 w-5" />

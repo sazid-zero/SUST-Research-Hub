@@ -3,30 +3,54 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Eye } from "lucide-react"
+import { Download, Eye, CheckCircle2, AlertCircle } from "lucide-react"
 import { useState } from "react"
 import type { Thesis } from "@/lib/data/theses"
+import { handleSupervisionRequest } from "@/app/actions/supervisor"
+import { useRouter } from "next/navigation"
 
 interface ReviewThesisClientProps {
   thesis: Thesis
+  requestId?: number
 }
 
-export function ReviewThesisClient({ thesis }: ReviewThesisClientProps) {
+export function ReviewThesisClient({ thesis, requestId }: ReviewThesisClientProps) {
   const [feedback, setFeedback] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [status, setStatus] = useState<{ success: boolean; message: string } | null>(null)
+  const router = useRouter()
 
-  const handleApprove = () => {
-    setIsSubmitting(true)
-    setTimeout(() => setIsSubmitting(false), 1000)
-  }
+  const handleAction = async (action: 'approve' | 'reject') => {
+    if (!requestId) {
+        setStatus({ success: false, message: "Request ID not found. Action cannot be performed." })
+        return
+    }
 
-  const handleReject = () => {
     setIsSubmitting(true)
-    setTimeout(() => setIsSubmitting(false), 1000)
+    setStatus(null)
+    
+    try {
+        const result = await handleSupervisionRequest(requestId, action, feedback)
+        setStatus(result)
+        if (result.success) {
+            setTimeout(() => router.push("/supervisor/reviews"), 2000)
+        }
+    } catch (error) {
+        setStatus({ success: false, message: "An error occurred while processing the request." })
+    } finally {
+        setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="p-6 max-w-6xl space-y-6">
+      {status && (
+          <div className={`p-4 rounded-lg flex items-center gap-3 ${status.success ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+              {status.success ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+              <p className="font-medium">{status.message}</p>
+          </div>
+      )}
+
       {/* Thesis Information */}
       <Card className="border-border bg-card p-6">
         <h2 className="text-lg font-bold text-foreground mb-4">Thesis Information</h2>
@@ -108,15 +132,15 @@ export function ReviewThesisClient({ thesis }: ReviewThesisClientProps) {
       {/* Action Buttons */}
       <div className="flex gap-4">
         <Button
-          onClick={handleApprove}
-          disabled={isSubmitting}
+          onClick={() => handleAction('approve')}
+          disabled={isSubmitting || !requestId}
           className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium h-10"
         >
           {isSubmitting ? "Processing..." : "Approve Thesis"}
         </Button>
         <Button
-          onClick={handleReject}
-          disabled={isSubmitting}
+          onClick={() => handleAction('reject')}
+          disabled={isSubmitting || !requestId}
           variant="outline"
           className="flex-1 border-red-200 text-red-600 hover:bg-red-50 font-medium h-10 bg-transparent"
         >

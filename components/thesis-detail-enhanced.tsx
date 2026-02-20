@@ -136,7 +136,7 @@ export function ThesisDetailEnhanced({
         <div className="h-screen bg-background flex flex-col">
             <GlobalNavbar user={user} />
 
-            <div className="container mx-auto px-4 py-6 max-w-[83.5rem] flex-1 overflow-hidden flex flex-col">
+            <div className="container mx-auto px-4 py-6 max-w-334 flex-1 overflow-hidden flex flex-col">
                 <div className="hidden lg:grid lg:grid-cols-3 gap-8 h-full">
                     <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-4 no-scrollbar">
                         {/* Header Card */}
@@ -163,8 +163,8 @@ export function ThesisDetailEnhanced({
                                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-4 w-4" />
-                      {thesis.submission_date
-                          ? new Date(thesis.submission_date).toLocaleDateString("en-US", {
+                      {thesis.submitted_date
+                          ? new Date(thesis.submitted_date).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "long",
                           })
@@ -186,21 +186,21 @@ export function ThesisDetailEnhanced({
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => {}}>
+                                    <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" onClick={() => {}}>
                                         <FileText className="h-4 w-4" />
                                         View Full Thesis
                                     </Button>
-                                    <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleDownload()}>
+                                    <Button variant="outline" className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all" onClick={() => handleDownload()}>
                                         <Download className="h-4 w-4" />
                                         Download PDF
                                     </Button>
-                                    <Button variant="outline" className="gap-2 bg-transparent">
+                                    <Button variant="outline" className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all">
                                         <Bookmark className="h-4 w-4" />
                                         Save
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        className="gap-2 bg-transparent"
+                                        className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all"
                                         onClick={() => navigator.share?.({ title: thesis.title, url: window.location.href })}
                                     >
                                         <Share2 className="h-4 w-4" />
@@ -283,7 +283,17 @@ export function ThesisDetailEnhanced({
                                         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                                             Supervisor
                                         </p>
-                                        <p className="font-medium text-foreground">{thesis.supervisor_name || "Not specified"}</p>
+                                        {thesis.supervisor_id ? (
+                                            <Link 
+                                                href={`/supervisor/profile/${thesis.supervisor_id}`}
+                                                className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                                            >
+                                                {thesis.supervisor_name || "Not specified"}
+                                                <ExternalLink className="h-3 w-3" />
+                                            </Link>
+                                        ) : (
+                                            <p className="font-medium text-foreground">{thesis.supervisor_name || "Not specified"}</p>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
@@ -292,7 +302,7 @@ export function ThesisDetailEnhanced({
                         {/* Publications */}
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                             <Card className="p-6 border-border bg-card relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-primary/60 to-primary/40"></div>
+                                <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-primary via-primary/60 to-primary/40"></div>
                                 <div className="flex items-center gap-3 mb-5">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                                         <FileText className="h-5 w-5 text-primary" />
@@ -317,14 +327,12 @@ export function ThesisDetailEnhanced({
                                                         </h3>
                                                         <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                                                             {pub.authors && pub.authors.length > 0 && (
-                                                                <span className="flex items-center gap-1">
-                                  <UserIcon className="h-3.5 w-3.5 text-primary/70" />
-                                                                    {pub.authors.length === 1
-                                                                        ? pub.authors[0].full_name
-                                                                        : pub.authors.length === 2
-                                                                            ? `${pub.authors[0].full_name} and ${pub.authors[1].full_name}`
-                                                                            : `${pub.authors[0].full_name} et al.`}
-                                </span>
+                                                                pub.authors.map((author: any) => (
+                                                                        <span key={author.id} className="flex items-center gap-1">
+                                                                            <UserIcon className="h-3.5 w-3.5 text-primary/70" />
+                                                                            {author.author_name}
+                                                                        </span>
+                                                                    ))
                                                             )}
                                                             {pub.journal_name && (
                                                                 <>
@@ -332,11 +340,11 @@ export function ThesisDetailEnhanced({
                                                                     <span>{pub.journal_name}</span>
                                                                 </>
                                                             )}
-                                                            {pub.publication_date && (
+                                                            {pub.published_date && (
                                                                 <>
                                                                     <span>•</span>
                                                                     <span>
-                                    {new Date(pub.publication_date).toLocaleDateString("en-US", {
+                                    {new Date(pub.published_date).toLocaleDateString("en-US", {
                                         year: "numeric",
                                         month: "short",
                                     })}
@@ -411,7 +419,8 @@ export function ThesisDetailEnhanced({
                     </div>
 
                     <div className="hidden lg:block space-y-6 overflow-y-auto pl-2 no-scrollbar">
-                        <Button className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
+
+                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all shadow-md shadow-primary/10">
                             <Download className="h-5 w-5" />
                             Download All Files
                         </Button>
@@ -449,7 +458,7 @@ export function ThesisDetailEnhanced({
                                                     <div key={idx} className="space-y-2">
                                                         <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors border border-transparent hover:border-border">
                                                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0 mt-0.5">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
                                                                     <FileIconBadge fileType={file.file_type || file.file_name} />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
@@ -530,8 +539,8 @@ export function ThesisDetailEnhanced({
                             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
-                  {thesis.submission_date
-                      ? new Date(thesis.submission_date).toLocaleDateString("en-US", {
+                  {thesis.submitted_date
+                      ? new Date(thesis.submitted_date).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
                       })
@@ -659,7 +668,7 @@ export function ThesisDetailEnhanced({
                     {/* Publications */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                         <Card className="p-6 border-border bg-card relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-primary/60 to-primary/40"></div>
+                            <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-primary via-primary/60 to-primary/40"></div>
                             <div className="flex items-center gap-3 mb-5">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                                     <FileText className="h-5 w-5 text-primary" />
@@ -684,14 +693,12 @@ export function ThesisDetailEnhanced({
                                                     </h3>
                                                     <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                                                         {pub.authors && pub.authors.length > 0 && (
-                                                            <span className="flex items-center gap-1">
-                              <UserIcon className="h-3.5 w-3.5 text-primary/70" />
-                                                                {pub.authors.length === 1
-                                                                    ? pub.authors[0].full_name
-                                                                    : pub.authors.length === 2
-                                                                        ? `${pub.authors[0].full_name} and ${pub.authors[1].full_name}`
-                                                                        : `${pub.authors[0].full_name} et al.`}
-                            </span>
+                                                            pub.authors.map((author: any) => (
+                                                                <span key={author.id} className="flex items-center gap-1">
+                                                                    <UserIcon className="h-3.5 w-3.5 text-primary/70" />
+                                                                    {author.author_name}
+                                                                </span>
+                                                            ))
                                                         )}
                                                         {pub.journal_name && (
                                                             <>
@@ -699,11 +706,11 @@ export function ThesisDetailEnhanced({
                                                                 <span>{pub.journal_name}</span>
                                                             </>
                                                         )}
-                                                        {pub.publication_date && (
+                                                        {pub.published_date && (
                                                             <>
                                                                 <span>•</span>
                                                                 <span>
-                                {new Date(pub.publication_date).toLocaleDateString("en-US", {
+                                {new Date(pub.published_date).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "short",
                                 })}
@@ -778,7 +785,7 @@ export function ThesisDetailEnhanced({
 
                     {/* Resources on Mobile */}
                     <div className="space-y-6">
-                        <Button className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
+                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
                             <Download className="h-5 w-5" />
                             Download All Files
                         </Button>
@@ -816,7 +823,7 @@ export function ThesisDetailEnhanced({
                                                     <div key={idx} className="space-y-2">
                                                         <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors border border-transparent hover:border-border">
                                                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0 mt-0.5">
+                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
                                                                     <FileIconBadge fileType={file.file_type || file.file_name} />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">

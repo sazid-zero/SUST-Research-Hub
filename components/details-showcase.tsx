@@ -3,14 +3,13 @@
 
 import ProjectDetailContent from "@/components/project-detail-content"
 import {mockProjects} from "@/components/project_mock/[id]/page"
-import {AnimatedParticles} from "@/components/repository-showcase";
+
 
 
 export function DetailsShowcase() {
 
     return (
         <section className="relative bg-background py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen">
-            <AnimatedParticles/>
             <div className="max-w-7xl mx-auto ">
                 <div className="relative z-10 container mx-auto text-center">
 

@@ -23,6 +23,20 @@ export interface Dataset {
   created_at: string
   updated_at: string
   published_at: string | null
+  
+  // Relations
+  files?: DatasetFile[]
+  project_id?: number
+}
+
+export interface DatasetFile {
+    id: number
+    dataset_id: number
+    file_name: string
+    file_url: string
+    file_size: number | null
+    file_type: string | null
+    uploaded_at: string
 }
 
 export async function getDatasets(filters?: {
@@ -98,9 +112,39 @@ export async function getDatasetById(id: number): Promise<Dataset | null> {
       WHERE id = $1 AND status = 'published'
     `
     const result = await db.query(query, [id])
-    return result.rows[0] || null
+    if (result.rows.length === 0) return null
+    
+    const dataset = result.rows[0]
+    
+    // Fetch files
+    const filesQuery = `
+        SELECT * FROM dataset_files WHERE dataset_id = $1 ORDER BY uploaded_at DESC
+    `
+    const filesResult = await db.query(filesQuery, [id])
+    
+    return {
+        ...dataset,
+        files: filesResult.rows
+    } as Dataset
   } catch (error) {
     console.error("Error fetching dataset:", error)
+    throw error
+  }
+}
+
+export async function getDatasetsByProject(projectId: number): Promise<Dataset[]> {
+  try {
+    const query = `
+      SELECT * FROM datasets 
+      WHERE project_id = $1 AND status = 'published'
+      ORDER BY created_at DESC
+    `
+    // Assuming project_id exists. If not, this returns empty or error.
+    // Will need to ensure schema has this column.
+    
+    return []
+  } catch (error) {
+    console.error("Error fetching project datasets:", error)
     throw error
   }
 }

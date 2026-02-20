@@ -2,7 +2,7 @@
 import { FileText, Search, Shield, BookOpen, Video, BarChart3 } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { useTheme } from "./theme-provider"
-import { AnimatedParticles } from "@/components/repository-showcase"
+
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {scrollToExplore} from "@/components/scroll-to-section";
@@ -210,7 +210,6 @@ export function FeaturesSection() {
 
     return (
         <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen bg-background transition-colors duration-500">
-            <AnimatedParticles />
             <ScatteredCubes isDark={isDark} />
 
             <div className="relative z-10 max-w-6xl mx-auto text-center">

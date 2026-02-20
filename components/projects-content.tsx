@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button"
 
 interface ProjectsContentProps {
     user: any
+    initialProjects?: any[]
 }
 
 const sampleProjects = [
+
     {
         id: 1,
         title: "AI Lab Research Initiative - Advanced Machine Learning Systems",
@@ -70,7 +72,7 @@ const sampleProjects = [
     },
 ]
 
-export default function ProjectsContent({ user }: ProjectsContentProps) {
+export default function ProjectsContent({ user, initialProjects }: ProjectsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
     const [selectedYear, setSelectedYear] = useState("All")
@@ -78,15 +80,28 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
     const [sortBy, setSortBy] = useState("trending")
     const [mounted, setMounted] = useState(false)
 
+    const allProjects = initialProjects && initialProjects.length > 0 ? initialProjects : sampleProjects;
+    
+    // Map projects to ensure consistent field names and presence of arrays
+    const projects = allProjects.map(p => ({
+        ...p,
+        authors: p.authors || p.team || [],
+        keywords: p.keywords || [],
+        abstract: p.abstract || p.description || "",
+        year: p.year || (p.created_at ? new Date(p.created_at).getFullYear() : 2024),
+        views: p.views || 0,
+        downloads: p.downloads || 0
+    }));
+
     useEffect(() => {
         setMounted(true)
     }, [])
 
-    const departments = ["All Departments", ...new Set(sampleProjects.map((p) => p.department))]
-    const years = ["All", ...new Set(sampleProjects.map((p) => p.year).sort((a, b) => b - a))]
-    const fields = ["All Fields", ...new Set(sampleProjects.flatMap((p) => p.keywords))]
+    const departments = ["All Departments", ...new Set(projects.map((p) => p.department || "Other"))]
+    const years = ["All", ...new Set(projects.map((p) => p.year).sort((a, b) => b - a))]
+    const fields = ["All Fields", ...new Set(projects.flatMap((p) => p.keywords))]
 
-    const filteredProjects = sampleProjects.filter((project) => {
+    const filteredProjects = projects.filter((project) => {
         const matchesSearch =
             project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             project.authors?.some((author: any) => author.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -100,6 +115,7 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
 
         return matchesSearch && matchesDepartment && matchesYear && matchesField
     })
+
 
     const clearFilters = () => {
         setSearchQuery("")
@@ -162,7 +178,7 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            {fields.slice(0, 10).map((field) => (
+                                            {(fields as string[]).slice(0, 10).map((field: string) => (
                                                 <SelectItem key={field} value={field}>
                                                     {field}
                                                 </SelectItem>
@@ -210,7 +226,7 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
                                 <div className="pt-4 border-t border-border">
                                     <p className="text-xs text-muted-foreground">
                                         Showing <span className="font-semibold text-foreground">{filteredProjects.length}</span> of{" "}
-                                        <span className="font-semibold text-foreground">{sampleProjects.length}</span>
+                                        <span className="font-semibold text-foreground">{projects.length}</span>
                                     </p>
                                 </div>
                             </div>
@@ -290,7 +306,7 @@ export default function ProjectsContent({ user }: ProjectsContentProps) {
 
                                                 {/* Keywords */}
                                                 <div className="flex flex-wrap gap-2">
-                                                    {project.keywords.slice(0, 3).map((keyword, idx) => (
+                                                    {(project.keywords as string[]).slice(0, 3).map((keyword: string, idx: number) => (
                                                         <Badge key={idx} className="bg-primary/10 text-primary border border-primary/20 text-xs">
                                                             {keyword}
                                                         </Badge>

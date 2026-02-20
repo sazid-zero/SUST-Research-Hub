@@ -17,10 +17,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-    turbopack: {
-        // Disable broken source map parsing in dev
-        sourceMaps: "none",
-    },
 }
 
 export default nextConfig

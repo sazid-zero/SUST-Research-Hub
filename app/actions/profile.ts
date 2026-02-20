@@ -12,19 +12,17 @@ export async function getStudentProfileWithAuth(studentId: string) {
   try {
     const currentUser = await getCurrentUser()
     
-    // Check authorization first
-    const canView = currentUser?.role === 'admin' || 
+    // For public research hub, we allow viewing of student profiles
+    // but we can still identify if the current user is the owner
+    const canViewSensitveInfo = currentUser?.role === 'admin' || 
                    currentUser?.role === 'supervisor' || 
                    currentUser?.student_id === studentId
-    
-    if (!canView) {
-      return { success: false, error: 'Not authorized', data: null, currentUser: null }
-    }
 
     const [student] = await sql`
       SELECT 
         id, full_name, email, department, student_id,
-        created_at, role, is_approved
+        created_at, role, is_approved,
+        bio, phone, session, semester, degree, profile_pic
       FROM users
       WHERE student_id = ${studentId} AND role = 'student'
       LIMIT 1
@@ -34,7 +32,37 @@ export async function getStudentProfileWithAuth(studentId: string) {
       return { success: false, error: 'Student not found', data: null, currentUser }
     }
 
-    return { success: true, data: student, currentUser }
+    // Fetch research data
+    const theses = await sql`
+      SELECT t.*, 
+        u.full_name as supervisor_name
+      FROM theses t
+      LEFT JOIN users u ON t.supervisor_id = u.id
+      INNER JOIN thesis_authors ta ON t.id = ta.thesis_id
+      WHERE ta.author_id = ${student.id}
+      ORDER BY t.created_at DESC
+    `
+
+    const publications = await sql`
+      SELECT p.* 
+      FROM publications p
+      JOIN publication_authors pa ON p.id = pa.publication_id
+      WHERE pa.user_id = ${student.id}
+      ORDER BY p.published_date DESC, p.year DESC
+    `
+
+    return { 
+      success: true, 
+      data: { 
+        ...student, 
+        // Hide sensitive info if not authorized
+        email: canViewSensitveInfo ? student.email : null,
+        phone: canViewSensitveInfo ? student.phone : null,
+        theses: theses || [], 
+        publications: publications || [] 
+      }, 
+      currentUser 
+    }
   } catch (error: any) {
     console.error('[Profile] Error:', error)
     return { success: false, error: 'Failed to fetch student profile', data: null, currentUser: null }
@@ -46,12 +74,8 @@ export async function getSupervisorProfileWithAuth(supervisorId: number) {
     const currentUser = await getCurrentUser()
     
     // Check authorization - only allow admins or the supervisor viewing their own profile
-    const canView = currentUser?.role === 'admin' || 
+    const canViewSensitiveInfo = currentUser?.role === 'admin' || 
                    currentUser?.id === supervisorId
-    
-    if (!canView) {
-      return { success: false, error: 'Not authorized', data: null, currentUser: null }
-    }
 
     const [supervisor] = await sql`
       SELECT 
@@ -66,7 +90,14 @@ export async function getSupervisorProfileWithAuth(supervisorId: number) {
       return { success: false, error: 'Supervisor not found', data: null, currentUser }
     }
 
-    return { success: true, data: supervisor, currentUser }
+    return { 
+      success: true, 
+      data: {
+        ...supervisor,
+        email: canViewSensitiveInfo ? supervisor.email : null
+      }, 
+      currentUser 
+    }
   } catch (error: any) {
     console.error('[Profile] Error:', error)
     return { success: false, error: 'Failed to fetch supervisor profile', data: null, currentUser: null }
@@ -127,7 +158,12 @@ export async function updateStudentProfile(data: any) {
       SET 
         full_name = ${data.fullName},
         email = ${data.email},
-        department = ${data.department}
+        department = ${data.department},
+        phone = ${data.phone},
+        bio = ${data.bio},
+        session = ${data.session},
+        semester = ${data.semester},
+        degree = ${data.degree}
       WHERE id = ${currentUser.id} AND role = 'student'
     `
 
@@ -150,7 +186,11 @@ export async function updateSupervisorProfile(data: any) {
       SET 
         full_name = ${data.fullName},
         email = ${data.email},
-        department = ${data.department}
+        department = ${data.department},
+        phone = ${data.phone},
+        designation = ${data.designation},
+        bio = ${data.bio},
+        degree = ${data.degree}
       WHERE id = ${currentUser.id} AND role = 'supervisor'
     `
 

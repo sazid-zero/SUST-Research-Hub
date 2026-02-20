@@ -1,2 +1,3 @@
 // Re-export database from parent
-export { db, sql } from "@/lib/db"
+export { db, sql } from "../database"
+export * from "./projects"

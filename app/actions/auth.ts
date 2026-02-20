@@ -10,6 +10,7 @@ import {
   createSession,
   deleteSession as deleteSessionDb,
   getUserByEmail,
+  User
 } from "@/lib/auth"
 import { sendRegistrationEmail, sendAdminNotificationEmail } from "@/lib/utils/email"
 
@@ -32,6 +33,13 @@ export interface LoginFormData {
 
 export async function register(formData: RegisterFormData) {
   try {
+    // Check if registration is allowed
+    const { getSystemSettings } = await import("./admin")
+    const settingsRes = await getSystemSettings()
+    if (settingsRes.success && settingsRes.settings && !settingsRes.settings.allowNewRegistrations) {
+      return { success: false, error: "New registrations are currently disabled by the administrator." }
+    }
+
     // Validate input
     if (!formData.email || !formData.password || !formData.fullName) {
       return { success: false, error: "Missing required fields" }
@@ -76,12 +84,12 @@ export async function register(formData: RegisterFormData) {
       VALUES (
         ${formData.email}, ${passwordHash}, ${formData.fullName}, ${formData.role}, 
         ${formData.studentId || null}, ${formData.department || null}, 
-        ${formData.role === "admin"}
+        ${(formData.role as string) === "admin"}
       )
       RETURNING *
     `
 
-    const user = results[0]
+    const user = results[0] as User
 
     // Create registration request for admin approval
     await sql`INSERT INTO registration_requests (user_id, status) VALUES (${user.id}, 'pending')`
@@ -130,7 +138,7 @@ export async function login(formData: LoginFormData) {
       }
     }
 
-    const passwordValid = await verifyPassword(password, user.password_hash)
+    const passwordValid = await verifyPassword(password, user.password_hash || "")
 
     if (!passwordValid) {
       return { success: false, error: "Invalid email or password" }

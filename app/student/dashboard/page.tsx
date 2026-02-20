@@ -2,8 +2,10 @@ import { StudentDashboardClient } from "@/components/student-dashboard-client"
 import { Card } from "@/components/ui/card"
 import { Suspense } from "react"
 import { getAllTheses } from "@/lib/data/theses"
+import { getUserWorkspaces } from "@/lib/db/workspace"
+import { getCurrentUser } from "@/app/actions/auth"
 
-export const revalidate = 3600 // Cache for 1 hour
+export const revalidate = 0 // Disable cache for dashboard to reflect real-time changes
 
 function DashboardLoading() {
   return (
@@ -27,8 +29,15 @@ function DashboardLoading() {
 
 async function DashboardContent() {
   try {
-    const allTheses = await getAllTheses()
-    return <StudentDashboardClient allTheses={allTheses} />
+    const user = await getCurrentUser()
+    if (!user) return <div>Unauthorized</div>
+
+    const [userWorkspaces, allTheses] = await Promise.all([
+        getUserWorkspaces(user.id),
+        getAllTheses()
+    ])
+
+    return <StudentDashboardClient allTheses={allTheses} userWorkspaces={userWorkspaces} userName={user.full_name} />
   } catch (error) {
     throw error
   }

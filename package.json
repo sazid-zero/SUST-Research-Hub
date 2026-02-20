@@ -77,11 +77,19 @@
     "@tailwindcss/postcss": "^4.1.9",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22",
+    "@types/prismjs": "^1.26.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",
+    "prismjs": "^1.30.0",
+    "react-simple-code-editor": "^0.14.1",
     "tailwindcss": "^4.1.9",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
+  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc",
+  "peerDependencies": {
+    "@types/prismjs": "^1.26.6",
+    "prismjs": "^1.30.0",
+    "react-simple-code-editor": "^0.14.1"
+  }
 }

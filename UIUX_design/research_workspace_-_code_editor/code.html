@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Workspace - Code Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111722", // Matches the provided component bg
+                        "surface-dark": "#192233", // Slightly lighter for panels
+                        "surface-darker": "#0d121c", // Darker for editor bg
+                        "border-dark": "#324467",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for IDE feel */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111722; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324467; 
+            border-radius: 5px;
+            border: 2px solid #111722;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5e85; 
+        }
+        
+        .code-syntax-keyword { color: #c678dd; } /* Purple */
+        .code-syntax-function { color: #61afef; } /* Blue */
+        .code-syntax-string { color: #98c379; } /* Green */
+        .code-syntax-comment { color: #5c6370; font-style: italic; } /* Grey */
+        .code-syntax-number { color: #d19a66; } /* Orange */
+        .code-syntax-class { color: #e5c07b; } /* Yellow */
+        
+        /* Line numbers counter */
+        .line-numbers {
+            counter-reset: line;
+        }
+        .code-line::before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            width: 2rem;
+            margin-right: 1rem;
+            text-align: right;
+            color: #4b5563;
+            font-size: 0.75rem;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col">
+<!-- Main Layout Container -->
+<div class="flex h-full w-full overflow-hidden">
+<!-- Sidebar Navigation (Adapted from Component) -->
+<div class="hidden lg:flex w-64 flex-col border-r border-border-dark bg-background-dark h-full">
+<div class="flex flex-col h-full p-4 justify-between">
+<div class="flex flex-col gap-6">
+<!-- User Profile / Team -->
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0" data-alt="Abstract geometric avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCANhhQkvQ6Y-B_xoWYsGIs-ToxINZ6CfnHUi1hp9iaEKpwKiz7MJ_2XHwZiOazqpuxKcC2NP7J8vrNh4UszJ_q_LoCH-JDz4fU0o6teLQQ4gqmmLbn0bo3JhY1wh6wUSSDw6Z9gYgACVcyeGGlWDZWxwgMDI44o02toCISgMy84XnPlvBhhChKGWqvek-I36FCBjF8rX3Sq9cp9tZeFWC3h-ZOkGmsPv1UE2eHNs41L6s1GOCLWQv1FU4MtGpNseY1lOl9Dp_tntbM");'></div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-white text-base font-medium leading-tight truncate">Research Hub</h1>
+<p class="text-[#92a4c9] text-xs font-normal leading-tight truncate">Team Workspace</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#92a4c9] hover:bg-[#192233] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">home</span>
+<span class="text-sm font-medium">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-white border border-primary/20" href="#">
+<span class="material-symbols-outlined text-[20px] text-primary">folder</span>
+<span class="text-sm font-medium">Projects</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#92a4c9] hover:bg-[#192233] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="text-sm font-medium">Datasets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#92a4c9] hover:bg-[#192233] hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</div>
+</div>
+<button class="flex w-full cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 text-white text-sm font-bold tracking-wide transition-colors shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined mr-2 text-[18px]">add</span>
+<span>New Project</span>
+</button>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-full overflow-hidden bg-background-dark relative">
+<!-- Top Header & Breadcrumbs -->
+<header class="h-16 border-b border-border-dark flex items-center justify-between px-6 shrink-0 bg-background-dark z-10">
+<div class="flex items-center gap-3 overflow-hidden">
+<div class="flex items-center text-[#92a4c9] text-sm font-medium whitespace-nowrap">
+<a class="hover:text-white transition-colors" href="#">Workspace</a>
+<span class="mx-2 text-slate-600">/</span>
+<a class="hover:text-white transition-colors" href="#">Neural Network Optimization</a>
+<span class="mx-2 text-slate-600">/</span>
+<span class="text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">code</span>
+                            Code
+                        </span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center -space-x-2">
+<img alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-background-dark" data-alt="Portrait of a collaborator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFLUpd_oVsz-I-qeTalITz6lC_SArz1uu-4OTzf9BhzWSf7mZZlRrGE12u_0vzJsBJk1u8zsn4cw8EKworjszBzI3Oq7dkPfrD8P8GX7RZWILk6DdlCa4WOUI9IvW7pWe9fx4yO-pKmxMZm1Uh5nKa2sbPoJVXz6T6izlmjwZ4v4CjudmvqvD-tgn1i6ZiKp9FWGCW4RYuawjbzfJLPNB-E2rox86cLCVUIIYkSrHXAY4WwMNebVNX_RAKjf-LuVrZ6GVOBy_P0xZK"/>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-background-dark" data-alt="Portrait of a collaborator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5XHu13NKNu6DNEHABaPlBFQAIFc9SD-cXxvXdHjz41z8ff3JrFMe6e-uV0XkTzcUCvDqKupZxY494JaEdA7MLtwIhsbAMkFZW5MGhmlpCtGcmZtxl6GCn2izhskTF6kt8QB9U0IPPY1aQOIp8-C2y2Pt4ZbzrOX6y1pywRIZvBovhWgj47BSyjTu2Sg87L54T2Fllfs9ojja-zp_IID1NBADoKiLTCu4K5TiMjlnzx1i2rfrxMEvTMmQFaCr3hwX6UuG7XPzKSf1v"/>
+<div class="w-8 h-8 rounded-full border-2 border-background-dark bg-surface-dark flex items-center justify-center text-xs font-bold text-[#92a4c9]">+3</div>
+</div>
+<button class="p-2 text-[#92a4c9] hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Project Context Tabs -->
+<div class="border-b border-border-dark px-6 bg-background-dark shrink-0">
+<div class="flex gap-8">
+<a class="flex items-center gap-2 py-3 border-b-[3px] border-transparent text-[#92a4c9] hover:text-white transition-colors" href="#">
+<span class="text-sm font-bold tracking-wide">Papers</span>
+</a>
+<a class="flex items-center gap-2 py-3 border-b-[3px] border-transparent text-[#92a4c9] hover:text-white transition-colors" href="#">
+<span class="text-sm font-bold tracking-wide">Models</span>
+</a>
+<a class="flex items-center gap-2 py-3 border-b-[3px] border-transparent text-[#92a4c9] hover:text-white transition-colors" href="#">
+<span class="text-sm font-bold tracking-wide">Datasets</span>
+</a>
+<a class="flex items-center gap-2 py-3 border-b-[3px] border-primary text-white" href="#">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span class="text-sm font-bold tracking-wide">Code</span>
+</a>
+</div>
+</div>
+<!-- IDE Container -->
+<div class="flex flex-1 overflow-hidden">
+<!-- File Explorer Pane -->
+<div class="w-64 bg-[#0d121c] border-r border-border-dark flex flex-col shrink-0">
+<div class="p-3 border-b border-border-dark flex justify-between items-center">
+<span class="text-xs font-bold text-[#92a4c9] uppercase tracking-wider">Explorer</span>
+<div class="flex gap-1">
+<button class="p-1 hover:bg-[#192233] rounded text-[#92a4c9] hover:text-white transition-colors" title="New File">
+<span class="material-symbols-outlined text-[16px]">note_add</span>
+</button>
+<button class="p-1 hover:bg-[#192233] rounded text-[#92a4c9] hover:text-white transition-colors" title="New Folder">
+<span class="material-symbols-outlined text-[16px]">create_new_folder</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-2">
+<!-- Project Root -->
+<div class="mb-2">
+<div class="flex items-center gap-1 py-1 px-2 text-white font-medium text-sm hover:bg-[#192233] rounded cursor-pointer group">
+<span class="material-symbols-outlined text-[18px] text-[#92a4c9] group-hover:text-white transition-transform transform rotate-90">arrow_right</span>
+<span>neural-opt-v2</span>
+</div>
+<!-- Tree Content -->
+<div class="pl-3 border-l border-border-dark ml-3 mt-1 flex flex-col gap-0.5">
+<!-- Folder: src -->
+<div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+<span>src</span>
+</div>
+<div class="pl-6 flex flex-col gap-0.5">
+<div class="flex items-center gap-2 py-1 px-2 text-white text-sm bg-primary/20 border border-primary/30 rounded cursor-pointer relative">
+<span class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l"></span>
+<span class="material-symbols-outlined text-[18px] text-blue-400">code</span> <!-- Python Icon placeholder -->
+<span>main.py</span>
+</div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px] text-blue-400">code</span>
+<span>utils.py</span>
+</div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px] text-blue-400">code</span>
+<span>config.py</span>
+</div>
+</div>
+</div>
+<!-- Folder: data -->
+<div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span>data</span>
+</div>
+</div>
+<!-- Folder: models -->
+<div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span>models</span>
+</div>
+</div>
+<!-- Files -->
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px] text-yellow-400">description</span>
+<span>README.md</span>
+</div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px] text-gray-400">settings</span>
+<span>.gitignore</span>
+</div>
+<div class="flex items-center gap-2 py-1 px-2 text-[#92a4c9] hover:text-white text-sm hover:bg-[#192233] rounded cursor-pointer">
+<span class="material-symbols-outlined text-[18px] text-green-400">terminal</span>
+<span>requirements.txt</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Editor Pane -->
+<div class="flex-1 flex flex-col bg-[#111722] min-w-0">
+<!-- Editor Toolbar -->
+<div class="h-12 border-b border-border-dark flex items-center justify-between px-4 bg-[#111722]">
+<div class="flex items-center h-full">
+<!-- Tabs -->
+<div class="flex h-full items-end pt-2 gap-1 overflow-x-auto no-scrollbar">
+<div class="group flex items-center gap-2 px-4 py-2 bg-[#192233] text-white text-sm font-medium rounded-t-lg border-t-2 border-primary min-w-[140px] justify-between cursor-pointer relative">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-blue-400">code</span>
+<span>main.py</span>
+</div>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity">close</span>
+</div>
+<div class="group flex items-center gap-2 px-4 py-2 hover:bg-[#192233]/50 text-[#92a4c9] text-sm font-medium rounded-t-lg border-t-2 border-transparent min-w-[140px] justify-between cursor-pointer transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-blue-400">code</span>
+<span>utils.py</span>
+</div>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity">close</span>
+</div>
+<div class="group flex items-center gap-2 px-4 py-2 hover:bg-[#192233]/50 text-[#92a4c9] text-sm font-medium rounded-t-lg border-t-2 border-transparent min-w-[140px] justify-between cursor-pointer transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-yellow-400">description</span>
+<span>README.md</span>
+</div>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity">close</span>
+</div>
+</div>
+</div>
+<!-- Editor Actions -->
+<div class="flex items-center gap-2">
+<button class="p-1.5 text-[#92a4c9] hover:text-white hover:bg-[#192233] rounded transition-colors" title="Toggle Word Wrap">
+<span class="material-symbols-outlined text-[20px]">wrap_text</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded text-sm font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Save</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-[#192233] text-white border border-border-dark rounded text-sm font-bold hover:bg-[#232f48] transition-colors">
+<span class="material-symbols-outlined text-[18px]">commit</span>
+<span>Commit</span>
+</button>
+<button class="p-1.5 text-[#92a4c9] hover:text-white hover:bg-[#192233] rounded transition-colors" title="Run Code">
+<span class="material-symbols-outlined text-[20px] text-green-500">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Code Area -->
+<div class="flex-1 relative bg-[#192233] overflow-hidden flex flex-col">
+<div class="flex-1 overflow-auto flex font-mono text-sm leading-6">
+<!-- Code Content -->
+<div class="w-full h-full p-4 text-[#abb2bf]">
+<pre class="line-numbers"><code class="language-python block w-full outline-none"><div class="code-line"><span class="code-syntax-keyword">import</span> torch</div><div class="code-line"><span class="code-syntax-keyword">import</span> torch.nn <span class="code-syntax-keyword">as</span> nn</div><div class="code-line"><span class="code-syntax-keyword">import</span> torch.optim <span class="code-syntax-keyword">as</span> optim</div><div class="code-line"></div><div class="code-line"><span class="code-syntax-comment"># Define the neural network architecture</span></div><div class="code-line"><span class="code-syntax-keyword">class</span> <span class="code-syntax-class">OptimizationNet</span>(nn.Module):</div><div class="code-line">    <span class="code-syntax-keyword">def</span> <span class="code-syntax-function">__init__</span>(self, input_size, hidden_size, output_size):</div><div class="code-line">        <span class="code-syntax-function">super</span>(OptimizationNet, self).<span class="code-syntax-function">__init__</span>()</div><div class="code-line">        self.fc1 = nn.Linear(input_size, hidden_size)</div><div class="code-line">        self.relu = nn.ReLU()</div><div class="code-line">        self.fc2 = nn.Linear(hidden_size, output_size)</div><div class="code-line">        self.dropout = nn.Dropout(<span class="code-syntax-number">0.2</span>)</div><div class="code-line">        </div><div class="code-line">    <span class="code-syntax-keyword">def</span> <span class="code-syntax-function">forward</span>(self, x):</div><div class="code-line">        out = self.fc1(x)</div><div class="code-line">        out = self.relu(out)</div><div class="code-line">        out = self.dropout(out)</div><div class="code-line">        out = self.fc2(out)</div><div class="code-line">        <span class="code-syntax-keyword">return</span> out</div><div class="code-line"></div><div class="code-line"><span class="code-syntax-comment"># Hyperparameters</span></div><div class="code-line">input_size = <span class="code-syntax-number">784</span></div><div class="code-line">hidden_size = <span class="code-syntax-number">500</span></div><div class="code-line">num_classes = <span class="code-syntax-number">10</span></div><div class="code-line">num_epochs = <span class="code-syntax-number">5</span></div><div class="code-line">batch_size = <span class="code-syntax-number">100</span></div><div class="code-line">learning_rate = <span class="code-syntax-number">0.001</span></div><div class="code-line"></div><div class="code-line"><span class="code-syntax-keyword">def</span> <span class="code-syntax-function">train_model</span>(model, train_loader, criterion, optimizer):</div><div class="code-line">    model.train()</div><div class="code-line">    <span class="code-syntax-keyword">for</span> epoch <span class="code-syntax-keyword">in</span> <span class="code-syntax-function">range</span>(num_epochs):</div><div class="code-line">        <span class="code-syntax-keyword">for</span> i, (images, labels) <span class="code-syntax-keyword">in</span> <span class="code-syntax-function">enumerate</span>(train_loader):</div><div class="code-line">            <span class="code-syntax-comment"># Reshape images to (batch_size, input_size)</span></div><div class="code-line">            images = images.reshape(-1, <span class="code-syntax-number">28</span>*<span class="code-syntax-number">28</span>)</div><div class="code-line">            </div><div class="code-line">            <span class="code-syntax-comment"># Forward pass</span></div><div class="code-line">            outputs = model(images)</div><div class="code-line">            loss = criterion(outputs, labels)</div><div class="code-line">            </div><div class="code-line">            <span class="code-syntax-comment"># Backward and optimize</span></div><div class="code-line">            optimizer.zero_grad()</div><div class="code-line">            loss.backward()</div><div class="code-line">            optimizer.step()</div><div class="code-line">            </div><div class="code-line">            <span class="code-syntax-keyword">if</span> (i+<span class="code-syntax-number">1</span>) % <span class="code-syntax-number">100</span> == <span class="code-syntax-number">0</span>:</div><div class="code-line">                <span class="code-syntax-function">print</span>(<span class="code-syntax-string">f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}'</span>)</div><div class="code-line"></div><div class="code-line"><span class="code-syntax-keyword">if</span> __name__ == <span class="code-syntax-string">"__main__"</span>:</div><div class="code-line">    model = OptimizationNet(input_size, hidden_size, num_classes)</div><div class="code-line">    criterion = nn.CrossEntropyLoss()</div><div class="code-line">    optimizer = optim.Adam(model.parameters(), lr=learning_rate)</div><div class="code-line">    <span class="code-syntax-function">print</span>(<span class="code-syntax-string">"Model initialized. Starting training..."</span>)</div></code></pre>
+</div>
+</div>
+<!-- Terminal / Bottom Panel -->
+<div class="h-48 border-t border-border-dark bg-[#0d121c] flex flex-col shrink-0">
+<div class="flex items-center px-4 py-1 bg-[#111722] border-b border-border-dark gap-6">
+<button class="text-xs font-bold text-white border-b-2 border-primary py-1 uppercase tracking-wide">Terminal</button>
+<button class="text-xs font-bold text-[#92a4c9] hover:text-white py-1 uppercase tracking-wide">Output</button>
+<button class="text-xs font-bold text-[#92a4c9] hover:text-white py-1 uppercase tracking-wide">Problems <span class="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full text-[10px] ml-1">0</span></button>
+<button class="text-xs font-bold text-[#92a4c9] hover:text-white py-1 uppercase tracking-wide">Debug Console</button>
+<div class="flex-1"></div>
+<button class="text-[#92a4c9] hover:text-white">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex-1 p-2 font-mono text-sm overflow-y-auto">
+<div class="flex flex-col gap-1 text-[#92a4c9]">
+<div class="flex gap-2">
+<span class="text-green-500">➜</span>
+<span class="text-blue-400">~/neural-opt-v2</span>
+<span class="text-[#92a4c9]">git status</span>
+</div>
+<div class="pl-4">
+                                        On branch main<br/>
+                                        Your branch is up to date with 'origin/main'.<br/>
+<br/>
+                                        Changes not staged for commit:<br/>
+<span class="text-red-400">  modified:   src/main.py</span><br/>
+<br/>
+                                        no changes added to commit (use "git add" and/or "git commit -a")
+                                    </div>
+<div class="flex gap-2 mt-2">
+<span class="text-green-500">➜</span>
+<span class="text-blue-400">~/neural-opt-v2</span>
+<span class="text-[#92a4c9] animate-pulse">_</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Status Bar -->
+<div class="absolute bottom-0 w-full h-6 bg-primary text-white text-[10px] flex items-center justify-between px-3 z-20 select-none">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1 hover:bg-white/10 px-1 rounded cursor-pointer">
+<span class="material-symbols-outlined text-[12px]">code_blocks</span>
+                        master*
+                    </span>
+<span class="flex items-center gap-1 hover:bg-white/10 px-1 rounded cursor-pointer">
+<span class="material-symbols-outlined text-[12px]">sync</span>
+                        0↓ 1↑
+                    </span>
+<span class="hover:bg-white/10 px-1 rounded cursor-pointer">
+                        0 errors, 0 warnings
+                    </span>
+</div>
+<div class="flex items-center gap-4">
+<span class="hover:bg-white/10 px-1 rounded cursor-pointer">Ln 32, Col 45</span>
+<span class="hover:bg-white/10 px-1 rounded cursor-pointer">UTF-8</span>
+<span class="hover:bg-white/10 px-1 rounded cursor-pointer">Python 3.9.12</span>
+<span class="flex items-center gap-1 hover:bg-white/10 px-1 rounded cursor-pointer">
+<span class="material-symbols-outlined text-[12px]">notifications</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</body></html>

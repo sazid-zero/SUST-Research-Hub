@@ -3,8 +3,8 @@ import { StudentProfileClient } from '@/components/student-profile-client'
 import { getStudentProfileWithAuth } from '@/app/actions/profile'
 import { redirect } from 'next/navigation'
 
-export default async function StudentProfilePage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function StudentProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   
   const result = await getStudentProfileWithAuth(id)
   

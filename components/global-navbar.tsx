@@ -2,16 +2,25 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import {BookOpen, Menu, X, Search, Moon, Sun, FileText, Database, Folder} from "lucide-react"
+import {BookOpen, Menu, X, Search, Moon, Sun, FileText, Database, Folder, PanelLeft} from "lucide-react"
 import { IconCube } from "@tabler/icons-react"
 import { useState, useEffect, useRef } from "react"
 import { useTheme } from "next-themes"
 import { AuthButton } from "@/components/auth-button"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
-import type { User } from "@supabase/supabase-js"
+import { useSidebar } from "@/components/sidebar-context"
+import { NotificationsPopover } from "@/components/notifications-popover"
+export interface GlobalUser {
+    id: string
+    email: string
+    full_name: string
+    role: string
+    student_id?: string
+    username?: string
+}
 
 interface GlobalNavbarProps {
-    user?: User | null
+    user?: GlobalUser | any | null
 }
 
 interface SearchResult {
@@ -32,6 +41,8 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     const { theme, setTheme } = useTheme()
     const pathname = usePathname()
     const router = useRouter()
+
+    const { toggle } = useSidebar()
 
     useEffect(() => {
         setMounted(true)
@@ -77,7 +88,6 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     const navItems = [
         { label: "Theses", href: "/theses", icon: BookOpen },
         { label: "Papers", href: "/papers", icon: FileText },
-        { label: "Datasets", href: "/datasets", icon: Database },
         { label: "Models", href: "/models", icon: IconCube },
         { label: "Projects", href: "/projects", icon: Folder },
     ]
@@ -126,20 +136,31 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     // @ts-ignore
     return (
         <>
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/50 border-b border-border/50">
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
                 <div className="max-w-8xl mx-auto px-4 lg:px-8">
                     <div className="flex h-16 items-center justify-between gap-4">
-                        {/* Logo and Title */}
-                        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                                <BookOpen className="h-5 w-5 text-primary-foreground" />
-                            </div>
-                            <span className="text-base font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hidden sm:inline">
-                Research Hub
-              </span>
-                        </Link>
+                        {/* Sidebar Toggle & Logo */}
+                        <div className="flex items-center gap-4 flex-shrink-0">
+                            {pathname.startsWith("/student") || pathname.startsWith("/supervisor") || pathname.startsWith("/admin") ? (
+                                <button
+                                    onClick={() => toggle()}
+                                    className="p-2 hover:bg-muted/50 rounded-lg transition-colors border border-border/50 lg:hidden"
+                                    aria-label="Toggle Sidebar"
+                                >
+                                    <PanelLeft className="h-5 w-5" />
+                                </button>
+                            ) : null}
+                            <Link href="/" className="flex items-center gap-2">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-accent">
+                                    <BookOpen className="h-5 w-5 text-primary-foreground" />
+                                </div>
+                                <span className="text-base font-bold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent hidden md:inline">
+                                    Research Hub
+                                </span>
+                            </Link>
+                        </div>
 
-                        <div className="hidden md:flex flex-1" ref={searchRef}>
+                        <div className="hidden lg:flex flex-1" ref={searchRef}>
                             <form onSubmit={handleSearchSubmit} className="relative w-full">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                                 <input
@@ -200,7 +221,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
                         </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-1 ml-auto">
+                        <div className="hidden lg:flex items-center gap-1 ml-auto">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.href}
@@ -221,21 +242,22 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
                         <div className="flex items-center gap-2 md:gap-3">
                             <button
                                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:scale-105 transition-transform border-2 "
+                                className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:scale-105 transition-transform border-2 "
                             >
                                 {mounted && (theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />)}
-                                <span className="hidden md:inline text-xs">{mounted && (theme === "dark" ? "Light" : "Dark")}</span>
+                                <span className="hidden lg:inline text-xs">{mounted && (theme === "dark" ? "Light" : "Dark")}</span>
                             </button>
 
                             {/* Mobile menu button */}
                             <button
-                                className="md:hidden p-2 hover:scale-105 rounded-lg transition-transform"
+                                className="lg:hidden p-2 hover:scale-105 rounded-lg transition-transform"
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             >
                                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                             </button>
 
-                            <div className="hidden sm:flex items-center gap-2 md:gap-3">
+                            <div className="hidden lg:flex items-center gap-2 md:gap-3">
+                                {user && <NotificationsPopover />}
                                 <AuthButton user={user} />
                                 {user && <UserProfileDropdown user={user} />}
                             </div>
@@ -245,7 +267,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
 
                 {/* Mobile Navigation */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden border-t border-border/50 bg-background">
+                    <div className="lg:hidden border-t border-border/50 bg-background">
                         <div className="px-4 py-3 space-y-2">
                             {/* Mobile search bar */}
                             <div className="mb-4">

@@ -112,6 +112,7 @@ export async function getAllPublishedTheses(): Promise<ThesisWithAuthors[]> {
                                                    'file_url', COALESCE(tf.file_url, ''),
                                                    'file_type', tf.file_type,
                                                    'file_size', tf.file_size,
+                                                   'file_path', tf.file_path,
                                                    'resource_type', COALESCE(tf.resource_type, 'document'),
                                                    'external_url', tf.external_url,
                                                    'description', tf.description
@@ -401,6 +402,7 @@ export async function getThesisById(id: number): Promise<ThesisWithAuthors | nul
                                                    'file_url', COALESCE(tf.file_url, ''),
                                                    'file_type', tf.file_type,
                                                    'file_size', tf.file_size,
+                                                   'file_path', tf.file_path,
                                                    'resource_type', COALESCE(tf.resource_type, 'document'),
                                                    'external_url', tf.external_url,
                                                    'description', tf.description

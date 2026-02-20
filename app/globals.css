@@ -37,6 +37,11 @@
   --chart-4: oklch(0.6 0.1 200);
   --chart-5: oklch(0.48 0.12 160);
 
+  /* High-Contrast Nesting Tokens (Prism-style) */
+  --nest-base: oklch(0.92 0 0);    /* Layer 1: Darker base */
+  --nest-tray: oklch(0.96 0.01 0); /* Layer 2: Neutral grey tray */
+  --nest-active: var(--background); /* Layer 3: Pure active component */
+
   --radius: 0.5rem;
   --sidebar: oklch(0.99 0 0);
   --sidebar-foreground: oklch(0.15 0 0);
@@ -114,6 +119,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --width-8xl: 96rem;
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -169,11 +175,117 @@
         text-rendering: optimizeLegibility;
     }
 
+    /* Scoped GitHub-style compact UI for dashboards */
+    .compact-ui {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .compact-ui .text-sm {
+        font-size: 12.5px;
+    }
+
+    .compact-ui .text-xs {
+        font-size: 11px;
+    }
+
+    .compact-ui .text-base {
+        font-size: 13.5px;
+    }
+
+    /* Standardized max-width container for authenticated pages */
+    .content-container {
+        @apply max-w-[1536px] mx-auto w-full px-4 md:px-8;
+    }
+
     body {
         @apply bg-background text-foreground;
         overflow-x: hidden;
         overscroll-behavior-y: none;
+        line-height: 1.5;
     }
+
+    /* Modern Prism.js Theme for Code Editor */
+code[class*="language-"],
+pre[class*="language-"] {
+    @apply text-slate-800 dark:text-slate-200 font-mono text-sm leading-relaxed;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    line-height: 1.5;
+    tab-size: 4;
+    hyphens: none;
+}
+
+/* Modern Prism.js Theme for Code Editor - Optimized for Specificity */
+.editor-textarea .token.comment,
+.editor-textarea .token.prolog,
+.editor-textarea .token.doctype,
+.editor-textarea .token.cdata {
+    @apply !text-slate-400 dark:!text-slate-500 italic;
+}
+
+.editor-textarea .token.punctuation {
+    @apply !text-slate-400 dark:!text-slate-500;
+}
+
+.editor-textarea .token.namespace {
+    opacity: .7;
+}
+
+.editor-textarea .token.property,
+.editor-textarea .token.tag,
+.editor-textarea .token.boolean,
+.editor-textarea .token.number,
+.editor-textarea .token.constant,
+.editor-textarea .token.symbol,
+.editor-textarea .token.deleted {
+    @apply !text-emerald-500 dark:!text-emerald-400;
+}
+
+.editor-textarea .token.selector,
+.editor-textarea .token.attr-name,
+.editor-textarea .token.string,
+.editor-textarea .token.char,
+.editor-textarea .token.builtin,
+.editor-textarea .token.inserted {
+    @apply !text-emerald-600 dark:!text-emerald-400;
+}
+
+.editor-textarea .token.operator,
+.editor-textarea .token.entity,
+.editor-textarea .token.url,
+.editor-textarea .language-css .token.string,
+.editor-textarea .style .token.string {
+    @apply !text-teal-600 dark:!text-teal-400;
+}
+
+.editor-textarea .token.atrule,
+.editor-textarea .token.attr-value,
+.editor-textarea .token.keyword {
+    @apply !text-teal-500 dark:!text-teal-300 font-bold;
+}
+
+.editor-textarea .token.function,
+.editor-textarea .token.class-name {
+    @apply !text-cyan-600 dark:!text-cyan-400;
+}
+
+.editor-textarea .token.regex,
+.editor-textarea .token.important,
+.editor-textarea .token.variable {
+    @apply !text-amber-600 dark:!text-amber-400;
+}
+
+.editor-textarea .token.important,
+.editor-textarea .token.bold {
+    font-weight: bold;
+}
+.editor-textarea .token.italic {
+    font-style: italic;
+}
 
     /* Optimize GPU layers only for hero elements being animated by GSAP */
     .hero-section {

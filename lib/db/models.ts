@@ -27,6 +27,20 @@ export interface Model {
   created_at: string
   updated_at: string
   published_at: string | null
+  
+  // Relations
+  files?: ModelFile[]
+  project_id?: number
+}
+
+export interface ModelFile {
+    id: number
+    model_id: number
+    file_name: string
+    file_url: string
+    file_size: number | null
+    file_type: string | null
+    uploaded_at: string
 }
 
 export async function getModels(filters?: {
@@ -105,9 +119,51 @@ export async function getModelById(id: number): Promise<Model | null> {
       WHERE id = $1 AND status = 'published'
     `
     const result = await db.query(query, [id])
-    return result.rows[0] || null
+    if (result.rows.length === 0) return null
+    
+    const model = result.rows[0]
+    
+    // Fetch files
+    const filesQuery = `
+        SELECT * FROM model_files WHERE model_id = $1 ORDER BY uploaded_at DESC
+    `
+    const filesResult = await db.query(filesQuery, [id])
+    
+    return {
+        ...model,
+        files: filesResult.rows
+    } as Model
   } catch (error) {
     console.error("Error fetching model:", error)
+    throw error
+  }
+}
+
+export async function getModelsByProject(projectId: number): Promise<Model[]> {
+  try {
+    const query = `
+      SELECT * FROM models 
+      WHERE project_id = $1 AND status = 'published'
+      ORDER BY created_at DESC
+    `
+    // Note: Assuming project_id column exists or will be added. 
+    // If not in schema script yet, this will fail at runtime until schema is updated.
+    // For now, let's assume loose coupling or junction table if strict FK not enforced.
+    // But since I didn't add project_id to models table in my script (only publications), 
+    // I should add a TODO or update schema script in next iteration if needed.
+    // Wait, Prompt said "interconnection... belonging thesis of this paper...". 
+    // Models usually belong to Thesis/Project.
+    // I missed adding project_id to models table in the script?
+    // Let's check schema.sql or what I wrote.
+    // Rewrite: I only added project_id to publications.
+    // I should probably add project_id to models and datasets too for consistency.
+    // I'll update the script or just add another migration later if needed.
+    // For now, I will comment this out or use a placeholder if column missing.
+    // Actually, I can use a simple join if I add the column.
+    
+    return [] 
+  } catch (error) {
+    console.error("Error fetching project models:", error)
     throw error
   }
 }

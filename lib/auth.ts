@@ -36,21 +36,23 @@ export interface User {
   email: string
   full_name: string
   role: "student" | "supervisor" | "admin"
+  password_hash?: string
   student_id?: string
   department?: string
   specialization?: string
+  profile_pic?: string | null
   is_approved: boolean
   created_at: Date
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const results = await sql`SELECT * FROM users WHERE email = ${email}`
-  return results[0] || null
+  return (results[0] as User) || null
 }
 
 export async function getUserById(id: number): Promise<User | null> {
   const results = await sql`SELECT * FROM users WHERE id = ${id}`
-  return results[0] || null
+  return (results[0] as User) || null
 }
 
 export async function createUser(userData: {
@@ -70,7 +72,7 @@ export async function createUser(userData: {
     RETURNING *
   `
 
-  return results[0]
+  return results[0] as User
 }
 
 export async function createSession(userId: number): Promise<string> {
@@ -90,7 +92,7 @@ export async function verifySession(token: string): Promise<User | null> {
       WHERE s.token = ${token} AND s.expires_at > NOW()
       LIMIT 1
     `
-    return results[0] || null
+    return (results[0] as User) || null
   } catch (error) {
     console.error("[Auth] Session verification error:", error)
     return null

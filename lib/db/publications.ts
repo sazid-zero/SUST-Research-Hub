@@ -8,6 +8,7 @@ export interface Publication {
     title: string
     journal_name: string
     publication_type: string
+    paper_subtype?: string // journal, conference
     doi?: string
     isbn?: string
     issn?: string
@@ -24,6 +25,7 @@ export interface Publication {
     abstract?: string
     keywords?: string[]
     status: string
+    thesis_department?: string
     created_at: string
     updated_at: string
     authors?: PublicationAuthor[]
@@ -35,9 +37,9 @@ export interface Publication {
     project?: {
         id: number
         title: string
-        slug: string
         status: string
     }
+    project_id?: number
     files?: PublicationFile[]
 }
 
@@ -49,6 +51,8 @@ export interface PublicationAuthor {
     affiliation?: string
     corresponding_author: boolean
     user_id?: number
+    student_id?: string
+    user_role?: string
     profile_pic?: string // Added profile_pic field
 }
 
@@ -57,7 +61,7 @@ export interface PublicationFile {
     publication_id: number
     file_name: string
     file_size?: number
-    resource_type: "code" | "dataset" | "model" | "supplementary"
+    resource_type: "code" | "dataset" | "model" | "supplementary" | "result"
     file_url: string
     description?: string
     uploaded_at: string
@@ -78,7 +82,9 @@ export async function getPublicationsByThesisId(thesisId: number): Promise<Publi
                         pa.*,
                         u.id as user_id,
                         u.full_name as user_full_name,
-                        u.profile_pic
+                        u.profile_pic,
+                        u.role as user_role,
+                        u.student_id
                     FROM publication_authors pa
                              LEFT JOIN users u ON LOWER(TRIM(pa.author_name)) = LOWER(TRIM(u.full_name))
                     WHERE pa.publication_id = ${pub.id}
@@ -101,8 +107,11 @@ export async function getPublicationsByThesisId(thesisId: number): Promise<Publi
 export async function getAllPublications(): Promise<Publication[]> {
     try {
         const publications = await sql`
-            SELECT * FROM publications
-            ORDER BY published_date DESC, year DESC
+            SELECT p.*, t.department as thesis_department
+            FROM publications p
+            LEFT JOIN theses t ON p.thesis_id = t.id
+            WHERE p.status = 'published'
+            ORDER BY p.published_date DESC, p.year DESC
         `
 
         const publicationsWithAuthors = await Promise.all(
@@ -112,7 +121,9 @@ export async function getAllPublications(): Promise<Publication[]> {
                         pa.*,
                         u.id as user_id,
                         u.full_name as user_full_name,
-                        u.profile_pic
+                        u.profile_pic,
+                        u.role as user_role,
+                        u.student_id
                     FROM publication_authors pa
                              LEFT JOIN users u ON LOWER(TRIM(pa.author_name)) = LOWER(TRIM(u.full_name))
                     WHERE pa.publication_id = ${pub.id}
@@ -132,16 +143,20 @@ export async function getAllPublications(): Promise<Publication[]> {
     }
 }
 
-export async function getPublicationById(publicationId: number) {
+export async function getPublicationById(publicationId: number): Promise<Publication | null> {
     try {
         const publication = await sql`
             SELECT
                 p.*,
                 t.id as thesis_id,
                 t.title as thesis_title,
-                t.status as thesis_status
+                t.status as thesis_status,
+                pr.id as pr_id,
+                pr.title as pr_title,
+                pr.status as pr_status
             FROM publications p
-                     LEFT JOIN theses t ON p.thesis_id = t.id
+            LEFT JOIN theses t ON p.thesis_id = t.id
+            LEFT JOIN projects pr ON p.project_id = pr.id
             WHERE p.id = ${publicationId}
         `
 
@@ -180,11 +195,46 @@ export async function getPublicationById(publicationId: number) {
                     title: pub.thesis_title,
                     status: pub.thesis_status,
                 }
-                : null,
-            project: null,
-        }
+                : undefined,
+            project: pub.pr_id
+                ? {
+                    id: pub.pr_id,
+                    title: pub.pr_title,
+                    status: pub.pr_status,
+                }
+                : undefined,
+        } as unknown as Publication
     } catch (error) {
         console.error("[v0] Error fetching publication by ID:", error)
         return null
+    }
+}
+export async function getPublicationsByUserId(userId: number): Promise<Publication[]> {
+    try {
+        const result = await sql`
+            SELECT p.* 
+            FROM publications p
+            JOIN publication_authors pa ON p.id = pa.publication_id
+            WHERE pa.user_id = ${userId}
+            ORDER BY p.created_at DESC
+        `
+        
+        // If no results by ID, try name matching as fallback (for legacy data)
+        if (result.length === 0) {
+             const fallback = await sql`
+                SELECT p.* 
+                FROM publications p
+                JOIN publication_authors pa ON p.id = pa.publication_id
+                JOIN users u ON LOWER(TRIM(pa.author_name)) = LOWER(TRIM(u.full_name))
+                WHERE u.id = ${userId}
+                ORDER BY p.created_at DESC
+            `
+            return fallback as Publication[]
+        }
+
+        return result as Publication[]
+    } catch (error) {
+        console.error("[v0] Error fetching user publications:", error)
+        return []
     }
 }

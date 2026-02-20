@@ -1,128 +1,113 @@
-"use client"
+"use server"
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { getCurrentUser } from "@/lib/auth"
+import { getNotifications } from "@/app/actions/notifications"
+import { Bell, Clock, Info, CheckCircle2, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Bell, CheckCircle, AlertCircle, Info, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { formatDistanceToNow } from "date-fns"
+import { redirect } from "next/navigation"
 
-interface Notification {
-  id: string
-  type: "success" | "warning" | "info"
-  title: string
-  message: string
-  timestamp: string
-  read: boolean
-}
+export default async function NotificationsPage() {
+    const user = await getCurrentUser()
+    if (!user) redirect("/login")
 
-export default function NotificationsPage() {
-  const notifications: Notification[] = [
-    {
-      id: "1",
-      type: "success",
-      title: "Thesis Approved",
-      message: 'Your thesis "Machine Learning in Healthcare" has been approved and published.',
-      timestamp: "2 hours ago",
-      read: false,
-    },
-    {
-      id: "2",
-      type: "warning",
-      title: "Changes Requested",
-      message: "Supervisor requested changes to the methodology section of your thesis.",
-      timestamp: "1 day ago",
-      read: false,
-    },
-    {
-      id: "3",
-      type: "info",
-      title: "New Thesis Submitted",
-      message: 'A new thesis "AI in Education" has been submitted for your review.',
-      timestamp: "2 days ago",
-      read: true,
-    },
-    {
-      id: "4",
-      type: "success",
-      title: "Submission Received",
-      message: "Your thesis submission has been received and is pending review.",
-      timestamp: "3 days ago",
-      read: true,
-    },
-    {
-      id: "5",
-      type: "info",
-      title: "System Update",
-      message: "The repository system has been updated with new features.",
-      timestamp: "1 week ago",
-      read: true,
-    },
-  ]
+    const notifications = await getNotifications()
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "success":
-        return <CheckCircle className="h-5 w-5 text-green-600" />
-      case "warning":
-        return <AlertCircle className="h-5 w-5 text-yellow-600" />
-      case "info":
-        return <Info className="h-5 w-5 text-blue-600" />
-      default:
-        return <Bell className="h-5 w-5 text-muted-foreground" />
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case 'supervision_request': return <AlertCircle className="w-5 h-5 text-amber-500" />
+            case 'supervision_accept': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            case 'invite': return <Info className="w-5 h-5 text-blue-500" />
+            case 'feedback': return <AlertCircle className="w-5 h-5 text-indigo-500" />
+            default: return <Bell className="w-5 h-5 text-slate-400" />
+        }
     }
-  }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
-            <Button variant="outline" size="sm">
-              Mark all as read
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Notifications List */}
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-4">
-          {notifications.map((notification) => (
-            <Card
-              key={notification.id}
-              className={`border-border p-6 flex items-start gap-4 hover:shadow-md transition-shadow cursor-pointer ${
-                !notification.read ? "bg-primary/5" : "bg-card"
-              }`}
-            >
-              <div className="flex-shrink-0 mt-1">{getIcon(notification.type)}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-foreground">{notification.title}</h3>
-                  {!notification.read && <Badge className="bg-primary text-primary-foreground">New</Badge>}
+    return (
+        <div className="p-6 lg:p-12">
+            <div className="max-w-4xl mx-auto space-y-8">
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Notification History</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Manage and view all your research alerts and invitations.</p>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">{notification.message}</p>
-                <p className="text-xs text-muted-foreground">{notification.timestamp}</p>
-              </div>
-              <Button variant="ghost" size="sm" className="flex-shrink-0">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </Card>
-          ))}
-        </div>
 
-        {notifications.length === 0 && (
-          <div className="text-center py-12">
-            <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No notifications yet</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+                <div className="grid gap-4">
+                    {notifications.length > 0 ? (
+                        notifications.map((n) => (
+                            <Card key={n.id} className={`bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 hover:shadow-md transition-all ${!n.is_read ? 'border-l-4 border-l-indigo-500' : ''}`}>
+                                <CardContent className="p-6">
+                                    <div className="flex gap-4">
+                                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#111722] border border-slate-100 dark:border-slate-800">
+                                            {getTypeIcon(n.type)}
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex items-start justify-between">
+                                                <h3 className={`text-base leading-tight ${!n.is_read ? 'font-bold text-indigo-600 dark:text-indigo-400' : 'font-semibold text-slate-900 dark:text-slate-100'}`}>
+                                                    {n.title}
+                                                </h3>
+                                                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+                                                {n.message}
+                                            </p>
+                                            <div className="flex items-center gap-3 pt-3">
+                                                <Badge variant="secondary" className="text-[9px] uppercase tracking-tighter h-5 px-2 bg-slate-100 dark:bg-slate-800">
+                                                    {n.type.replace('_', ' ')}
+                                                </Badge>
+                                                {n.link && (
+                                                    <Link href={n.link}>
+                                                        <Button size="sm" variant="link" className="h-auto p-0 text-indigo-500 font-bold text-xs hover:text-indigo-600 transition-colors">
+                                                            Review Details
+                                                        </Button>
+                                                    </Link>
+                                                )}
+
+                                                {n.type === 'invite' && (
+                                                    <div className="flex gap-2 ml-auto">
+                                                        <form action={async () => {
+                                                            "use server"
+                                                            const { acceptWorkspaceInvitation } = await import("@/app/actions/workspace")
+                                                            await acceptWorkspaceInvitation(n.source_id, n.source_type)
+                                                        }}>
+                                                            <Button size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 rounded-xl shadow-lg shadow-emerald-500/20">
+                                                                Accept
+                                                            </Button>
+                                                        </form>
+                                                        <form action={async () => {
+                                                            "use server"
+                                                            const { declineWorkspaceInvitation } = await import("@/app/actions/workspace")
+                                                            await declineWorkspaceInvitation(n.source_id, n.source_type)
+                                                        }}>
+                                                            <Button size="sm" variant="outline" className="h-8 border-rose-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950 font-bold px-4 rounded-xl">
+                                                                Decline
+                                                            </Button>
+                                                        </form>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))
+                    ) : (
+                        <Card className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 border-dashed py-20">
+                            <CardContent className="flex flex-col items-center justify-center text-slate-400 gap-4">
+                                <Bell className="w-12 h-12 opacity-10" />
+                                <div className="text-center">
+                                    <p className="text-sm font-bold">Safe and Sound</p>
+                                    <p className="text-xs">You don't have any notifications at the moment.</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
 }

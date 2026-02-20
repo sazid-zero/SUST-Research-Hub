@@ -1,15 +1,24 @@
 import type React from "react"
 import { SupervisorSidebar } from "@/components/supervisor-sidebar"
+import { GlobalNavbar } from "@/components/global-navbar"
+import { getCurrentUser } from "@/app/actions/auth"
 
-export default function SupervisorLayout({
+export default async function SupervisorLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const user = await getCurrentUser()
+  
   return (
-    <div className="flex h-screen bg-background">
-      <SupervisorSidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
+    <div className="min-h-screen bg-background compact-ui">
+      <GlobalNavbar user={user} />
+      <div className="flex pt-16 lg:pt-0">
+        <SupervisorSidebar />
+        <main className="flex-1 w-full lg:pl-64">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

@@ -21,20 +21,34 @@ export const viewport = {
     userScalable: true,
 }
 
-export default function RootLayout({
+import { SidebarProvider } from "@/components/sidebar-context"
+import { getSystemSettings } from "@/app/actions/admin"
+import { getCurrentUser } from "@/lib/auth"
+import { MaintenanceGuard } from "@/components/maintenance-guard"
+
+export default async function RootLayout({
                                        children,
                                    }: {
     children: React.ReactNode
 }) {
+    const settingsRes = await getSystemSettings()
+    const user = await getCurrentUser()
+    
+    const isMaintenanceMode = settingsRes.success && settingsRes.settings?.maintenanceMode === true
+    const isAdmin = user?.role === "admin"
+
     return (
         <html lang="en" suppressHydrationWarning>
         <body className={`min-h-screen antialiased ${geist.className}`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-            <GlobalSmoothScroll
-            >
-                {children}
-                <Toaster position="top-center" richColors />
-            </GlobalSmoothScroll>
+            <SidebarProvider>
+                <GlobalSmoothScroll>
+                    <MaintenanceGuard isMaintenanceMode={isMaintenanceMode} isAdmin={isAdmin}>
+                        {children}
+                    </MaintenanceGuard>
+                    <Toaster position="top-center" richColors />
+                </GlobalSmoothScroll>
+            </SidebarProvider>
         </ThemeProvider>
         <Analytics />
         </body>

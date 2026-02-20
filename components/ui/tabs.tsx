@@ -26,7 +26,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        'bg-muted text-muted-foreground inline-flex h-10 w-fit items-center justify-center rounded-xl p-[3px]',
+        'bg-muted/50 dark:bg-slate-800/40 backdrop-blur-sm text-muted-foreground inline-flex h-11 w-fit items-center justify-center rounded-2xl p-1.5 border border-border/40',
         className,
       )}
       {...props}
@@ -42,7 +42,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-background dark:data-[state=active]:backdrop-blur:sm data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-white/10 text-muted-foreground dark:text-muted-foreground inline-flex h-[calc(100%-2px)] flex-1 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:bg-background dark:data-[state=active]:bg-slate-700/80 data-[state=active]:text-primary dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-lg dark:data-[state=active]:shadow-blue-500/10 data-[state=active]:border-border/50 focus-visible:ring-ring/50 text-muted-foreground dark:text-slate-400 inline-flex h-full items-center justify-center gap-2 rounded-xl border border-transparent px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all duration-300 hover:text-foreground disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 leading-none active:scale-95",
         className,
       )}
       {...props}

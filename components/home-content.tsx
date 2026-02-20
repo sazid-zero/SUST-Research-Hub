@@ -17,23 +17,39 @@ import {
     BarChart3,
     Mail,
     ArrowRight,
+    Users,
 } from "lucide-react"
 import {useState, useEffect, useRef} from "react"
 import { useInView } from "react-intersection-observer"
 import { useTheme } from "next-themes"
-import type { Thesis, User } from "@/lib/data/theses"
+import type { Thesis } from "@/lib/data/theses"
+import type { User } from "@/lib/db/users"
 import { GlobalNavbar } from "@/components/global-navbar"
-import { AnimatedParticles, RepositoryShowcase } from "@/components/repository-showcase"
+import { RepositoryShowcase } from "@/components/repository-showcase"
+import { TechStackShowcase } from "@/components/tech-stack-showcase"
 import { FeaturesSection } from "@/components/features-section"
 
+import { getShowcaseStats, ShowcaseStats } from "@/app/actions/stats"
+
 interface HomeContentProps {
-    user: User | null
+    user: any // Allow flexible user type to avoid auth discrepancy
     allTheses: Thesis[]
     recentTheses: Thesis[]
+    allProjects: any[]
+    allPublications: any[]
     currentRecentIndex: number
+    stats: ShowcaseStats | null
 }
 
-export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }: HomeContentProps) {
+export function HomeContent({ 
+    user, 
+    allTheses, 
+    recentTheses, 
+    allProjects, 
+    allPublications, 
+    currentRecentIndex, 
+    stats 
+}: HomeContentProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [featuredIndex, setFeaturedIndex] = useState(0)
@@ -62,90 +78,127 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
         return () => window.removeEventListener("resize", handleResize)
     }, [])
 
+    // Normalize and combine all research items
+    const combinedResearch = [
+        ...allTheses.map((t: any) => ({ 
+            ...t, 
+            type: 'thesis' as const, 
+            displayType: 'Thesis',
+            href: `/thesis/${t.id}`
+        })),
+        ...allProjects.map((p: any) => ({ 
+            ...p, 
+            type: 'project' as const, 
+            displayType: 'Project',
+            href: `/project/${p.id}`,
+            // Project fields mapping
+            abstract: p.description,
+            year: p.start_date ? new Date(p.start_date).getFullYear() : 2024,
+            downloads: 0,
+            views: p.views || 0,
+            authors: p.team?.map((m: any) => ({ full_name: m.full_name })) || []
+        })),
+        ...allPublications.map((pub: any) => ({ 
+            ...pub, 
+            type: 'publication' as const, 
+            displayType: 'Publication',
+            href: `/paper/${pub.id}`,
+            // Publication fields mapping
+            authors: pub.authors?.map((a: any) => ({ ...a, full_name: a.user_full_name || a.author_name || a.full_name })) || [],
+            department: pub.thesis_department || pub.thesis?.department || 'Research',
+            downloads: pub.citations || 0,
+            views: 0
+        }))
+    ].sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at || a.published_date || a.start_date || a.year || 0).getTime()
+        const dateB = new Date(b.created_at || b.published_date || b.start_date || b.year || 0).getTime()
+        return dateB - dateA
+    })
+
     const researchCategories = [
-        { id: "all", label: "All Fields", icon: BookOpen, count: allTheses.length },
+        { id: "all", label: "All Fields", icon: BookOpen, count: combinedResearch.length },
         {
             id: "ai",
             label: "Artificial Intelligence",
             icon: Zap,
-            count: allTheses.filter((t) =>
-                t.keywords.some((k) => k.toLowerCase().includes("ai") || k.toLowerCase().includes("machine learning")),
+            count: combinedResearch.filter((t: any) =>
+                t.keywords?.some((k: string) => k.toLowerCase().includes("ai") || k.toLowerCase().includes("machine learning")),
             ).length,
         },
         {
             id: "biotech",
             label: "Biotechnology",
             icon: Microscope,
-            count: allTheses.filter(
-                (t) =>
-                    t.department.toLowerCase().includes("biochemistry") ||
-                    t.keywords.some((k) => k.toLowerCase().includes("biomedical")),
+            count: combinedResearch.filter(
+                (t: any) =>
+                    t.department?.toLowerCase().includes("biochemistry") ||
+                    t.keywords?.some((k: string) => k.toLowerCase().includes("biomedical")),
             ).length,
         },
         {
             id: "physics",
             label: "Physics and Mathematics",
             icon: TrendingUp,
-            count: allTheses.filter(
-                (t) => t.department.toLowerCase().includes("physics") || t.department.toLowerCase().includes("mathematics"),
+            count: combinedResearch.filter(
+                (t: any) => t.department?.toLowerCase().includes("physics") || t.department?.toLowerCase().includes("mathematics"),
             ).length,
         },
         {
             id: "chemistry",
             label: "Chemistry and Material Science",
             icon: Microscope,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("chemistry")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("chemistry")).length,
         },
         {
             id: "environmental",
             label: "Environmental Science",
             icon: TrendingUp,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("environmental")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("environmental")).length,
         },
         {
             id: "robotics",
             label: "Robotics and Automation",
             icon: Github,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("robotics")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("robotics")).length,
         },
         {
             id: "economics",
             label: "Economics",
             icon: BarChart3,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("economics")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("economics")).length,
         },
         {
             id: "agriculture",
             label: "Agriculture and Food Technology",
             icon: Microscope,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("agriculture")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("agriculture")).length,
         },
         {
             id: "cs",
             label: "Computer Science",
             icon: Github,
-            count: allTheses.filter((t) => t.department.toLowerCase().includes("computer science")).length,
+            count: combinedResearch.filter((t: any) => t.department?.toLowerCase().includes("computer science")).length,
         },
     ]
 
     const filteredResearch =
         selectedCategory === "all"
-            ? allTheses
-            : allTheses.filter((r) => {
-                const lowerDept = r.department.toLowerCase()
-                const lowerKeywords = r.keywords.map((k) => k.toLowerCase())
+            ? combinedResearch
+            : combinedResearch.filter((r: any) => {
+                const lowerDept = r.department?.toLowerCase() || ""
+                const lowerKeywords = r.keywords?.map((k: string) => k.toLowerCase()) || []
 
                 switch (selectedCategory) {
                     case "cs":
                         return (
                             lowerDept.includes("computer science") ||
                             lowerKeywords.some(
-                                (k) => k.includes("machine learning") || k.includes("ai") || k.includes("blockchain"),
+                                (k: string) => k.includes("machine learning") || k.includes("ai") || k.includes("blockchain"),
                             )
                         )
                     case "ai":
                         return lowerKeywords.some(
-                            (k) =>
+                            (k: string) =>
                                 k.includes("machine learning") ||
                                 k.includes("ai") ||
                                 k.includes("neural") ||
@@ -154,40 +207,40 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     case "biotech":
                         return (
                             lowerDept.includes("biochemistry") ||
-                            lowerKeywords.some((k) => k.includes("biomedical") || k.includes("protein") || k.includes("healthcare"))
+                            lowerKeywords.some((k: string) => k.includes("biomedical") || k.includes("protein") || k.includes("healthcare"))
                         )
                     case "physics":
                         return (
                             lowerDept.includes("physics") ||
                             lowerDept.includes("mathematics") ||
-                            lowerKeywords.some((k) => k.includes("quantum") || k.includes("mathematics") || k.includes("physics"))
+                            lowerKeywords.some((k: string) => k.includes("quantum") || k.includes("mathematics") || k.includes("physics"))
                         )
                     case "chemistry":
                         return (
                             lowerDept.includes("chemistry") ||
                             lowerKeywords.some(
-                                (k) => k.includes("chemistry") || k.includes("nanomaterials") || k.includes("catalysis"),
+                                (k: string) => k.includes("chemistry") || k.includes("nanomaterials") || k.includes("catalysis"),
                             )
                         )
                     case "environmental":
                         return (
                             lowerDept.includes("environmental") ||
                             lowerKeywords.some(
-                                (k) => k.includes("climate") || k.includes("environmental") || k.includes("sustainability"),
+                                (k: string) => k.includes("climate") || k.includes("environmental") || k.includes("sustainability"),
                             )
                         )
                     case "robotics":
                         return (
                             lowerDept.includes("robotics") ||
                             lowerKeywords.some(
-                                (k) => k.includes("robotics") || k.includes("automation") || k.includes("autonomous"),
+                                (k: string) => k.includes("robotics") || k.includes("automation") || k.includes("autonomous"),
                             )
                         )
                     case "economics":
                         return (
                             lowerDept.includes("economics") ||
                             lowerKeywords.some(
-                                (k) => k.includes("economics") || k.includes("microfinance") || k.includes("economic"),
+                                (k: string) => k.includes("economics") || k.includes("microfinance") || k.includes("economic"),
                             )
                         )
                     case "agriculture":
@@ -195,7 +248,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                             lowerDept.includes("agriculture") ||
                             lowerDept.includes("food technology") ||
                             lowerKeywords.some(
-                                (k) => k.includes("agriculture") || k.includes("food") || k.includes("farming") || k.includes("crop"),
+                                (k: string) => k.includes("agriculture") || k.includes("food") || k.includes("farming") || k.includes("crop"),
                             )
                         )
                     default:
@@ -203,16 +256,22 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 }
             })
 
+    const allRecentCombined = [...combinedResearch].sort((a, b) => {
+        const dateA = new Date(a.created_at || a.published_date || a.start_date || a.year || 0).getTime()
+        const dateB = new Date(b.created_at || b.published_date || b.start_date || b.year || 0).getTime()
+        return dateB - dateA
+    })
+
     const displayedCategoryResearchMobile = filteredResearch.slice(0, 4)
     const displayedCategoryResearchDesktop = filteredResearch.slice(0, 4)
-    const recentResearch = recentTheses.slice(currentRecentIndex, currentRecentIndex + 3)
+    const recentResearch = allRecentCombined.slice(currentRecentIndex, currentRecentIndex + 3)
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setFeaturedIndex((prev) => (prev + 3 >= recentTheses.length ? 0 : prev + 3))
+            setFeaturedIndex((prev) => (prev + 3 >= allRecentCombined.length ? 0 : prev + 3))
         }, 5000) // Increased for less distraction
         return () => clearInterval(interval)
-    }, [recentTheses.length])
+    }, [allRecentCombined.length])
 
 
     // Users can manually click categories instead
@@ -320,7 +379,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                             </div>
                             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-balance leading-tight text-foreground">
                                 Discover Academic
-                                <span className="text-2xl block bg-gradient-to-r from-primary via-accent to-blue-500 bg-clip-text text-transparent">
+                                <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl block bg-gradient-to-r from-primary via-accent to-blue-500 bg-clip-text text-transparent">
                   Innovation
                 </span>
                             </h1>
@@ -336,7 +395,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                 <Link href={getDashboardRoute(user)} className="w-full sm:w-auto">
                                     <Button
                                         size="lg"
-                                        className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 hover:scale-105 transition-transform text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
+                                        className="w-full bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-white text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
                                     >
                                         Start Publishing
                                         <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
@@ -356,13 +415,13 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                     </div>
 
                     {/* Right: Recent Research — GSAP Target */}
-                    <div className="hero-recent-cards w-full lg:w-1/2 h-full flex flex-col justify-center py-4 sm:py-6 md:py-8 lg:py-0">
+                    <div className="hero-recent-cards w-full lg:w-1/2 h-full flex flex-col justify-center py-4 sm:py-6 md:py-8 lg:py-0 lg:pt-20">
                         <div className="space-y-2 sm:space-y-3 md:space-y-5 relative">
                             <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-foreground">Recent Research</h3>
-                            {recentResearch.map((research, idx) => (
+                            {recentResearch.map((research: any, idx) => (
                                 <Link
                                     key={research.id}
-                                    href={`/thesis/${research.id}`}
+                                    href={research.href}
                                     className="block relative pointer-events-auto"
                                     prefetch={true}
                                 >
@@ -377,23 +436,36 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                         {/* Card content */}
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-[8px] sm:text-xs md:text-xs font-semibold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="inline-block px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[8px] sm:text-[10px] font-medium">
+                                                      {research.year}
+                                                    </span>
+                                                    <span className="inline-block px-1.5 py-0.5 rounded bg-accent/10 text-accent text-[8px] sm:text-[10px] font-semibold">
+                                                      {research.displayType}
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-[10px] sm:text-xs md:text-sm font-bold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
                                                     {research.title}
                                                 </h4>
-                                                <p className="text-xs md:text-xs text-muted-foreground mt-1 line-clamp-1">
-                                                    {research.authors?.map((author: any, aIdx: number) => (
-                                                        <span key={author.id || aIdx}>
-                              {author.full_name}
-                                                            {aIdx < research.authors.length - 1 && ", "}
-                            </span>
-                                                    )) || research.author}
-                                                </p>
                                             </div>
-                                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0" />
+                                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-primary/60 group-hover:text-primary transition-colors shrink-0" />
                                         </div>
                                         <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
-                                            <Eye className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3" />
-                                            {research.views.toLocaleString()} views
+                                            <Users className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 text-primary/60 shrink-0" />
+                                            <span className="font-medium truncate flex-1 min-w-0">
+                                                {research.authors && research.authors.length > 0 ? (
+                                                    research.authors.map((author: any, aIdx: number) => (
+                                                        <span key={author.id || aIdx}>
+                                                            {author.full_name}
+                                                            {aIdx < research.authors!.length - 1 && ", "}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    research.author
+                                                )}
+                                            </span>
+                                            <span className="mx-0.5 sm:mx-1 text-muted-foreground/30 shrink-0">•</span>
+                                            <span className="shrink-0 text-[8px] sm:text-[9px] md:text-[10px] bg-muted/50 px-1.5 py-0.5 rounded uppercase tracking-wider">{research.department}</span>
                                         </div>
                                     </div>
                                 </Link>
@@ -507,15 +579,20 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                 <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-2">
                                     {/* Mobile view - 2 items */}
                                     <div className="md:hidden contents">
-                                        {displayedCategoryResearchMobile.map((research) => (
-                                            <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
+                                        {displayedCategoryResearchMobile.map((research: any) => (
+                                            <Link key={research.id} href={research.href} className="block group">
                                                 <Card className="relative overflow-hidden border-border bg-card p-2 md:p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
                                                     <div className="space-y-1 sm:space-y-1.5 md:space-y-3">
                                                         <div>
                                                             <div className="flex items-start justify-between mb-0.5 sm:mb-1 md:mb-1.5">
-                                <span className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] sm:text-[10px] md:text-xs font-medium">
-                                  {research.year}
-                                </span>
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    <span className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] sm:text-[10px] md:text-xs font-medium">
+                                                                      {research.year}
+                                                                    </span>
+                                                                    <span className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded bg-accent/10 text-accent text-[9px] sm:text-[10px] md:text-xs font-semibold">
+                                                                      {research.displayType}
+                                                                    </span>
+                                                                </div>
                                                                 <div className="flex items-center gap-0.5 sm:gap-1 text-muted-foreground">
                                                                     <Star className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3.5 md:w-3.5 fill-primary text-primary" />
                                                                     <span className="text-[9px] sm:text-[10px] md:text-xs font-medium">{research.downloads}</span>
@@ -528,12 +605,16 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
 
                                                         <div className="space-y-0.5">
                                                             <p className="text-xs text-foreground font-medium line-clamp-1">
-                                                                {research.authors?.map((author: any, idx: number) => (
-                                                                    <span className="text-xs" key={author.id || idx}>
-                                    {author.full_name}
-                                                                        {idx < research.authors.length - 1 && ", "}
-                                  </span>
-                                                                )) || research.author}
+                                                                {research.authors && research.authors.length > 0 ? (
+                                                                    research.authors.map((author: any, idx: number) => (
+                                                                        <span className="text-xs" key={author.id || idx}>
+                                                                            {author.full_name}
+                                                                            {idx < research.authors!.length - 1 && ", "}
+                                                                        </span>
+                                                                    ))
+                                                                ) : (
+                                                                    research.author
+                                                                )}
                                                             </p>
                                                             <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-clamp-1">{research.department}</p>
                                                         </div>
@@ -541,7 +622,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                                         <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
 
                                                         <div className="flex flex-wrap gap-0.5 sm:gap-1 md:gap-1.5 pt-0.5 sm:pt-1 md:pt-1.5">
-                                                            {research.keywords.slice(0, 2).map((keyword) => (
+                                                            {research.keywords?.slice(0, 2).map((keyword: string) => (
                                                                 <span
                                                                     key={keyword}
                                                                     className="inline-block px-1 sm:px-1.5 md:px-2 py-0.5 rounded-md bg-primary/5 text-primary text-[8px] sm:text-[9px] md:text-xs"
@@ -558,15 +639,20 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
 
                                     {/* Desktop view - 4 items */}
                                     <div className="hidden md:contents">
-                                        {displayedCategoryResearchDesktop.map((research) => (
-                                            <Link key={research.id} href={`/thesis/${research.id}`} className="block group">
+                                        {displayedCategoryResearchDesktop.map((research: any) => (
+                                            <Link key={research.id} href={research.href} className="block group">
                                                 <Card className="relative overflow-hidden border-border bg-card p-4 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10 cursor-pointer h-full backdrop-blur-sm">
                                                     <div className="space-y-3">
                                                         <div>
                                                             <div className="flex items-start justify-between mb-1.5">
-                                <span className="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
-                                  {research.year}
-                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="inline-block px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
+                                                                      {research.year}
+                                                                    </span>
+                                                                    <span className="inline-block px-2 py-0.5 rounded bg-accent/10 text-accent text-xs font-semibold">
+                                                                      {research.displayType}
+                                                                    </span>
+                                                                </div>
                                                                 <div className="flex items-center gap-1 text-muted-foreground">
                                                                     <Star className="h-3.5 w-3.5 fill-primary text-primary" />
                                                                     <span className="text-xs font-medium">{research.downloads}</span>
@@ -579,20 +665,24 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
 
                                                         <div className="space-y-0.5">
                                                             <p className="text-xs text-foreground font-medium line-clamp-1">
-                                                                {research.authors?.map((author: any, idx: number) => (
-                                                                    <span key={author.id || idx}>
-                                    {author.full_name}
-                                                                        {idx < research.authors.length - 1 && ", "}
-                                  </span>
-                                                                )) || research.author}
+                                                                {research.authors && research.authors.length > 0 ? (
+                                                                    research.authors.map((author: any, idx: number) => (
+                                                                        <span key={author.id || idx}>
+                                                                            {author.full_name}
+                                                                            {idx < research.authors!.length - 1 && ", "}
+                                                                        </span>
+                                                                    ))
+                                                                ) : (
+                                                                    research.author
+                                                                )}
                                                             </p>
                                                             <p className="text-xs text-muted-foreground line-clamp-1">{research.department}</p>
                                                         </div>
 
-                                                        <p className="text-xs text-muted-foreground line-clamp-1">{research.abstract}</p>
+                                                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{research.abstract}</p>
 
                                                         <div className="flex flex-wrap gap-1.5 pt-1.5">
-                                                            {research.keywords.slice(0, 2).map((keyword) => (
+                                                            {research.keywords?.slice(0, 3).map((keyword: string) => (
                                                                 <span
                                                                     key={keyword}
                                                                     className="inline-block px-2 py-0.5 rounded-md bg-primary/5 text-primary text-xs"
@@ -611,7 +701,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                 <Link href="/theses" className="block mt-6 flex justify-center">
                                     <Button
                                         size="lg"
-                                        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                                        className="bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-white px-8"
                                     >
                                         Browse All Research
                                         <ExternalLink className="ml-2 h-4 w-4" />
@@ -623,25 +713,24 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                 </div>
             </section>
 
-            {/* 3D Repository Showcase Section */}
+            {/* Repository Showcase Section */}
             <section
                 id="repository-showcase"
-                className="relative py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 lg:px-8 z-40 border-t-12 border-primary/50 dark:border-primary rounded-4xl bg-background"
+                className="relative z-40 bg-background"
             >
-                <div className="max-w-8xl mx-auto ">
-                    <RepositoryShowcase />
+                <div className="max-w-8xl mx-auto">
+                    <RepositoryShowcase stats={stats} />
                 </div>
-                    <div className="max-w-8xl mx-auto ">
-                    <DetailsShowcase />
+                <div className="relative">
+                    <TechStackShowcase />
                 </div>
-                <div className="max-w-8xl mx-auto ">
+                <div className="max-w-8xl mx-auto">
                     <FeaturesSection />
                 </div>
             </section>
 
             <section className="relative z-30 overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32 xl:py-40 bg-background ">
                 {/* Subtle gradient overlays for depth */}
-                <AnimatedParticles />
                 <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
 
@@ -674,7 +763,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                             <Button
                                 asChild
                                 size="lg"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 px-4 sm:px-6 md:px-8 text-xs sm:text-sm md:text-base"
+                                className="bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-primary-foreground px-4 sm:px-6 md:px-8 text-xs sm:text-sm md:text-base"
                             >
                                 <Link href="/register">
                                     Get Started
@@ -828,7 +917,7 @@ export function HomeContent({ user, allTheses, recentTheses,currentRecentIndex }
                                 <Button
                                     type="submit"
                                     size="sm"
-                                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white border-0"
+                                    className="w-full bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-white"
                                 >
                                     Subscribe
                                     <ArrowRight className="ml-2 h-3 w-3" />

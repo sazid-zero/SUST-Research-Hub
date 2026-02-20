@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Workspace - General Info</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "sidebar-dark": "#161e2e",
+                        "panel-dark": "#1a2436",
+                        "border-dark": "#2a364d"
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 h-screen overflow-hidden flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="h-14 bg-white dark:bg-sidebar-dark border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-4 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">science</span>
+<span class="font-bold text-slate-900 dark:text-white">Research Hub</span>
+</div>
+<div class="h-4 w-[1px] bg-slate-300 dark:bg-slate-600 mx-2"></div>
+<nav class="flex items-center gap-2 text-sm font-medium">
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">Workspace</a>
+<span class="material-symbols-outlined text-[16px] text-slate-400">chevron_right</span>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">My Thesis</a>
+<span class="material-symbols-outlined text-[16px] text-slate-400">chevron_right</span>
+<span class="text-slate-900 dark:text-white">General Info</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full text-xs font-semibold border border-green-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Saved
+            </div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-sidebar-dark">
+                JS
+            </div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-slate-50 dark:bg-sidebar-dark border-r border-slate-200 dark:border-border-dark flex flex-col shrink-0">
+<div class="p-4">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</span>
+<input class="w-full pl-9 pr-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder-slate-400 dark:text-slate-200 transition-all" placeholder="Search files..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
+<div class="px-2 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Project Root</div>
+<!-- Active File -->
+<a class="group flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg border border-primary/20" href="#">
+<span class="material-symbols-outlined text-[18px]" data-weight="fill">description</span>
+<span class="text-sm font-medium">general-info.json</span>
+</a>
+<div class="group flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span class="text-sm font-medium">experiments</span>
+</div>
+<div class="pl-8 space-y-1">
+<a class="group flex items-center gap-2 px-3 py-1.5 text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">science</span>
+<span class="text-xs">exp_001_baseline</span>
+</a>
+<a class="group flex items-center gap-2 px-3 py-1.5 text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">science</span>
+<span class="text-xs">exp_002_transformer</span>
+</a>
+</div>
+<div class="group flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors mt-2">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span class="text-sm font-medium">literature-review</span>
+</div>
+<div class="group flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span class="text-sm font-medium">datasets</span>
+</div>
+<div class="group flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[18px]">folder</span>
+<span class="text-sm font-medium">assets</span>
+</div>
+<div class="mt-6 px-2 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">References</div>
+<a class="group flex items-center gap-2 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">book</span>
+<span class="text-sm font-medium">Bibliography.bib</span>
+</a>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark">
+<button class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New File
+                </button>
+</div>
+</aside>
+<!-- Main Workspace Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Tabs -->
+<div class="flex items-center px-8 border-b border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark/50 backdrop-blur-sm sticky top-0 z-10">
+<button class="relative py-4 px-1 mr-8 text-primary font-medium text-sm border-b-2 border-primary">
+                    General Info
+                </button>
+<button class="relative py-4 px-1 mr-8 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium text-sm border-b-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                    Models
+                </button>
+<button class="relative py-4 px-1 mr-8 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium text-sm border-b-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                    Datasets
+                </button>
+<button class="relative py-4 px-1 mr-8 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium text-sm border-b-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                    Code
+                </button>
+</div>
+<!-- Content Scroll Area -->
+<div class="flex-1 overflow-y-auto p-8 lg:px-16 lg:py-10">
+<div class="max-w-4xl mx-auto space-y-10 pb-20">
+<!-- Title Section -->
+<div class="space-y-4">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Project Title</label>
+<textarea class="w-full bg-transparent border-0 border-b border-slate-200 dark:border-slate-700 p-0 text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white focus:ring-0 focus:border-primary placeholder-slate-300 dark:placeholder-slate-700 resize-none h-auto overflow-hidden leading-tight" placeholder="Enter research title..." rows="2">Deep Learning for Climate Pattern Recognition</textarea>
+</div>
+<!-- Meta Controls Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Type Selector -->
+<div class="space-y-3">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Research Type</label>
+<div class="flex bg-slate-100 dark:bg-panel-dark p-1 rounded-lg w-full max-w-sm border border-slate-200 dark:border-border-dark">
+<label class="flex-1 cursor-pointer">
+<input checked="" class="sr-only peer" name="researchType" type="radio" value="Paper"/>
+<span class="flex items-center justify-center py-2 px-3 text-sm font-medium text-slate-500 dark:text-slate-400 rounded-md peer-checked:bg-white dark:peer-checked:bg-background-dark peer-checked:text-primary peer-checked:shadow-sm transition-all">Paper</span>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="sr-only peer" name="researchType" type="radio" value="Thesis"/>
+<span class="flex items-center justify-center py-2 px-3 text-sm font-medium text-slate-500 dark:text-slate-400 rounded-md peer-checked:bg-white dark:peer-checked:bg-background-dark peer-checked:text-primary peer-checked:shadow-sm transition-all">Thesis</span>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="sr-only peer" name="researchType" type="radio" value="Project"/>
+<span class="flex items-center justify-center py-2 px-3 text-sm font-medium text-slate-500 dark:text-slate-400 rounded-md peer-checked:bg-white dark:peer-checked:bg-background-dark peer-checked:text-primary peer-checked:shadow-sm transition-all">Project</span>
+</label>
+</div>
+</div>
+<!-- Status -->
+<div class="space-y-3">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</label>
+<div class="relative w-full max-w-xs">
+<select class="w-full appearance-none bg-slate-100 dark:bg-panel-dark border border-slate-200 dark:border-border-dark text-slate-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 pr-8">
+<option>Planning</option>
+<option selected="">In Progress</option>
+<option>Review</option>
+<option>Published</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Abstract -->
+<div class="space-y-3 relative group">
+<div class="flex justify-between items-end">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Abstract</label>
+<span class="text-xs text-slate-400 font-mono">145 words</span>
+</div>
+<div class="relative">
+<div class="absolute right-2 top-2 flex gap-1 bg-white dark:bg-panel-dark rounded-md border border-slate-200 dark:border-border-dark p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded"><span class="material-symbols-outlined text-[16px]">format_bold</span></button>
+<button class="p-1 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded"><span class="material-symbols-outlined text-[16px]">format_italic</span></button>
+<button class="p-1 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded"><span class="material-symbols-outlined text-[16px]">link</span></button>
+</div>
+<textarea class="w-full min-h-[200px] bg-slate-50 dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-lg p-4 text-base leading-relaxed text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent placeholder-slate-400 resize-y" placeholder="Write your abstract here...">This research proposes a novel transformer-based architecture for predicting long-term climate patterns using historical satellite imagery data. By leveraging self-attention mechanisms, our model, ClimateFormer, outperforms traditional CNN-LSTM approaches in capturing spatiotemporal dependencies. We introduce a new dataset, SatClim-2M, specifically curated for this task, and demonstrate state-of-the-art results on precipitation forecasting benchmarks. The findings suggest that attention-based models are highly effective for high-dimensional chaotic systems like global weather patterns.</textarea>
+</div>
+</div>
+<!-- Authors & Institutions -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-3">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Authors</label>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 pl-1 pr-3 py-1 bg-white dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-full">
+<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-400 flex items-center justify-center text-white text-[10px] font-bold">JS</div>
+<span class="text-sm font-medium">Jane Smith</span>
+</div>
+<div class="flex items-center gap-2 pl-1 pr-3 py-1 bg-white dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-full">
+<img alt="User Avatar" class="w-6 h-6 rounded-full" data-alt="Avatar of Alex Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8bjyA7WuBdQd_HVA0HaMatv3n2ikC97p04AZvG38W4rHQOVh1mV2O7RBYWM2mjw4aZZKAzOJAxwSzqcj8KNrixfnBiv9IogJ7T9CnfP_kwdh1-QXY1KVh4VcE-g5nQhZBmTFElfiJhGYXxh_dKkH5Zn5d0SrbR5ItRzrP31jxNDSl5nQp7h2uPEiZjomPHUhd8hdB2g35df_oiLLEUddhgxS4hHEhoSl8lSbOadhJlb9UFKWcZoJ_QztY4_UMz8EQYqckclwkDLlO"/>
+<span class="text-sm font-medium">Alex Chen</span>
+<button class="text-slate-400 hover:text-red-400"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</div>
+<button class="flex items-center gap-1 pl-2 pr-3 py-1 border border-dashed border-slate-300 dark:border-slate-600 rounded-full text-slate-500 hover:text-primary hover:border-primary transition-colors text-sm">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Add Author</span>
+</button>
+</div>
+</div>
+<div class="space-y-3">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Institutions</label>
+<input class="w-full bg-slate-50 dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent placeholder-slate-400" type="text" value="MIT Media Lab, Stanford AI"/>
+</div>
+</div>
+<!-- Keywords / Tags -->
+<div class="space-y-3">
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Keywords</label>
+<div class="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-lg p-3 min-h-[50px]">
+<span class="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-sm font-medium">
+                                Machine Learning
+                                <button class="hover:text-primary/70 flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</span>
+<span class="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-sm font-medium">
+                                Climate Change
+                                <button class="hover:text-primary/70 flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</span>
+<span class="flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-sm font-medium">
+                                Transformers
+                                <button class="hover:text-primary/70 flex items-center"><span class="material-symbols-outlined text-[14px]">close</span></button>
+</span>
+<input class="bg-transparent border-0 p-1 text-sm focus:ring-0 placeholder-slate-400 dark:text-white min-w-[100px]" placeholder="Add tag..." type="text"/>
+</div>
+</div>
+<!-- Divider -->
+<div class="border-t border-slate-200 dark:border-border-dark my-8"></div>
+<!-- Additional Metadata -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Creation Date</label>
+<div class="text-sm text-slate-900 dark:text-white font-mono">Oct 24, 2023</div>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Last Modified</label>
+<div class="text-sm text-slate-900 dark:text-white font-mono">2 hours ago</div>
+</div>
+<div class="space-y-2">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400">License</label>
+<div class="text-sm text-slate-900 dark:text-white">CC BY-SA 4.0</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Bar / Footer -->
+<div class="absolute bottom-6 right-8 left-8 md:left-auto flex justify-end gap-3 pointer-events-none">
+<button class="pointer-events-auto shadow-lg shadow-black/20 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-panel-dark border border-slate-200 dark:border-border-dark rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                    Preview
+                </button>
+<button class="pointer-events-auto shadow-lg shadow-primary/30 flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+                    Export Citation
+                </button>
+</div>
+</main>
+</div>
+</body></html>

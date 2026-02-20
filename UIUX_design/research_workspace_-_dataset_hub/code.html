@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Workspace - Dataset Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "surface-dark": "#1a2332",
+                        "surface-darker": "#111722",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Space Grotesk", "sans-serif"], // Using Space Grotesk for body as requested in context of theme
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111722; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #232f48; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #33415e; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-hidden">
+<div class="flex h-screen w-full bg-background-light dark:bg-background-dark">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-surface-darker flex flex-col justify-between h-full overflow-y-auto">
+<div class="flex flex-col gap-4 p-4">
+<div class="flex gap-3 items-center mb-6">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 flex-shrink-0" data-alt="Abstract geometric blue pattern" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDosVyfoi6ceKPw_DVGjo9T6wox9_RLKeSJXQfP49xN0tmYPyIrhWtgDGteVYD2mjoMROiS6RD0NbHe-QbUU-0JmQ9EUzp91Qupcb2TmhhyylUTu3CjXpz-rxjdo8CMtm1ybq_4ARf-8RUgKTvW_-Z9guIJ7SG73SEot67IkU2T6HqewOczuR9LrER976CRgg9ElprAMFKk1UdUFEZIYbeEG7mIufBodIN5a8IALwStsxyMxnZV3iU5zPbL8nwYec9BZEKSmTbwr16q");'></div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-white text-base font-medium leading-tight truncate">Research Workspace</h1>
+<p class="text-slate-400 text-xs font-normal leading-normal truncate">Project Alpha</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">home</span>
+<span class="text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">description</span>
+<span class="text-sm font-medium">Papers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">package</span>
+<span class="text-sm font-medium">Models</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary border border-primary/20" href="#">
+<span class="material-symbols-outlined fill-current" style="font-size: 24px;">database</span>
+<span class="text-sm font-bold">Datasets</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 24px;">code</span>
+<span class="text-sm font-medium">Code</span>
+</a>
+</nav>
+</div>
+<div class="p-4">
+<button class="flex w-full items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary hover:bg-blue-600 transition-colors text-white text-sm font-bold shadow-lg shadow-blue-900/20">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+<span>New Project</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Top Header & Search -->
+<header class="flex-shrink-0 px-8 py-6 border-b border-slate-800 bg-background-dark/95 backdrop-blur-sm z-10">
+<div class="flex justify-between items-start gap-6">
+<div class="flex flex-col gap-1">
+<h2 class="text-3xl font-bold text-white tracking-tight">Dataset Hub</h2>
+<p class="text-slate-400 text-sm max-w-2xl">
+                            Manage and curate data sources for your research projects. Upload files directly or link to external repositories.
+                        </p>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-500" style="font-size: 20px;">search</span>
+</div>
+<input class="bg-surface-dark text-white text-sm rounded-lg block w-64 pl-10 p-2.5 border border-slate-700 focus:ring-primary focus:border-primary placeholder-slate-500 transition-all focus:w-80" placeholder="Search datasets..." type="text"/>
+</div>
+<button class="p-2.5 text-slate-400 hover:text-white bg-surface-dark rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">filter_list</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-8">
+<div class="flex flex-col gap-8 max-w-[1400px] mx-auto">
+<!-- Add New Dataset Section -->
+<section class="bg-surface-dark rounded-xl border border-slate-700/50 p-6 shadow-xl relative overflow-hidden group">
+<!-- Decorative gradient background -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700 pointer-events-none"></div>
+<div class="flex justify-between items-center mb-6 relative z-10">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">cloud_upload</span>
+</div>
+<h3 class="text-xl font-bold text-white">Add New Dataset</h3>
+</div>
+<div class="flex bg-surface-darker p-1 rounded-lg border border-slate-700">
+<button class="px-4 py-1.5 rounded text-sm font-medium bg-primary text-white shadow-sm transition-all">Upload File</button>
+<button class="px-4 py-1.5 rounded text-sm font-medium text-slate-400 hover:text-white transition-all">External Link</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+<!-- Drag & Drop Zone -->
+<div class="lg:col-span-1">
+<label class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-primary transition-all group/upload" for="file-upload">
+<div class="flex flex-col items-center justify-center pt-5 pb-6">
+<span class="material-symbols-outlined text-slate-400 group-hover/upload:text-primary mb-3 transition-colors" style="font-size: 32px;">upload_file</span>
+<p class="mb-2 text-sm text-slate-300"><span class="font-semibold text-primary">Click to upload</span> or drag and drop</p>
+<p class="text-xs text-slate-500">CSV, JSON, PARQUET (MAX. 5GB)</p>
+</div>
+<input class="hidden" id="file-upload" type="file"/>
+</label>
+</div>
+<!-- Metadata Form -->
+<div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="col-span-2 md:col-span-1">
+<label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide">Title</label>
+<input class="bg-surface-darker border border-slate-700 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 placeholder-slate-600" placeholder="e.g. Q3 Customer Churn Data" type="text"/>
+</div>
+<div class="col-span-2 md:col-span-1">
+<label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide">Version</label>
+<input class="bg-surface-darker border border-slate-700 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 placeholder-slate-600" placeholder="e.g. v1.0.2" type="text"/>
+</div>
+<div class="col-span-2">
+<label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide">Description</label>
+<textarea class="bg-surface-darker border border-slate-700 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 placeholder-slate-600 resize-none" placeholder="Brief abstract of the dataset contents and methodology..." rows="2"></textarea>
+</div>
+<div class="col-span-2 flex items-end justify-between gap-4">
+<div class="w-full">
+<label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-wide">Keywords</label>
+<div class="flex items-center bg-surface-darker border border-slate-700 rounded-lg p-1.5 focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
+<span class="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded mr-2 whitespace-nowrap">raw-data</span>
+<input class="bg-transparent border-none text-white text-sm w-full focus:ring-0 p-0 placeholder-slate-600" placeholder="Add tags..." type="text"/>
+</div>
+</div>
+<button class="bg-primary hover:bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg transition-colors h-[42px] flex items-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" style="font-size: 20px;">save</span>
+                                        Save
+                                    </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Datasets Grid -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-white">Recent Datasets</h3>
+<div class="flex gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wider self-center mr-2">Sort by:</span>
+<select class="bg-surface-dark border border-slate-700 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2">
+<option>Date Added (Newest)</option>
+<option>Name (A-Z)</option>
+<option>Size (Largest)</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-dark rounded-xl border border-slate-700/50 p-5 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-pointer flex flex-col h-full">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-indigo-500/10 p-2 rounded-lg text-indigo-400 border border-indigo-500/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">table_chart</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg group-hover:text-primary transition-colors">Customer Sentiment Q3</h4>
+<p class="text-xs text-slate-500">Updated 2h ago by Sarah J.</p>
+</div>
+</div>
+<button class="text-slate-500 hover:text-white">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<p class="text-slate-400 text-sm mb-4 line-clamp-3 flex-grow">
+                                    Processed sentiment analysis logs from customer support tickets during Q3 2023. Contains rigorous cleaning of PII data and normalized timestamps.
+                                </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">nlp</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">sentiment</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">csv</span>
+</div>
+<div class="border-t border-slate-700/50 pt-3 flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-slate-500" style="font-size: 16px;">hard_drive</span>
+<span>450 MB</span>
+</div>
+<div class="flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+<span>View Data</span>
+<span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-dark rounded-xl border border-slate-700/50 p-5 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-pointer flex flex-col h-full">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-emerald-500/10 p-2 rounded-lg text-emerald-400 border border-emerald-500/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">link</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg group-hover:text-primary transition-colors">ImageNet Validation</h4>
+<p class="text-xs text-slate-500">Updated 1d ago by System</p>
+</div>
+</div>
+<button class="text-slate-500 hover:text-white">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<p class="text-slate-400 text-sm mb-4 line-clamp-3 flex-grow">
+                                    External link to the official ImageNet 2012 validation set hosted on the university mirror. Used for baseline model comparison.
+                                </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">computer-vision</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">images</span>
+</div>
+<div class="border-t border-slate-700/50 pt-3 flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-slate-500" style="font-size: 16px;">public</span>
+<span>External URL</span>
+</div>
+<div class="flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+<span>Open Link</span>
+<span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-dark rounded-xl border border-slate-700/50 p-5 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-pointer flex flex-col h-full">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-orange-500/10 p-2 rounded-lg text-orange-400 border border-orange-500/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">dataset</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg group-hover:text-primary transition-colors">Global Weather 2024</h4>
+<p class="text-xs text-slate-500">Updated 3d ago by Alex M.</p>
+</div>
+</div>
+<button class="text-slate-500 hover:text-white">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<p class="text-slate-400 text-sm mb-4 line-clamp-3 flex-grow">
+                                    Hourly weather metrics aggregated from 500 major cities. Includes temperature, humidity, precipitation, and wind vectors.
+                                </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">time-series</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">parquet</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">large-scale</span>
+</div>
+<div class="border-t border-slate-700/50 pt-3 flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-slate-500" style="font-size: 16px;">hard_drive</span>
+<span>2.1 GB</span>
+</div>
+<div class="flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+<span>View Data</span>
+<span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-dark rounded-xl border border-slate-700/50 p-5 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-pointer flex flex-col h-full">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-pink-500/10 p-2 rounded-lg text-pink-400 border border-pink-500/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">description</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg group-hover:text-primary transition-colors">Financial Reports Q1-Q4</h4>
+<p class="text-xs text-slate-500">Updated 1w ago by Finance Team</p>
+</div>
+</div>
+<button class="text-slate-500 hover:text-white">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</div>
+<p class="text-slate-400 text-sm mb-4 line-clamp-3 flex-grow">
+                                    Consolidated PDF extracts and OCR json outputs from annual financial reports for competitor analysis.
+                                </p>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">finance</span>
+<span class="bg-slate-800 text-slate-300 text-xs font-medium px-2.5 py-0.5 rounded border border-slate-700">ocr</span>
+</div>
+<div class="border-t border-slate-700/50 pt-3 flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-symbols-outlined text-slate-500" style="font-size: 16px;">hard_drive</span>
+<span>89 MB</span>
+</div>
+<div class="flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+<span>View Data</span>
+<span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</body></html>

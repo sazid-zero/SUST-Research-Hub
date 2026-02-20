@@ -16,7 +16,7 @@ export function AuthButton({ user }: AuthButtonProps) {
         <Button variant="ghost" asChild>
           <Link href="/login">Sign In</Link>
         </Button>
-        <Button asChild>
+        <Button asChild className="bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300">
           <Link href="/register">Sign Up</Link>
         </Button>
       </div>
@@ -32,7 +32,7 @@ export function AuthButton({ user }: AuthButtonProps) {
         : "/student/dashboard"
 
   return (
-    <Button asChild>
+    <Button asChild className="bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300">
         <div className="flex items-center gap-2">
       <LayoutDashboard className=" h-4 w-4" />
       <Link href={dashboardUrl}>Dashboard</Link>
