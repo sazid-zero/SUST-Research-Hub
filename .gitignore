@@ -43,3 +43,9 @@ next-env.d.ts
 .vercel
 
 /scripts
+
+# Generated documentation files
+README_IMPROVEMENTS.md
+README_QUICK_REFERENCE.md
+README_COMPLETION_SUMMARY.md
+PROJECT_COMPLETION_REPORT.md
