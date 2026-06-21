@@ -163,6 +163,7 @@ export async function uploadLegacyWorkspace(formData: FormData) {
         } else if (type === "publication") {
             const doi = formData.get("doi") as string || null
             const journalName = formData.get("journal_name") as string || "TBD"
+            const publicationType = formData.get("publication_type") as string || "journal"
 
             const result = await sql`
                 INSERT INTO publications (
@@ -170,7 +171,7 @@ export async function uploadLegacyWorkspace(formData: FormData) {
                     doi, year, keywords, status, created_at, updated_at
                 )
                 VALUES (
-                    ${title}, ${abstract}, ${journalName}, 'journal',
+                    ${title}, ${abstract}, ${journalName}, ${publicationType},
                     ${doi}, ${year}, ${keywords}, ${status === 'approved' ? 'published' : status}, NOW(), NOW()
                 )
                 RETURNING id
