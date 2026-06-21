@@ -70,7 +70,7 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
     <div className="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#0b1120]">
       <main className="mb-20 w-full">
         {/* Hero Banner Area */}
-        <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+        <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
             <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
             <div className="max-w-6xl mx-auto relative z-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -79,17 +79,17 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
                             <Sparkles className="h-3 w-3" />
                             Research Command Center
                         </div>
-                        <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                             Build Your <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Legacy</span>, {userName.split(' ')[0]}
                         </h1>
-                        <p className="text-muted-foreground font-medium max-w-lg">
+                        <p className="text-sm text-muted-foreground font-medium max-w-lg">
                             Manage your academic journey, track your research progress, and collaborate with world-class supervisors.
                         </p>
                     </div>
                     <div>
                         <Link href="/student/workspace/create">
-                            <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-primary/20 border-none">
-                                <Plus className="h-5 w-5 mr-2" />
+                            <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none">
+                                <Plus className="h-4 w-4 mr-2" />
                                 Launch New Workspace
                             </Button>
                         </Link>
@@ -98,9 +98,9 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
             </div>
         </div>
 
-        <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-12">
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
           {/* Stats Grid */}
-          <section className="space-y-6">
+          <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <LayoutDashboard className="h-4 w-4 text-primary" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Overview Metrics</h2>
@@ -116,7 +116,7 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
                             </div>
                             <div>
                                 <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-3xl font-black text-foreground mt-1">
+                                <p className="text-2xl font-black text-foreground mt-1">
                                     {stat.value}
                                 </p>
                             </div>
@@ -128,7 +128,7 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
           </section>
 
           {/* Table Area */}
-          <section className="space-y-6">
+          <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-primary" />

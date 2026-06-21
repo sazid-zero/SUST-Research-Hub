@@ -70,9 +70,9 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
               )}
             </div>
             
-            <div className="flex-1 mb-4">
+            <div className="flex-1 mb-2">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                   {supervisor.full_name}
                 </h1>
                 <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors uppercase tracking-widest text-[10px] font-bold px-3 py-1">
@@ -92,19 +92,19 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
             </div>
 
             {isOwnProfile && (
-              <div className="flex gap-3 mb-4">
+              <div className="flex gap-3 mb-2">
                 <Button 
                   onClick={() => setIsEditing(!isEditing)}
                   variant={isEditing ? "outline" : "default"}
                   className={cn(
-                    "rounded-xl font-bold transition-all px-6 py-6 h-auto",
-                    !isEditing && "bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none px-8"
+                    "rounded-xl font-bold transition-all px-6 py-4 h-10",
+                    !isEditing && "bg-linear-to-r from-primary to-accent hover:scale-105 shadow-md border-none px-6"
                   )}
                 >
                   {isEditing ? "Discard" : "Update Profile"}
                 </Button>
                 {isEditing && (
-                  <Button onClick={handleSave} className="rounded-xl font-bold bg-primary px-8 py-6 h-auto shadow-xl shadow-primary/20">
+                  <Button onClick={handleSave} className="rounded-xl font-bold bg-primary px-6 py-4 h-10 shadow-md">
                     Save Changes
                   </Button>
                 )}
@@ -112,18 +112,18 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
             )}
           </div>
 
-          <div className="mt-12">
+          <div className="mt-8">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="mb-8">
+              <TabsList className="mb-6">
                 <TabsTrigger value="overview">Hub Overview</TabsTrigger>
                 {isOwnProfile && <TabsTrigger value="settings">Account Security</TabsTrigger>}
               </TabsList>
 
               <TabsContent value="overview">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Left Column: Stats & Info */}
-                  <div className="lg:col-span-1 space-y-8">
-                    <Card className="p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
+                  <div className="lg:col-span-1 space-y-6">
+                    <Card className="p-4 sm:p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
                       <h3 className="text-sm font-black text-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
                         <UserCircle className="h-4 w-4 text-primary" />
                         Professional Info
@@ -168,7 +168,7 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
                       </div>
                     </Card>
 
-                    <Card className="p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
+                    <Card className="p-4 sm:p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
                       <h3 className="text-sm font-black text-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
                         <Award className="h-4 w-4 text-amber-500" />
                         Research Focus
@@ -182,9 +182,9 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
                   </div>
 
                   {/* Right Column: Bio & Editor */}
-                  <div className="lg:col-span-2 space-y-8">
+                  <div className="lg:col-span-2 space-y-6">
                     {isEditing ? (
-                      <Card className="p-8 rounded-3xl border-border/50 bg-background shadow-xl ring-1 ring-primary/5">
+                      <Card className="p-6 rounded-3xl border-border/50 bg-background shadow-md ring-1 ring-primary/5">
                         <div className="flex items-center gap-3 mb-8">
                           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                             <Edit2 className="h-5 w-5 text-primary" />
@@ -195,31 +195,31 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
                           </div>
                         </div>
                         
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                           <div className="grid gap-6 md:grid-cols-2">
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Full Name</Label>
-                              <Input name="fullName" value={formData.fullName} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="fullName" value={formData.fullName} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Faculty Email</Label>
-                              <Input name="email" type="email" value={formData.email} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="email" type="email" value={formData.email} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Phone</Label>
-                              <Input name="phone" value={formData.phone} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="phone" value={formData.phone} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Department</Label>
-                              <Input name="department" value={formData.department} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="department" value={formData.department} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Current Designation</Label>
-                              <Input name="designation" value={formData.designation} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="designation" value={formData.designation} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                             <div className="space-y-2.5">
                               <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/80 pl-1">Highest Degree</Label>
-                              <Input name="degree" value={formData.degree} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4" />
+                              <Input name="degree" value={formData.degree} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 text-sm" />
                             </div>
                           </div>
                           <div className="space-y-2.5">
@@ -229,14 +229,14 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
                               value={formData.bio} 
                               onChange={handleInputChange} 
                               placeholder="Describe your research interests and academic background..."
-                              className="rounded-2xl bg-muted/30 border-none focus:ring-2 focus:ring-primary min-h-[160px] p-4 text-sm leading-relaxed" 
+                              className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary min-h-[120px] p-4 text-sm leading-relaxed" 
                             />
                           </div>
                         </div>
                       </Card>
                     ) : (
-                      <div className="space-y-8">
-                        <Card className="p-10 rounded-3xl border-border/50 bg-background shadow-sm relative overflow-hidden">
+                      <div className="space-y-6">
+                        <Card className="p-6 rounded-3xl border-border/50 bg-background shadow-sm relative overflow-hidden">
                           <div className="absolute top-0 right-0 p-8 opacity-[0.05]">
                             <BookOpen className="h-32 w-32" />
                           </div>
@@ -275,7 +275,7 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
 
               {isOwnProfile && (
                 <TabsContent value="settings">
-                  <Card className="p-10 rounded-3xl border-border/50 bg-background shadow-sm">
+                  <Card className="p-6 rounded-3xl border-border/50 bg-background shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
                         <Shield className="h-5 w-5 text-orange-500" />
@@ -306,7 +306,7 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
                       <Separator className="bg-border/50" />
 
                       <div>
-                        <Button variant="outline" className="rounded-xl py-6 h-auto border-border text-foreground hover:bg-muted font-bold transition-all">
+                        <Button variant="outline" className="rounded-xl py-4 h-10 border-border text-foreground hover:bg-muted font-bold transition-all text-sm">
                           Change Account Password
                         </Button>
                       </div>

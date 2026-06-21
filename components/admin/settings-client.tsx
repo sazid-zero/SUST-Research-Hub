@@ -66,7 +66,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Header Area */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -75,28 +75,28 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                           <SettingsIcon className="h-3 w-3" />
                           Platform Configuration
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         System <span className="bg-linear-to-r from-orange-500 to-rose-500 bg-clip-text text-transparent">Preferences</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Fine-tune platform behavior, manage registration protocols, and control system-wide maintenance states.
                       </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <Link href="/admin/dashboard">
-                        <Button variant="ghost" className="font-bold text-muted-foreground hover:bg-muted rounded-2xl h-14 px-6">
+                        <Button variant="ghost" className="font-bold text-muted-foreground hover:bg-muted rounded-xl h-10 px-6">
                             Cancel
                         </Button>
                     </Link>
                     <Button 
-                      className="bg-linear-to-r from-orange-500 to-rose-500 hover:scale-105 transition-all text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-orange-500/20 border-none" 
+                      className="bg-linear-to-r from-orange-500 to-rose-500 hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none" 
                       onClick={handleSave}
                       disabled={isSaving}
                     >
                       {isSaving ? (
-                        <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       ) : (
-                        <Save className="h-5 w-5 mr-3" />
+                        <Save className="h-4 w-4 mr-2" />
                       )}
                       Save All Core Settings
                     </Button>
@@ -105,16 +105,16 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-12 mb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column: Platform Identity */}
-            <div className="lg:col-span-2 space-y-10">
-                <section className="space-y-6">
+            <div className="lg:col-span-2 space-y-6">
+                <section className="space-y-4">
                     <div className="flex items-center gap-2 px-2">
                         <Globe className="h-4 w-4 text-blue-500" />
                         <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Platform Identity</h2>
                     </div>
-                    <Card className="border-border/50 bg-background/80 backdrop-blur-sm p-8 rounded-3xl shadow-sm ring-1 ring-primary/5">
+                    <Card className="border-border/50 bg-background/80 backdrop-blur-sm p-6 rounded-3xl shadow-sm ring-1 ring-primary/5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-2">
                                 <Label htmlFor="systemName" className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest ml-1">
@@ -125,7 +125,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                                     name="systemName"
                                     value={settings.systemName}
                                     onChange={handleInputChange}
-                                    className="bg-muted/20 border-border/50 h-12 rounded-2xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold"
+                                    className="bg-muted/20 border-border/50 h-10 rounded-xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold text-sm"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -138,7 +138,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                                     type="email"
                                     value={settings.systemEmail}
                                     onChange={handleInputChange}
-                                    className="bg-muted/20 border-border/50 h-12 rounded-2xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold"
+                                    className="bg-muted/20 border-border/50 h-10 rounded-xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold text-sm"
                                 />
                             </div>
                         </div>
@@ -157,7 +157,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                                     type="number"
                                     value={settings.maxFileSize}
                                     onChange={handleInputChange}
-                                    className="bg-muted/20 border-border/50 h-12 rounded-2xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold w-40"
+                                    className="bg-muted/20 border-border/50 h-10 rounded-xl focus:ring-primary/20 focus:border-primary/50 transition-all font-bold w-40 text-sm"
                                 />
                                 <p className="text-xs font-medium text-muted-foreground italic">
                                     Maximum allowed size for research papers and archive document uploads.
@@ -167,7 +167,7 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                     </Card>
                 </section>
 
-                <section className="space-y-6">
+                <section className="space-y-4">
                     <div className="flex items-center gap-2 px-2">
                         <Shield className="h-4 w-4 text-emerald-500" />
                         <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Flow Integrity</h2>
@@ -216,13 +216,13 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
             </div>
 
             {/* Right Column: Intelligence & Security */}
-            <div className="space-y-10">
-                <section className="space-y-6">
+            <div className="space-y-6">
+                <section className="space-y-4">
                     <div className="flex items-center gap-2 px-2">
                         <Mail className="h-4 w-4 text-primary" />
                         <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Communications</h2>
                     </div>
-                    <Card className="border-border/50 bg-linear-to-br from-primary/5 to-accent/5 p-8 rounded-3xl shadow-sm border ring-1 ring-primary/5">
+                    <Card className="border-border/50 bg-linear-to-br from-primary/5 to-accent/5 p-6 rounded-3xl shadow-sm border ring-1 ring-primary/5">
                         <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter">Notification Backbone</h4>
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
@@ -240,12 +240,12 @@ export default function SettingsClient({ initialSettings }: SettingsClientProps)
                     </Card>
                 </section>
 
-                <section className="space-y-6">
+                <section className="space-y-4">
                     <div className="flex items-center gap-2 px-2">
                         <Shield className="h-4 w-4 text-emerald-500" />
                         <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Infrastructure</h2>
                     </div>
-                    <Card className="border-border/50 bg-card/80 backdrop-blur-sm p-8 rounded-3xl shadow-sm border border-dashed ring-1 ring-emerald-500/5">
+                    <Card className="border-border/50 bg-card/80 backdrop-blur-sm p-6 rounded-3xl shadow-sm border border-dashed ring-1 ring-emerald-500/5">
                         <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter">Security Perimeter</h4>
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">

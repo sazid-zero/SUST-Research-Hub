@@ -72,7 +72,7 @@ async function DashboardContent() {
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Header Area */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -81,18 +81,18 @@ async function DashboardContent() {
                           <Sparkles className="h-3 w-3" />
                           Academic Leadership
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         Research <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Overview</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Welcome back, Professor {user?.full_name?.split(' ').pop()}. Monitor your supervision pipeline and student excellence.
                       </p>
                   </div>
                   <div>
                     <Link href="/supervisor/requests">
-                        <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-primary/20 border-none">
+                        <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none text-sm">
                             Triage Requests
-                            <ArrowRight className="h-5 w-5 ml-2" />
+                            <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
                     </Link>
                   </div>
@@ -100,9 +100,9 @@ async function DashboardContent() {
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-12">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         {/* Stats Grid */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <LayoutDashboard className="h-4 w-4 text-primary" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Supervision Pulse</h2>
@@ -118,7 +118,7 @@ async function DashboardContent() {
                             </div>
                             <div>
                                 <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-3xl font-black text-foreground mt-1">
+                                <p className="text-2xl font-black text-foreground mt-1">
                                     {stat.value}
                                 </p>
                             </div>
@@ -130,7 +130,7 @@ async function DashboardContent() {
         </section>
 
         {/* Pending Requests Section */}
-        <section className="space-y-6 mb-20">
+        <section className="space-y-4 mb-20">
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-amber-500" />
@@ -146,7 +146,7 @@ async function DashboardContent() {
                     <Card key={request.id} className="group border-border/50 bg-background/80 backdrop-blur-sm p-6 rounded-3xl shadow-sm hover:shadow-md transition-all ring-1 ring-primary/5">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-start gap-4">
-                                <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center text-xl font-bold shrink-0 border border-border/50">
+                                <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-lg font-bold shrink-0 border border-border/50">
                                     {request.student_name?.[0]}
                                 </div>
                                 <div className="space-y-1">
@@ -168,7 +168,7 @@ async function DashboardContent() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <Link href={`/supervisor/requests`} className="w-full md:w-auto">
-                                    <Button size="lg" className="w-full md:w-auto rounded-2xl font-bold bg-primary/5 hover:bg-primary/10 text-primary border-none h-12 px-8">
+                                    <Button size="sm" className="w-full md:w-auto rounded-xl font-bold bg-primary/5 hover:bg-primary/10 text-primary border-none h-10 px-6">
                                         Review Proposal
                                     </Button>
                                 </Link>

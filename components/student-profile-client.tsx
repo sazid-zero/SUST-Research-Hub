@@ -71,9 +71,9 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
               )}
             </div>
             
-            <div className="flex-1 mb-4">
+            <div className="flex-1 mb-2">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                   {student.full_name}
                 </h1>
                 <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors uppercase tracking-widest text-[10px] font-bold px-3 py-1">
@@ -93,19 +93,19 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
             </div>
 
             {isOwnProfile && (
-              <div className="flex gap-3 mb-4">
+              <div className="flex gap-3 mb-2">
                 <Button 
                   onClick={() => setIsEditing(!isEditing)}
                   variant={isEditing ? "outline" : "default"}
                   className={cn(
-                    "rounded-xl font-bold transition-all px-6 py-6 h-auto",
-                    !isEditing && "bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none"
+                    "rounded-xl font-bold transition-all px-6 py-4 h-10",
+                    !isEditing && "bg-linear-to-r from-primary to-accent hover:scale-105 shadow-md border-none"
                   )}
                 >
                   {isEditing ? "Discard Changes" : "Redesign Profile"}
                 </Button>
                 {isEditing && (
-                  <Button onClick={handleSave} className="rounded-xl font-bold bg-primary px-8 py-6 h-auto shadow-xl shadow-primary/20">
+                  <Button onClick={handleSave} className="rounded-xl font-bold bg-primary px-6 py-4 h-10 shadow-md">
                     Save Changes
                   </Button>
                 )}
@@ -113,10 +113,10 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
             )}
           </div>
 
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column: Info & Stats */}
-            <div className="lg:col-span-1 space-y-8">
-              <Card className="p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
+            <div className="lg:col-span-1 space-y-6">
+              <Card className="p-4 sm:p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
                 <h3 className="text-sm font-black text-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
                   <UserCircle className="h-4 w-4 text-primary" />
                   Contact Information
@@ -152,7 +152,7 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
                 </div>
               </Card>
 
-              <Card className="p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm overflow-hidden relative group">
+              <Card className="p-4 sm:p-6 rounded-3xl border-border/50 bg-background/80 backdrop-blur-md shadow-sm overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
                   <BookOpen className="h-32 w-32" />
                 </div>
@@ -178,9 +178,9 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
             </div>
 
             {/* Right Column: Content/Editor */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-6">
               {isEditing ? (
-                <Card className="p-8 rounded-3xl border-border/50 bg-background shadow-xl ring-1 ring-primary/5">
+                <Card className="p-6 rounded-3xl border-border/50 bg-background shadow-md ring-1 ring-primary/5">
                   <div className="flex items-center gap-3 mb-8">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                       <Edit2 className="h-5 w-5 text-primary" />
@@ -191,35 +191,35 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
                     </div>
                   </div>
                   
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2.5">
                         <Label htmlFor="fullName" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Full Name</Label>
-                        <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5">
                         <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Institutional Email</Label>
-                        <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5">
                         <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Contact Number</Label>
-                        <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5">
                         <Label htmlFor="department" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Department</Label>
-                        <Input id="department" name="department" value={formData.department} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="department" name="department" value={formData.department} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5">
                         <Label htmlFor="session" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Academic Session</Label>
-                        <Input id="session" name="session" value={formData.session} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="session" name="session" value={formData.session} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5">
                         <Label htmlFor="semester" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Current Semester</Label>
-                        <Input id="semester" name="semester" value={formData.semester} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="semester" name="semester" value={formData.semester} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                       <div className="space-y-2.5 md:col-span-2">
                         <Label htmlFor="degree" className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Degree Program</Label>
-                        <Input id="degree" name="degree" value={formData.degree} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-12 px-4 font-medium" />
+                        <Input id="degree" name="degree" value={formData.degree} onChange={handleInputChange} className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary h-10 px-4 font-medium text-sm" />
                       </div>
                     </div>
                     <div className="space-y-2.5">
@@ -230,14 +230,14 @@ export function StudentProfileClient({ student, isOwnProfile, currentUserRole }:
                         value={formData.bio} 
                         onChange={handleInputChange} 
                         placeholder="Tell us about yourself and your research path..."
-                        className="rounded-2xl bg-muted/30 border-none focus:ring-2 focus:ring-primary min-h-[160px] p-4 font-medium leading-relaxed" 
+                        className="rounded-xl bg-muted/30 border-none focus:ring-2 focus:ring-primary min-h-[120px] p-4 font-medium leading-relaxed text-sm" 
                       />
                     </div>
                   </div>
                 </Card>
               ) : (
-                <div className="space-y-8">
-                  <Card className="p-10 rounded-3xl border-border/50 bg-background shadow-sm relative overflow-hidden group">
+                <div className="space-y-6">
+                  <Card className="p-6 rounded-3xl border-border/50 bg-background shadow-sm relative overflow-hidden group">
                     <div className="absolute -top-12 -right-12 h-40 w-40 bg-primary/5 rounded-full blur-3xl" />
                     <h3 className="text-base font-black text-foreground uppercase tracking-wider mb-6 flex items-center gap-3">
                       <User className="h-5 w-5 text-primary" />

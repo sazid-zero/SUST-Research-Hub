@@ -48,7 +48,7 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Header Area */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -57,10 +57,10 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
                           <Activity className="h-3 w-3" />
                           Platform Metrics
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         Research <span className="bg-linear-to-r from-emerald-500 to-primary bg-clip-text text-transparent">Intelligence</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Analyze submission trends, department output, and system growth metrics through real-time data visualization.
                       </p>
                   </div>
@@ -68,9 +68,9 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-12 mb-20">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 mb-10">
         {/* Stats Grid */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <LayoutDashboard className="h-4 w-4 text-emerald-500" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Metric Overview</h2>
@@ -86,7 +86,7 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
                             </div>
                             <div>
                                 <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-3xl font-black text-foreground mt-1">
+                                <p className="text-2xl font-black text-foreground mt-1">
                                     {stat.value}
                                 </p>
                             </div>
@@ -98,9 +98,9 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
         </section>
 
         {/* Charts Section */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
             {/* Submission Trend */}
-            <section className="space-y-6">
+            <section className="space-y-4">
                 <div className="flex items-center gap-2 px-2">
                     <TrendingUp className="h-4 w-4 text-blue-500" />
                     <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Submissions Curve</h2>
@@ -135,7 +135,7 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
             </section>
 
             {/* Department Distribution */}
-            <section className="space-y-6">
+            <section className="space-y-4">
                 <div className="flex items-center gap-2 px-2">
                     <LayoutDashboard className="h-4 w-4 text-purple-500" />
                     <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Faculty Distribution</h2>
@@ -172,12 +172,12 @@ export default function AnalyticsClient({ data, stats }: AnalyticsClientProps) {
         </div>
 
         {/* Status Breakdown Section */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <Sparkles className="h-4 w-4 text-amber-500" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Verification Status Distribution</h2>
             </div>
-            <Card className="border-border/50 bg-background/80 backdrop-blur-sm p-8 rounded-3xl shadow-sm ring-1 ring-primary/5">
+            <Card className="border-border/50 bg-background/80 backdrop-blur-sm p-6 rounded-3xl shadow-sm ring-1 ring-primary/5">
                 <div className="h-[350px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>

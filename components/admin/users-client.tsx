@@ -110,7 +110,7 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Header Area */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -119,16 +119,16 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
                           <Users className="h-3 w-3" />
                           Identity Management
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         User <span className="bg-linear-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">Directory</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Manage all platform participants, verify identities, and control administrative access.
                       </p>
                   </div>
                   <div>
-                      <Button className="bg-linear-to-r from-blue-500 to-indigo-500 hover:scale-105 transition-all text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-blue-500/20 border-none">
-                          <Plus className="h-5 w-5 mr-2" />
+                      <Button className="bg-linear-to-r from-blue-500 to-indigo-500 hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none">
+                          <Plus className="h-4 w-4 mr-2" />
                           Provision New User
                       </Button>
                   </div>
@@ -136,9 +136,9 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-8 mb-20">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 mb-10">
         {/* Search and Filters */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <LayoutDashboard className="h-4 w-4 text-blue-500" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Operations Console</h2>
@@ -151,10 +151,10 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
                             placeholder="Search identities by name or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-12 bg-muted/20 border-border/50 h-12 rounded-2xl focus:ring-blue-500/20 focus:border-blue-500/50 transition-all font-medium"
+                            className="pl-12 bg-muted/20 border-border/50 h-10 rounded-xl focus:ring-blue-500/20 focus:border-blue-500/50 transition-all font-medium text-sm"
                         />
                     </div>
-                    <Button variant="outline" className="h-12 border-border/50 px-6 rounded-2xl bg-white/50 backdrop-blur-sm hover:bg-muted font-bold gap-2">
+                    <Button variant="outline" className="h-10 border-border/50 px-6 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-muted font-bold gap-2">
                         <Filter className="h-4 w-4" />
                         Refine Search
                     </Button>

@@ -98,7 +98,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Header Area */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -107,10 +107,10 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
                           <GraduationCap className="h-3 w-3" />
                           Knowledge Repository
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         Research <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Vault</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Audit, validate, and manage the complete body of research work produced across all university departments.
                       </p>
                   </div>
@@ -118,9 +118,9 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-10 mb-20">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 mb-10">
         {/* Controls Section */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center gap-2 px-2">
                 <LayoutDashboard className="h-4 w-4 text-primary" />
                 <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Audit Controls</h2>
@@ -131,7 +131,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                         placeholder="Search by title, student, or supervisor..." 
-                        className="pl-12 bg-muted/20 border-border/50 h-12 rounded-2xl focus:ring-primary/20 focus:border-primary/50 transition-all font-medium" 
+                        className="pl-12 bg-muted/20 border-border/50 h-10 rounded-xl focus:ring-primary/20 focus:border-primary/50 transition-all font-medium text-sm" 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -144,7 +144,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
                             size="sm"
                             onClick={() => setStatusFilter(status)}
                             className={cn(
-                                "rounded-xl px-5 h-10 font-bold capitalize transition-all",
+                                "rounded-lg px-4 h-9 text-sm font-bold capitalize transition-all",
                                 statusFilter === status ? "shadow-lg shadow-primary/20 scale-105" : "border-border/50 bg-white/50 backdrop-blur-sm"
                             )}
                         >
@@ -156,7 +156,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
         </section>
 
         {/* Results List */}
-        <section className="space-y-6">
+        <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
