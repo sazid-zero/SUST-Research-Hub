@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
-import fs from "fs"
-import path from "path"
+import crypto from "crypto"
 
 interface AuthorInput {
     name: string
@@ -238,23 +237,49 @@ export async function uploadLegacyWorkspace(formData: FormData) {
             return { success: false, message: "Invalid workspace type." }
         }
 
-        // Helper to save physical files
-        const savePhysicalFile = async (file: File, subFolder: string = "") => {
-            const bytes = await file.arrayBuffer()
-            const buffer = Buffer.from(bytes)
-            const uploadDir = path.join(process.cwd(), "public", "uploads", type, workspaceId.toString(), subFolder)
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true })
+        // Helper to upload files to Cloudinary
+        const uploadToCloudinary = async (file: File, subFolder: string = "") => {
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+            const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY
+            const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET
+
+            if (!cloudName || !apiKey || !apiSecret) {
+                throw new Error("Cloudinary credentials not configured")
             }
-            const filePath = path.join(uploadDir, file.name)
-            fs.writeFileSync(filePath, buffer)
-            return `/uploads/${type}/${workspaceId}${subFolder ? '/' + subFolder : ''}/${file.name}`
+
+            const timestamp = Math.round(Date.now() / 1000)
+            const folder = `sust_research/${type}/${workspaceId}${subFolder ? '/' + subFolder : ''}`
+            
+            // Generate signature for signed upload
+            const signatureString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
+            const signature = crypto.createHash('sha1').update(signatureString).digest('hex')
+
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('api_key', apiKey)
+            formData.append('timestamp', timestamp.toString())
+            formData.append('signature', signature)
+            formData.append('folder', folder)
+            formData.append('resource_type', 'auto')
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+                { method: 'POST', body: formData }
+            )
+
+            if (!response.ok) {
+                const err = await response.text()
+                throw new Error(`Cloudinary upload failed: ${err}`)
+            }
+
+            const result = await response.json()
+            return result.secure_url as string
         }
 
         // Handle File Uploads (Document)
         if (type === "thesis" || type === "project") {
             if (documentFile) {
-                const url = await savePhysicalFile(documentFile)
+                const url = await uploadToCloudinary(documentFile)
                 if (type === "thesis") {
                     await sql`INSERT INTO thesis_files (thesis_id, file_name, file_url, file_type, file_size, resource_type, uploaded_at) VALUES (${workspaceId}, ${documentFile.name}, ${url}, 'pdf', ${documentFile.size}, 'document', NOW())`
                 } else {
@@ -286,7 +311,7 @@ export async function uploadLegacyWorkspace(formData: FormData) {
 
         // Handle Publication PDF
         if (type === "publication" && paperFile) {
-            const url = await savePhysicalFile(paperFile)
+            const url = await uploadToCloudinary(paperFile)
             await sql`INSERT INTO publication_files (publication_id, file_name, file_url, file_type, file_size, resource_type, uploaded_at) VALUES (${workspaceId}, ${paperFile.name}, ${url}, 'pdf', ${paperFile.size}, 'paper', NOW())`
             await sql`UPDATE publications SET pdf_url = ${url} WHERE id = ${workspaceId}`
         }
