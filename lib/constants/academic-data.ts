@@ -30,6 +30,7 @@ export const DEPARTMENTS = [
 export const FIELDS_OF_STUDY = [
   "Artificial Intelligence",
   "Machine Learning",
+  "Deep Learning",
   "Data Science",
   "Cybersecurity",
   "Software Engineering",

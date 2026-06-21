@@ -250,8 +250,11 @@ export async function uploadLegacyWorkspace(formData: FormData) {
             const timestamp = Math.round(Date.now() / 1000)
             const folder = `sust_research/${type}/${workspaceId}${subFolder ? '/' + subFolder : ''}`
             
-            // Generate signature for signed upload
-            const signatureString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`
+            // Generate signature for signed upload (parameters must be alphabetical)
+            // public_id is the original filename without extension (Cloudinary adds it back for raw)
+            const publicId = file.name.replace(/\.[^/.]+$/, "")
+            
+            const signatureString = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
             const signature = crypto.createHash('sha1').update(signatureString).digest('hex')
 
             const formData = new FormData()
@@ -260,10 +263,11 @@ export async function uploadLegacyWorkspace(formData: FormData) {
             formData.append('timestamp', timestamp.toString())
             formData.append('signature', signature)
             formData.append('folder', folder)
-            formData.append('resource_type', 'auto')
+            formData.append('public_id', publicId)
+            formData.append('resource_type', 'raw')
 
             const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+                `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
                 { method: 'POST', body: formData }
             )
 
