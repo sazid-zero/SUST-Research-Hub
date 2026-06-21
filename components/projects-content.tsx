@@ -17,60 +17,6 @@ interface ProjectsContentProps {
     initialProjects?: any[]
 }
 
-const sampleProjects = [
-
-    {
-        id: 1,
-        title: "AI Lab Research Initiative - Advanced Machine Learning Systems",
-        authors: [
-            { id: 1, full_name: "Dr. Ahmed Hassan", student_id: "supervisor1" },
-            { id: 2, full_name: "Team Lead: Sarah Mohamed", student_id: "lead1" },
-        ],
-        abstract:
-            "Our research initiative focuses on developing state-of-the-art machine learning systems for real-world applications. The project encompasses multiple research areas including computer vision, natural language processing, and reinforcement learning.",
-        department: "Computer Science & Engineering",
-        field: "Machine Learning",
-        year: 2024,
-        keywords: ["Machine Learning", "Deep Learning", "AI Research", "Computer Vision", "NLP"],
-        views: 2341,
-        downloads: 567,
-        updated: "2 days ago",
-    },
-    {
-        id: 2,
-        title: "Biomedical Engineering Group - Medical Device Innovation",
-        authors: [
-            { id: 3, full_name: "Dr. Sarah Ibrahim", student_id: "supervisor2" },
-            { id: 4, full_name: "Team Lead: Youssef Ali", student_id: "lead2" },
-        ],
-        abstract:
-            "A collaborative research project aimed at developing innovative biomedical devices and diagnostic tools. We combine engineering principles with medical science to create solutions for healthcare challenges.",
-        department: "Biochemistry",
-        field: "Biomedical",
-        year: 2024,
-        keywords: ["Biomedical", "Medical Devices", "Healthcare", "Diagnostics", "Innovation"],
-        views: 1876,
-        downloads: 423,
-        updated: "5 days ago",
-    },
-    {
-        id: 3,
-        title: "Robotics Lab Projects - Autonomous Systems Development",
-        authors: [
-            { id: 5, full_name: "Prof. Hassan Khaled", student_id: "supervisor3" },
-            { id: 6, full_name: "Team Lead: Fatima Ahmed", student_id: "lead3" },
-        ],
-        abstract:
-            "Research and development of autonomous robotic systems with applications in manufacturing, logistics, and service industries. The project explores navigation, manipulation, and human-robot interaction.",
-        department: "Mechanical Engineering",
-        field: "Robotics",
-        year: 2024,
-        keywords: ["Robotics", "Autonomous Systems", "Navigation", "Control Systems", "AI"],
-        views: 3421,
-        downloads: 789,
-        updated: "1 day ago",
-    },
-]
 
 export default function ProjectsContent({ user, initialProjects }: ProjectsContentProps) {
     const [searchQuery, setSearchQuery] = useState("")
@@ -81,7 +27,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
     const [sortBy, setSortBy] = useState("trending")
     const [mounted, setMounted] = useState(false)
 
-    const allProjects = initialProjects && initialProjects.length > 0 ? initialProjects : sampleProjects;
+    const allProjects = initialProjects || []
     
     // Map projects to ensure consistent field names and presence of arrays
     const projects = allProjects.map(p => ({

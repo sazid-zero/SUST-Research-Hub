@@ -94,8 +94,48 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
 
             form.set("authors", JSON.stringify(formattedAuthors))
             
-            if (documentFile) form.set("documentFile", documentFile)
-            if (paperFile) form.set("paperFile", paperFile)
+            // Direct client-side upload to Cloudinary (Bypasses Vercel 4.5MB payload limit)
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+            const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+
+            const uploadDirectToCloudinary = async (file: File) => {
+                if (!cloudName || !uploadPreset) throw new Error("Cloudinary environment variables missing")
+                
+                const uploadData = new FormData()
+                uploadData.append('file', file)
+                uploadData.append('upload_preset', uploadPreset)
+                uploadData.append('resource_type', 'auto')
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+                    method: 'POST',
+                    body: uploadData
+                })
+
+                if (!res.ok) {
+                    const errorText = await res.text()
+                    throw new Error(`Cloudinary upload failed: ${errorText}`)
+                }
+
+                const result = await res.json()
+                return result.secure_url
+            }
+
+            if (documentFile) {
+                toast.loading("Uploading document to cloud...", { id: "upload-toast" })
+                const docUrl = await uploadDirectToCloudinary(documentFile)
+                form.set("documentUrl", docUrl)
+                form.set("documentName", documentFile.name)
+                form.set("documentSize", documentFile.size.toString())
+                toast.dismiss("upload-toast")
+            }
+            if (paperFile) {
+                toast.loading("Uploading paper to cloud...", { id: "upload-toast" })
+                const paperUrl = await uploadDirectToCloudinary(paperFile)
+                form.set("paperUrl", paperUrl)
+                form.set("paperName", paperFile.name)
+                form.set("paperSize", paperFile.size.toString())
+                toast.dismiss("upload-toast")
+            }
             
             if (codeUrl.trim()) {
                 form.set("codeUrl", codeUrl)
@@ -127,9 +167,10 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
             } else {
                 toast.error(result.message || "Failed to upload workspace")
             }
-        } catch (error) {
+        } catch (error: any) {
+            toast.dismiss("upload-toast")
             console.error("Upload error:", error)
-            toast.error("An unexpected error occurred")
+            toast.error(error.message || "An unexpected error occurred")
         } finally {
             setIsSubmitting(false)
         }

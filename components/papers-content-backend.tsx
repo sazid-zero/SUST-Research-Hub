@@ -3,7 +3,7 @@
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Eye, DownloadIcon, Search, X, ArrowUpDown } from "lucide-react"
+import { Eye, Quote, Search, X, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -281,7 +281,11 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
                         <div className="flex gap-4 text-xs text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <Eye className="h-4 w-4" />
-                            <span>{paper.citations} citations</span>
+                            <span>{paper.views || 0} views</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Quote className="h-4 w-4" />
+                            <span>{paper.citations || 0} citations</span>
                           </div>
                           {paper.impact_factor && (
                             <div className="flex items-center gap-2">

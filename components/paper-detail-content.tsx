@@ -45,7 +45,11 @@ interface PaperDetailContentProps {
 export function PaperDetailContent({ publication, user }: PaperDetailContentProps) {
     const [copied, setCopied] = useState(false)
     const [bookmarked, setBookmarked] = useState(false)
-    const { trackDownload } = useContentTracking("publication", publication.id)
+    const [viewCount, setViewCount] = useState(publication.views || 0)
+
+    const { trackDownload } = useContentTracking("publication", publication.id, {
+        onView: () => setViewCount(prev => prev + 1)
+    })
 
     const [secureViewerOpen, setSecureViewerOpen] = useState(false)
     const [currentDocUrl, setCurrentDocUrl] = useState("")
@@ -205,6 +209,10 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                     </span>
                                     )}
                                     {publication.pages && <span>Pages {publication.pages}</span>}
+                                    <span className="flex items-center gap-1.5 ml-auto text-primary">
+                                        <Eye className="h-4 w-4" />
+                                        {viewCount} Views
+                                    </span>
                                 </div>
 
                                 {/* Citations */}
