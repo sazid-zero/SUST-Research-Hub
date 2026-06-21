@@ -9,6 +9,7 @@ export interface User {
     department: string | null
     profile_pic: string | null
     specialization: string | null
+    student_id?: string
 }
 
 export async function getSupervisors(department?: string): Promise<User[]> {
@@ -44,6 +45,19 @@ export async function getSupervisors(department?: string): Promise<User[]> {
         return result as User[]
     } catch (error) {
         console.error("Error fetching supervisors:", error)
+    }
+}
+
+export async function getAllUsers(): Promise<User[]> {
+    try {
+        const result = await sql`
+            SELECT id, full_name, student_id, email, role, department, profile_pic
+            FROM users
+            ORDER BY full_name ASC
+        `
+        return result as User[]
+    } catch (error) {
+        console.error("Error fetching all users:", error)
         return []
     }
 }

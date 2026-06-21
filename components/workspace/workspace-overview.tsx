@@ -2,25 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { updateWorkspaceDetails, getRelatedWork, linkRelatedWork } from "@/app/actions/workspace"
+import { updateWorkspaceDetails, getRelatedWork, submitForReview } from "@/app/actions/workspace"
+import { syncPublicationCitations } from "@/app/actions/citations"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-    Bold, Italic, Link as LinkIcon, Plus, X, 
-    Eye, Share, Search, FileText, Upload, 
-    Clock, Calendar, Shield, GraduationCap, CheckCircle2,
-    Save, ChevronRight, Info, ExternalLink, MessageSquare,
-    Users, Settings, History, Lock, Share2
-} from "lucide-react"
+import { Link as LinkIcon, X, FileText, GraduationCap, CheckCircle2, ChevronRight, History, Send, AlertCircle, Users, ExternalLink, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog"
 import { SupervisionRequestDialog } from "@/components/workspace/supervision-request-dialog"
 import { LinkRelatedWorkDialog } from "@/components/workspace/link-related-work-dialog"
+import { WorkspaceSettingsDialog } from "@/components/workspace/workspace-settings-dialog"
 import { User } from "@/lib/db/users"
-import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface WorkspaceOverviewProps {
   workspace: any
@@ -34,6 +27,9 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
   const [keywords, setKeywords] = useState<string[]>(workspace.keywords || [])
   const [newKeyword, setNewKeyword] = useState("")
   const [relatedWork, setRelatedWork] = useState<any[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSyncingCitations, setIsSyncingCitations] = useState(false)
+  const [citationCount, setCitationCount] = useState<number>(workspace.citations || 0)
   
   useEffect(() => {
      fetchRelatedWork()
@@ -71,30 +67,69 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
   }
 
   const handleRemoveKeyword = (k: string) => {
-    setKeywords(keywords.filter((item) => item !== k))
-    handleSaveChanges()
+    const updated = keywords.filter((item) => item !== k)
+    setKeywords(updated)
+    // Need to save changes after state updates
+    setTimeout(() => handleSaveChanges(), 0)
+  }
+
+  const handleSubmitForReview = async () => {
+    setIsSubmitting(true)
+    const result = await submitForReview(workspace.id, workspace.type)
+    if (result.success) {
+        toast.success(result.message)
+    } else {
+        toast.error(result.message)
+    }
+    setIsSubmitting(false)
+  }
+
+  const handleSyncCitations = async () => {
+      if (workspace.type !== 'publication') return;
+      setIsSyncingCitations(true);
+      const result = await syncPublicationCitations(workspace.id);
+      if (result.success) {
+          toast.success(result.message);
+          if (result.citations !== undefined) {
+              setCitationCount(result.citations);
+          }
+      } else {
+          toast.error(result.message);
+      }
+      setIsSyncingCitations(false);
   }
 
   const supervisorsList = workspace.members?.filter((m: any) => m.role === 'supervisor') || []
   const teamMembers = workspace.members?.filter((m: any) => m.role !== 'supervisor') || []
 
+  const getStatusDisplay = () => {
+    switch(workspace.status) {
+        case 'draft': return { label: 'Draft', color: 'bg-slate-100 text-slate-800 border-slate-200' }
+        case 'pending_review': return { label: 'Under Review', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' }
+        case 'needs_revision': return { label: 'Needs Revision', color: 'bg-red-100 text-red-800 border-red-200' }
+        case 'approved': return { label: 'Approved & Published', color: 'bg-green-100 text-green-800 border-green-200' }
+        default: return { label: workspace.status, color: 'bg-slate-100 text-slate-800 border-slate-200' }
+    }
+  }
+
+  const statusDisplay = getStatusDisplay()
+
   return (
-    <div className="h-full bg-[#f8fafc] dark:bg-[#0d121c] overflow-hidden flex flex-col">
-        {/* Top Header / Breadcrumbs placeholder */}
-        <div className="px-8 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101622] flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+    <div className="h-full bg-background overflow-hidden flex flex-col">
+        <div className="px-8 py-3 border-b bg-card flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                 <span>Workspace</span>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-slate-900 dark:text-slate-200 capitalize">{workspace.type}</span>
+                <span className="capitalize">{workspace.type}</span>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-indigo-500 font-semibold truncate max-w-[200px]">{workspace.title}</span>
+                <span className="text-primary font-semibold truncate max-w-[200px]">{workspace.title}</span>
             </div>
             <div className="flex items-center gap-3">
-                 <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-2 py-0.5 text-[10px] animate-pulse">
-                    LIVE
+                 <Badge variant="outline" className={`px-2 py-0.5 text-[10px] ${statusDisplay.color}`}>
+                    {statusDisplay.label}
                 </Badge>
-                <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
-                <span className="text-[10px] font-mono text-slate-400">ID: {workspace.id}-{workspace.type.substring(0,1).toUpperCase()}</span>
+                <div className="h-4 w-px bg-border" />
+                <span className="text-[10px] font-mono text-muted-foreground">ID: {workspace.id}-{workspace.type.substring(0,1).toUpperCase()}</span>
             </div>
         </div>
 
@@ -111,21 +146,21 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 onBlur={handleSaveChanges}
-                                className="w-full bg-transparent border-0 p-0 text-xl lg:text-2xl font-black text-slate-900 dark:text-white focus:ring-0 placeholder-slate-200 dark:placeholder-slate-800 resize-none h-auto leading-[1.2] transition-all scrollbar-hide"
+                                className="w-full bg-transparent border-0 p-0 text-xl lg:text-3xl font-bold text-foreground focus:ring-0 placeholder:text-muted-foreground resize-none h-auto leading-[1.2] transition-all scrollbar-hide"
                                 placeholder="Untitled Research..."
                                 rows={2}
                             />
                             <div className="flex flex-wrap gap-2 items-center">
                                 {keywords.map((k) => (
-                                    <Badge key={k} variant="secondary" className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-medium px-2 py-1 rounded-md text-xs group">
+                                    <Badge key={k} variant="secondary" className="bg-muted text-muted-foreground font-medium px-2 py-1 rounded-md text-xs group">
                                         #{k}
                                         <button onClick={() => handleRemoveKeyword(k)} className="ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <X className="h-3 w-3 hover:text-red-500" />
+                                            <X className="h-3 w-3 hover:text-destructive" />
                                         </button>
                                     </Badge>
                                 ))}
                                 <input 
-                                    className="bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 px-2 py-0.5 text-xs focus:ring-0 placeholder-slate-400 dark:text-white outline-none w-24 focus:w-40 transition-all font-medium" 
+                                    className="bg-transparent border-b border-dashed border-border px-2 py-0.5 text-xs focus:ring-0 placeholder:text-muted-foreground text-foreground outline-none w-24 focus:w-40 transition-all font-medium" 
                                     placeholder="+ Add keyword" 
                                     type="text"
                                     value={newKeyword}
@@ -137,12 +172,12 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
 
                         {/* Abstract / Description Section */}
                         <section className="space-y-6">
-                            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                    <FileText className="w-5 h-5 text-indigo-500" />
+                            <div className="flex items-center justify-between border-b pb-3">
+                                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-primary" />
                                     Research Abstract
                                 </h2>
-                                <div className="flex items-center gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                                     <span className="flex items-center gap-1"><History className="w-3 h-3" /> Auto-saved</span>
                                     <span>{description.split(/\s+/).filter(Boolean).length} Words</span>
                                 </div>
@@ -152,22 +187,17 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     onBlur={handleSaveChanges}
-                                    className="w-full min-h-[400px] bg-white dark:bg-[#111722] border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-lg leading-[1.8] text-slate-600 dark:text-slate-300 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm font-serif" 
+                                    className="w-full min-h-[400px] bg-card border rounded-xl p-6 text-base leading-[1.8] text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm font-sans" 
                                     placeholder="Start drafting your research abstract or overview here..."
                                 />
-                                <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all">
-                                    <Button variant="outline" size="sm" className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 text-[10px] h-7 px-3 rounded-full hover:bg-slate-50">
-                                        Expand Editor
-                                    </Button>
-                                </div>
                             </div>
                         </section>
 
                         {/* Related Work Section */}
                         <section className="space-y-6">
-                             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                    <LinkIcon className="w-5 h-5 text-indigo-500" />
+                             <div className="flex items-center justify-between border-b pb-3">
+                                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                    <LinkIcon className="w-5 h-5 text-primary" />
                                     Internal References
                                 </h2>
                                 <LinkRelatedWorkDialog 
@@ -179,23 +209,23 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {relatedWork.length > 0 ? relatedWork.map((rw) => (
-                                    <Card key={rw.id} className="bg-white dark:bg-[#1a2436] border-slate-100 dark:border-slate-800/50 hover:shadow-md transition-all cursor-pointer group">
+                                    <Card key={rw.id} className="bg-card hover:shadow-md transition-all cursor-pointer group">
                                         <CardContent className="p-4 flex items-start gap-4">
-                                            <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                                            <div className="p-2 rounded-lg bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                                                 <GraduationCap className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <Badge variant="outline" className="text-[9px] uppercase tracking-tighter mb-1.5 border-slate-200 dark:border-slate-800">
+                                                <Badge variant="outline" className="text-[9px] uppercase tracking-tighter mb-1.5">
                                                     {rw.target_type}
                                                 </Badge>
-                                                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 truncate">{rw.target_title}</h4>
-                                                <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">{rw.description || "Referenced research work."}</p>
+                                                <h4 className="text-sm font-bold text-foreground truncate">{rw.target_title}</h4>
+                                                <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">{rw.description || "Referenced research work."}</p>
                                             </div>
-                                            <ChevronRight className="w-4 h-4 text-slate-300 self-center group-hover:translate-x-1 transition-transform" />
+                                            <ChevronRight className="w-4 h-4 text-muted-foreground self-center group-hover:translate-x-1 transition-transform" />
                                         </CardContent>
                                     </Card>
                                 )) : (
-                                    <div className="col-span-full border-2 border-dashed border-slate-100 dark:border-slate-800/50 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 gap-2">
+                                    <div className="col-span-full border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-muted-foreground gap-2">
                                         <LinkIcon className="w-8 h-8 opacity-20" />
                                         <p className="text-xs font-medium italic">No related internal works linked yet.</p>
                                     </div>
@@ -205,155 +235,177 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                     </div>
 
                     {/* RIGHT COLUMN: Metadata & Sidebar Controls */}
-                    <div className="lg:col-span-4 space-y-8">
+                    <div className="lg:col-span-4 space-y-6">
                         
                         {/* Status & Action Card */}
-                        <Card className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                             <div className="bg-indigo-600 h-1" />
+                        <Card className="shadow-sm overflow-hidden border-primary/20">
+                             <div className="bg-primary h-1" />
                              <CardContent className="p-6 space-y-6">
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Progress</span>
-                                        <span className="text-xs font-bold text-indigo-500">45% Complete</span>
-                                    </div>
-                                    <Progress value={45} className="h-2 bg-indigo-50 dark:bg-slate-800" />
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#111722] border border-slate-100 dark:border-slate-800">
-                                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Status</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                            <span className="text-xs font-bold text-slate-900 dark:text-white capitalize">{workspace.status}</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#111722] border border-slate-100 dark:border-slate-800">
-                                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Privacy</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <Lock className="w-3 h-3 text-slate-400" />
-                                            <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tighter">Private</span>
-                                        </div>
+                                    <h3 className="font-semibold flex items-center gap-2">
+                                        <CheckCircle2 className="w-5 h-5 text-primary" />
+                                        Workflow Status
+                                    </h3>
+                                    
+                                    <div className={`p-4 rounded-xl border ${statusDisplay.color} bg-opacity-10 bg-current`}>
+                                        <span className="block font-bold text-sm mb-1">{statusDisplay.label}</span>
+                                        <p className="text-xs opacity-80">
+                                            {workspace.status === 'draft' && "Keep working on your research. Submit for review when ready."}
+                                            {workspace.status === 'pending_review' && "Your workspace is currently being reviewed by your supervisor."}
+                                            {workspace.status === 'needs_revision' && "Supervisor requested revisions. Please check feedback."}
+                                            {workspace.status === 'approved' && "Your research has been approved and published!"}
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Button 
-                                        className="w-full bg-indigo-600 hover:bg-indigo-700 h-11 shadow-lg shadow-indigo-600/10"
-                                        onClick={() => {
-                                            const pathType = workspace.type === 'publication' ? 'paper' : workspace.type
-                                            const url = `${window.location.origin}/${pathType}/${workspace.id}`
-                                            navigator.clipboard.writeText(url)
-                                            toast.success("Public link copied to clipboard")
-                                        }}
-                                    >
-                                        <Share className="w-4 h-4 mr-2" /> Share Workspace
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-11 border-slate-200 dark:border-slate-800"
-                                        onClick={() => {
-                                            const pathType = workspace.type === 'publication' ? 'paper' : workspace.type
-                                            router.push(`/${pathType}/${workspace.id}`)
-                                        }}
-                                    >
-                                        <Eye className="w-4 h-4 mr-2" /> Live Preview
-                                    </Button>
+                                <div className="space-y-3 pt-4 border-t">
+                                    {workspace.status === 'draft' || workspace.status === 'needs_revision' ? (
+                                        <Button 
+                                            className="w-full h-11"
+                                            onClick={handleSubmitForReview}
+                                            disabled={isSubmitting || (supervisorsList.length === 0 && workspace.type !== 'publication')}
+                                        >
+                                            <Send className="w-4 h-4 mr-2" /> 
+                                            {workspace.status === 'needs_revision' ? "Resubmit for Review" : "Submit for Review"}
+                                        </Button>
+                                    ) : null}
+
+                                    {workspace.status === 'approved' && (
+                                        <Button 
+                                            variant="outline"
+                                            className="w-full h-11"
+                                            onClick={() => {
+                                                const pathType = workspace.type === 'publication' ? 'paper' : workspace.type
+                                                window.open(`/${pathType}/${workspace.id}`, '_blank')
+                                            }}
+                                        >
+                                            <ExternalLink className="w-4 h-4 mr-2" /> View Public Page
+                                        </Button>
+                                    )}
+
+                                    {supervisorsList.length === 0 && workspace.type !== 'publication' && workspace.status !== 'approved' && (
+                                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-2">
+                                            <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
+                                            Assign a supervisor before submitting.
+                                        </p>
+                                    )}
                                 </div>
                              </CardContent>
                         </Card>
 
-                        {/* Supervision Card */}
-                        <Card className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                    <GraduationCap className="w-4 h-4 text-emerald-500" /> Supervision
+                        {/* Supervisor Card */}
+                        {workspace.type !== 'publication' && (
+                            <Card className="shadow-sm">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                        <GraduationCap className="w-4 h-4 text-primary" />
+                                        Supervisor
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {supervisorsList.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {supervisorsList.map((sup: any) => (
+                                                <div key={sup.user_id} className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                                                        {sup.full_name?.charAt(0) || 'S'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-semibold">{sup.full_name}</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase">{sup.role}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <p className="text-xs text-muted-foreground">No supervisor assigned yet.</p>
+                                            <SupervisionRequestDialog 
+                                                workspaceId={workspace.id} 
+                                                type={workspace.type} 
+                                                supervisors={supervisors}
+                                            />
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Team Members Card */}
+                        <Card className="shadow-sm">
+                            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    <Users className="w-4 h-4 text-primary" />
+                                    {workspace.type === 'publication' ? 'Authors' : 'Team Members'}
                                 </CardTitle>
+                                <InviteMemberDialog workspaceId={workspace.id} type={workspace.type} />
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                {supervisorsList.length > 0 ? (
-                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-                                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 font-bold">
-                                            {supervisorsList[0].full_name?.substring(0,1)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold truncate">{supervisorsList[0].full_name}</p>
-                                            <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tight">Verified Expert</p>
-                                        </div>
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <CardContent>
+                                {teamMembers.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {teamMembers.map((member: any) => (
+                                            <div key={member.user_id || member.id} className="flex items-center justify-between group">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs">
+                                                        {member.full_name?.charAt(0) || member.author_name?.charAt(0) || 'M'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">{member.full_name || member.author_name}</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase">
+                                                            {member.role || 'Co-author'} {member.status === 'invited' ? '(Pending)' : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : (
-                                    <SupervisionRequestDialog 
-                                        workspaceId={workspace.id} 
-                                        type={workspace.type} 
-                                        supervisors={supervisors} 
-                                    />
+                                    <p className="text-xs text-muted-foreground italic">No other members.</p>
                                 )}
                             </CardContent>
                         </Card>
 
-                        {/* Team Members Card */}
-                        <Card className="bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                            <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
-                                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                    <Users className="w-4 h-4 text-indigo-500" /> Research Team
-                                </CardTitle>
-                                <InviteMemberDialog workspaceId={workspace.id} type={workspace.type}>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950">
-                                        <Plus className="w-4 h-4" />
-                                    </Button>
-                                </InviteMemberDialog>
+                        {/* Metadata Card */}
+                        <Card className="shadow-sm">
+                            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                                <CardTitle className="text-sm">Metadata</CardTitle>
+                                <WorkspaceSettingsDialog workspace={workspace} />
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                {teamMembers.map((member: any) => (
-                                     <div key={member.user_id} className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors group">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-[10px] font-bold">
-                                            {member.full_name?.substring(0, 2)}
+                            <CardContent className="space-y-3 text-sm">
+                                <div className="flex justify-between items-center py-1 border-b">
+                                    <span className="text-muted-foreground">Department</span>
+                                    <span className="font-medium">{workspace.department || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-1 border-b">
+                                    <span className="text-muted-foreground">Field</span>
+                                    <span className="font-medium">{workspace.field || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-1 border-b">
+                                    <span className="text-muted-foreground">Created</span>
+                                    <span className="font-medium">{new Date(workspace.created_at).toLocaleDateString()}</span>
+                                </div>
+                                {workspace.type === 'publication' && (
+                                    <div className="flex justify-between items-center py-2 pt-3">
+                                        <div className="flex flex-col">
+                                            <span className="text-muted-foreground">Citations</span>
+                                            <span className="font-bold text-lg">{citationCount}</span>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold truncate">{member.full_name}</p>
-                                            <Badge variant="outline" className="text-[9px] uppercase tracking-tighter p-0 h-auto text-slate-400 border-0">
-                                                {member.role === 'leader' ? 'Principal Investigator' : 'Contributor'}
-                                            </Badge>
-                                        </div>
+                                        <Button 
+                                            size="sm" 
+                                            variant="secondary" 
+                                            onClick={handleSyncCitations}
+                                            disabled={isSyncingCitations}
+                                            className="h-8 text-xs bg-primary/10 text-primary hover:bg-primary/20"
+                                        >
+                                            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isSyncingCitations ? 'animate-spin' : ''}`} />
+                                            {isSyncingCitations ? 'Syncing...' : 'Sync Live'}
+                                        </Button>
                                     </div>
-                                ))}
+                                )}
                             </CardContent>
                         </Card>
 
-                         {/* Timeline / Dates Card */}
-                         <Card className="bg-slate-900 border-0 shadow-lg text-white">
-                            <CardContent className="p-6 space-y-6">
-                                <div className="space-y-4">
-                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
-                                            <Calendar className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Initialization</p>
-                                            <p className="text-xs font-medium">{new Date(workspace.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric'})}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
-                                            <Clock className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Last Modified</p>
-                                            <p className="text-xs font-medium">{new Date(workspace.updated_at).toLocaleTimeString()}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Shield className="w-3.5 h-3.5 text-indigo-400" />
-                                        <span className="text-[10px] font-bold text-white/60">CC BY-SA 4.0</span>
-                                    </div>
-                                    <Settings className="w-3.5 h-3.5 text-white/40 hover:text-white cursor-pointer transition-colors" />
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
-
                 </div>
             </div>
         </div>

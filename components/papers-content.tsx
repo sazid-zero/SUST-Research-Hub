@@ -303,30 +303,20 @@ export function PapersContent({ user }: PapersContentProps) {
                                                             <Eye className="h-4 w-4" />
                                                             <span>{paper.views} views</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Zap className="h-4 w-4" />
-                                                            <span>{paper.downloads} downloads</span>
-                                                        </div>
+
                                                     </div>
                                                     <div className="flex gap-2 w-full sm:w-auto">
                                                         <Link href={`/paper/${paper.id}`} className="flex-1 sm:flex-none">
                                                             <Button
-                                                                variant="outline"
                                                                 size="sm"
-                                                                className="border-border hover:bg-muted bg-transparent w-full sm:w-auto text-xs"
+                                                                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto text-xs"
                                                             >
                                                                 <Eye className="h-4 w-4 mr-1" />
                                                                 View
                                                             </Button>
                                                         </Link>
-                                                        <Button
-                                                            size="sm"
-                                                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
-                                                        >
-                                                            <Zap className="h-4 w-4 mr-1" />
-                                                            Download
-                                                        </Button>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>

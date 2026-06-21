@@ -1,0 +1,14 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.env.local
+.idea
+.vercel
+build_err.txt
+build_output.txt
+tsc_output.txt
+UIUX_design

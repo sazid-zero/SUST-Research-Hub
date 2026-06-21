@@ -77,6 +77,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
     const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
     const [selectedYear, setSelectedYear] = useState("All")
     const [selectedField, setSelectedField] = useState("All Fields")
+    const [selectedSupervisor, setSelectedSupervisor] = useState("All Supervisors")
     const [sortBy, setSortBy] = useState("trending")
     const [mounted, setMounted] = useState(false)
 
@@ -100,6 +101,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
     const departments = ["All Departments", ...new Set(projects.map((p) => p.department || "Other"))]
     const years = ["All", ...new Set(projects.map((p) => p.year).sort((a, b) => b - a))]
     const fields = ["All Fields", ...new Set(projects.flatMap((p) => p.keywords))]
+    const supervisors = ["All Supervisors", ...new Set(projects.map((p) => p.supervisor_name).filter(Boolean))]
 
     const filteredProjects = projects.filter((project) => {
         const matchesSearch =
@@ -112,8 +114,9 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
         const matchesField =
             selectedField === "All Fields" ||
             project.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
+        const matchesSupervisor = selectedSupervisor === "All Supervisors" || project.supervisor_name === selectedSupervisor
 
-        return matchesSearch && matchesDepartment && matchesYear && matchesField
+        return matchesSearch && matchesDepartment && matchesYear && matchesField && matchesSupervisor
     })
 
 
@@ -122,13 +125,15 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
         setSelectedDepartment("All Departments")
         setSelectedYear("All")
         setSelectedField("All Fields")
+        setSelectedSupervisor("All Supervisors")
     }
 
     const hasActiveFilters =
         searchQuery !== "" ||
         selectedDepartment !== "All Departments" ||
         selectedYear !== "All" ||
-        selectedField !== "All Fields"
+        selectedField !== "All Fields" ||
+        selectedSupervisor !== "All Supervisors"
 
     if (!mounted) return null
 
@@ -181,6 +186,22 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
                                             {(fields as string[]).slice(0, 10).map((field: string) => (
                                                 <SelectItem key={field} value={field}>
                                                     {field}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-foreground font-medium mb-2 block">Supervisor</Label>
+                                    <Select value={selectedSupervisor} onValueChange={setSelectedSupervisor}>
+                                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-popover border-border">
+                                            {supervisors.slice(0, 10).map((sup: any) => (
+                                                <SelectItem key={sup} value={sup}>
+                                                    {sup}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -325,29 +346,19 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
                                                             <Eye className="h-4 w-4" />
                                                             <span>{project.views} views</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Zap className="h-4 w-4" />
-                                                            <span>{project.downloads} downloads</span>
-                                                        </div>
+
                                                     </div>
                                                     <div className="flex gap-2 w-full sm:w-auto">
                                                         <Link href={`/project/${project.id}`} className="flex-1 sm:flex-none">
                                                             <Button
-                                                                variant="outline"
                                                                 size="sm"
-                                                                className="border-border hover:bg-muted bg-transparent w-full sm:w-auto text-xs"
+                                                                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto text-xs"
                                                             >
                                                                 <Eye className="h-4 w-4 mr-1" />
                                                                 View
                                                             </Button>
                                                         </Link>
-                                                        <Button
-                                                            size="sm"
-                                                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
-                                                        >
-                                                            <Zap className="h-4 w-4 mr-1" />
-                                                            Download
-                                                        </Button>
+
                                                     </div>
                                                 </div>
                                             </div>

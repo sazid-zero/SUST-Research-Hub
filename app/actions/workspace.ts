@@ -49,13 +49,6 @@ export async function createWorkspace(prevState: any, formData: FormData) {
   try {
     if (type === "thesis") {
       // Create Thesis
-      // Check system settings for auto-approval
-      const { getSystemSettings } = await import("./admin")
-      const settingsRes = await getSystemSettings()
-      const autoApprove = settingsRes.success && settingsRes.settings?.autoApproveThesis
-      
-      const status = autoApprove ? 'approved' : 'pending'
-
       const result = await sql`
         INSERT INTO theses (
           title, abstract, department, field, 
@@ -65,7 +58,7 @@ export async function createWorkspace(prevState: any, formData: FormData) {
         VALUES (
           ${title}, ${description}, ${department || user.department}, ${field || user.specialization},
           EXTRACT(YEAR FROM NOW()), CURRENT_DATE,
-          ${status}, null, NOW(), NOW()
+          'draft', null, NOW(), NOW()
         )
         RETURNING id
       `
@@ -93,7 +86,7 @@ export async function createWorkspace(prevState: any, formData: FormData) {
         )
         VALUES (
             ${title}, ${description}, ${department || user.department}, ${field || user.specialization},
-            'active', NOW(), NOW()
+            'draft', NOW(), NOW()
         )
         RETURNING id
       `
@@ -112,7 +105,7 @@ export async function createWorkspace(prevState: any, formData: FormData) {
                 title, abstract, journal_name, publication_type, paper_subtype, year, status, created_at, updated_at
             )
             VALUES (
-                ${title}, ${description}, 'TBD', 'journal', ${paperSubtype || 'journal'}, EXTRACT(YEAR FROM NOW()), 'submitted', NOW(), NOW()
+                ${title}, ${description}, 'TBD', 'journal', ${paperSubtype || 'journal'}, EXTRACT(YEAR FROM NOW()), 'draft', NOW(), NOW()
             )
             RETURNING id
         `
@@ -457,7 +450,7 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
             `
         }
 
-        revalidatePath(`/student/workspace/${type}/${id}`)
+        revalidateWorkspace(id, type)
         return { message: "Updated successfully", success: true }
     } catch (error) {
         console.error("Update error:", error)
@@ -465,110 +458,122 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
     }
 }
 
-export async function saveCodeFile(workspaceId: number, workspaceType: string, path: string, content: string, name: string) {
+export async function submitForReview(workspaceId: number, workspaceType: string) {
     const user = await getCurrentUser()
-    if (!user) return { message: "Unauthorized", success: false }
+    if (!user) return { success: false, message: "Unauthorized" }
 
     try {
-        await sql`
-            INSERT INTO workspace_code_files (workspace_id, workspace_type, path, name, content, is_directory, updated_at)
-            VALUES (${workspaceId}, ${workspaceType}, ${path}, ${name}, ${content}, false, NOW())
-            ON CONFLICT (workspace_id, workspace_type, path) 
-            DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
-        `
+        // Find supervisor
+        const supervisorId = await getWorkspaceSupervisorId(workspaceId, workspaceType)
+        if (!supervisorId && workspaceType !== 'publication') { // Publications might go to admin
+            return { success: false, message: "Please request a supervisor first." }
+        }
+
+        // Update status to pending_review
+        if (workspaceType === 'thesis') {
+            await sql`UPDATE theses SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            await sql`UPDATE projects SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            await sql`UPDATE publications SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
+        }
+
         revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
-        return { success: true }
+
+        // Notify supervisor
+        if (supervisorId) {
+            const title = await getWorkspaceTitle(workspaceId, workspaceType)
+            await createNotification({
+                userId: supervisorId,
+                type: 'info',
+                title: 'Review Requested',
+                message: `${user.full_name} has submitted "${title || 'their workspace'}" for review.`,
+                link: `/supervisor/review/${workspaceType}/${workspaceId}`,
+                sourceId: workspaceId,
+                sourceType: workspaceType
+            })
+        }
+
+        return { success: true, message: "Submitted for review successfully" }
     } catch (error) {
-        console.error("Save code file error:", error)
-        return { success: false, message: "Failed to save file" }
+        console.error("Submit for review error:", error)
+        return { success: false, message: "Failed to submit for review" }
     }
 }
 
-export async function createFolder(workspaceId: number, workspaceType: string, path: string, name: string) {
+export async function supervisorReviewAction(
+    workspaceId: number, 
+    workspaceType: string, 
+    action: 'approve' | 'request_revision', 
+    feedback?: string
+) {
     const user = await getCurrentUser()
-    if (!user) return { message: "Unauthorized", success: false }
+    if (!user || user.role === 'student') return { success: false, message: "Unauthorized" }
 
     try {
-        await sql`
-            INSERT INTO workspace_code_files (workspace_id, workspace_type, path, name, is_directory)
-            VALUES (${workspaceId}, ${workspaceType}, ${path}, ${name}, true)
-            ON CONFLICT (workspace_id, workspace_type, path) DO NOTHING
-        `
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
-        return { success: true }
-    } catch (error) {
-        console.error("Create folder error:", error)
-        return { success: false, message: "Failed to create folder" }
-    }
-}
+        const newStatus = action === 'approve' ? 'approved' : 'needs_revision'
+        
+        if (workspaceType === 'thesis') {
+            await sql`UPDATE theses SET status = ${newStatus}, updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            await sql`UPDATE projects SET status = ${newStatus}, updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            await sql`UPDATE publications SET status = ${newStatus}, updated_at = NOW() WHERE id = ${workspaceId}`
+        }
 
-export async function deleteCodeFile(workspaceId: number, workspaceType: string, path: string) {
-    const user = await getCurrentUser()
-    if (!user) return { message: "Unauthorized", success: false }
-
-    try {
-        await sql`
-            DELETE FROM workspace_code_files 
-            WHERE workspace_id = ${workspaceId} 
-              AND workspace_type = ${workspaceType} 
-              AND (path = ${path} OR path LIKE ${path + '/%'})
-        `
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
-        return { success: true }
-    } catch (error) {
-        console.error("Delete code file error:", error)
-        return { success: false, message: "Failed to delete" }
-    }
-}
-
-export async function renameCodeItem(workspaceId: number, workspaceType: string, oldPath: string, newName: string) {
-    const user = await getCurrentUser()
-    if (!user) return { message: "Unauthorized", success: false }
-
-    try {
-        const pathParts = oldPath.split('/')
-        const oldName = pathParts[pathParts.length - 1]
-        pathParts[pathParts.length - 1] = newName
-        const newPath = pathParts.join('/')
-
-        // 1. Rename the item itself
-        await sql`
-            UPDATE workspace_code_files 
-            SET name = ${newName}, path = ${newPath}, updated_at = NOW()
-            WHERE workspace_id = ${workspaceId} 
-              AND workspace_type = ${workspaceType} 
-              AND path = ${oldPath}
-        `
-
-        // 2. If it's a directory, rename all children's paths
-        await sql`
-            UPDATE workspace_code_files 
-            SET path = REGEXP_REPLACE(path, '^' || ${oldPath + '/'}, ${newPath + '/'})
-            WHERE workspace_id = ${workspaceId} 
-              AND workspace_type = ${workspaceType} 
-              AND path LIKE ${oldPath + '/%'}
-        `
+        // Add feedback if provided
+        if (feedback && feedback.trim() !== '') {
+            await sql`
+                INSERT INTO supervision_requests (
+                    student_id, supervisor_id, 
+                    thesis_id, project_id, 
+                    topic_proposal, status, created_at, feedback
+                )
+                VALUES (
+                    (SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId} LIMIT 1), 
+                    ${user.id},
+                    ${workspaceType === 'thesis' ? workspaceId : null}, 
+                    ${workspaceType === 'project' ? workspaceId : null},
+                    'Review Feedback', 'feedback', NOW(), ${feedback}
+                )
+            `
+        }
 
         revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
-        return { success: true }
-    } catch (error) {
-        console.error("Rename error:", error)
-        return { success: false, message: "Failed to rename" }
-    }
-}
+        revalidatePath(`/supervisor/review/${workspaceType}/${workspaceId}`)
 
-export async function getCodeFiles(workspaceId: number, workspaceType: string) {
-    try {
-        const files = await sql`
-            SELECT id, name, path, is_directory, content, updated_at
-            FROM workspace_code_files
-            WHERE workspace_id = ${workspaceId} AND workspace_type = ${workspaceType}
-            ORDER BY is_directory DESC, name ASC
-        `
-        return files
+        // Notify team
+        const title = await getWorkspaceTitle(workspaceId, workspaceType)
+        let members: any[] = []
+        if (workspaceType === 'thesis') {
+            members = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId} AND role != 'supervisor'`
+        } else if (workspaceType === 'project') {
+            members = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId} AND role != 'supervisor'`
+        } else if (workspaceType === 'publication') {
+            members = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${workspaceId}`
+        }
+
+        for (const member of members) {
+            await createNotification({
+                userId: member.user_id,
+                type: action === 'approve' ? 'success' : 'warning',
+                title: action === 'approve' ? 'Workspace Approved' : 'Revision Requested',
+                message: action === 'approve' 
+                    ? `Your ${workspaceType} "${title || ''}" has been approved and published.`
+                    : `Revisions requested for your ${workspaceType} "${title || ''}".`,
+                link: `/student/workspace/${workspaceType}/${workspaceId}`,
+                sourceId: workspaceId,
+                sourceType: workspaceType
+            })
+        }
+
+        return { 
+            success: true, 
+            message: action === 'approve' ? "Workspace approved and published" : "Revision requested" 
+        }
     } catch (error) {
-        console.error("Fetch code files error:", error)
-        return []
+        console.error("Supervisor review error:", error)
+        return { success: false, message: "Failed to process review" }
     }
 }
 export async function saveResourceMetadata(data: {
@@ -661,7 +666,7 @@ export async function createModel(prevState: any, formData: FormData) {
                 ${model_type}, ${download_url}, NOW(), NOW()
             )
         `
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidateWorkspace(workspaceId, workspaceType)
         return { message: "Model registered successfully", success: true }
     } catch (error) {
         console.error("Create model error:", error)
@@ -710,11 +715,25 @@ export async function createDataset(prevState: any, formData: FormData) {
             INSERT INTO datasets (workspace_id, workspace_type, title, description, type, size, location, version, tags, created_at, updated_at)
             VALUES (${workspaceId}, ${workspaceType}, ${title}, ${description}, ${type}, ${size}, ${location}, ${version}, ${tags}, NOW(), NOW())
         `
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidateWorkspace(workspaceId, workspaceType)
         return { message: "Dataset added successfully", success: true }
     } catch (error) {
         console.error("Create dataset error:", error)
         return { message: "Failed to add dataset", success: false }
+    }
+}
+
+export async function deleteWorkspaceDataset(datasetId: number, workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        await sql`DELETE FROM datasets WHERE id = ${datasetId}`
+        revalidateWorkspace(workspaceId, workspaceType)
+        return { success: true, message: "Dataset removed successfully" }
+    } catch (error) {
+        console.error("Delete dataset error:", error)
+        return { success: false, message: "Failed to delete dataset" }
     }
 }
 
@@ -771,7 +790,7 @@ export async function uploadDocument(
             VALUES (${workspaceId}, ${workspaceType}, ${file.name}, ${fileUrl}, ${file.size}, ${file.type}, ${user.id}, NOW())
         `
 
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidateWorkspace(workspaceId, workspaceType)
         return { success: true, message: `Uploaded to ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}` }
     } catch (error) {
         console.error("Upload error:", error)
@@ -813,7 +832,7 @@ export async function addResourceLink(
             INSERT INTO resource_links (workspace_id, workspace_type, title, url, category, updated_at)
             VALUES (${workspaceId}, ${workspaceType}, ${title}, ${url}, ${category}, NOW())
         `
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidateWorkspace(workspaceId, workspaceType)
         return { message: "Resource link added successfully", success: true }
     } catch (error) {
         console.error("Add resource link error:", error)
@@ -841,7 +860,7 @@ export async function deleteResourceLink(linkId: number, workspaceId: number, wo
 
     try {
         await sql`DELETE FROM resource_links WHERE id = ${linkId}`
-        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidateWorkspace(workspaceId, workspaceType)
         return { success: true }
     } catch (error) {
         console.error("Delete resource link error:", error)
@@ -900,7 +919,7 @@ export async function getRelatedWork(sourceId: number, sourceType: string) {
     }
 }
 
-export async function updateWorkspaceSettings(id: number, type: string, data: { status?: string, department?: string, visibility?: string }) {
+export async function updateWorkspaceSettings(id: number, type: string, data: { department?: string, visibility?: string }) {
     const user = await getCurrentUser()
     if (!user) return { success: false, message: "Unauthorized" }
 
@@ -908,75 +927,27 @@ export async function updateWorkspaceSettings(id: number, type: string, data: { 
         if (type === 'thesis') {
             await sql`
                 UPDATE theses 
-                SET status = ${data.status || 'pending'}, 
-                    department = ${data.department || 'CSE'},
+                SET department = ${data.department || 'CSE'},
                     updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'project') {
             await sql`
                 UPDATE projects 
-                SET status = ${data.status || 'active'}, 
-                    department = ${data.department || 'CSE'},
+                SET department = ${data.department || 'CSE'},
                     updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'publication') {
             await sql`
                 UPDATE publications 
-                SET status = ${data.status || 'published'}, 
-                    department = ${data.department || 'CSE'},
+                SET department = ${data.department || 'CSE'},
                     updated_at = NOW()
                 WHERE id = ${id}
             `
         }
 
-        revalidatePath(`/student/workspace/${type}/${id}`)
-
-        // --- Notification Logic for Status Change ---
-        if (data.status) {
-            const title = await getWorkspaceTitle(id, type)
-            // Get all members to notify
-            let members: any[] = []
-            if (type === 'thesis') {
-                members = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${id}`
-            } else if (type === 'project') {
-                members = await sql`SELECT user_id FROM project_members WHERE project_id = ${id}`
-            } else if (type === 'publication') {
-                members = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${id}`
-            }
-
-            for (const member of members) {
-                if (member.user_id === user.id) continue; // Don't notify self
-
-                await createNotification({
-                    userId: member.user_id,
-                    type: 'info',
-                    title: 'Workspace Status Update',
-                    message: `The ${type} "${title || 'workspace'}" is now: ${data.status}`,
-                    link: `/student/workspace/${type}/${id}`,
-                    sourceId: id,
-                    sourceType: type
-                })
-            }
-
-            // Specific notification for Supervisor if status becomes 'pending'
-            if (data.status === 'pending') {
-                const supervisorId = await getWorkspaceSupervisorId(id, type)
-                if (supervisorId) {
-                    await createNotification({
-                        userId: supervisorId,
-                        type: 'supervision_request',
-                        title: 'Research Submitted for Review',
-                        message: `The ${type} "${title || 'workspace'}" has been submitted for your review.`,
-                        link: `/student/workspace/${type}/${id}`,
-                        sourceId: id,
-                        sourceType: type
-                    })
-                }
-            }
-        }
-
+        revalidateWorkspace(id, type)
 
         return { success: true, message: "Settings updated" }
     } catch (error) {
@@ -1015,6 +986,136 @@ async function getWorkspaceSupervisorId(id: number, type: string) {
     } catch (e) {
         console.error("Error fetching supervisor ID:", e)
         return null
+    }
+}
+
+function revalidateWorkspace(workspaceId: number, workspaceType: string) {
+    revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+    const publicType = workspaceType === 'publication' ? 'paper' : workspaceType
+    revalidatePath(`/${publicType}/${workspaceId}`)
+}
+
+export async function deleteDocument(fileId: number, workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        let fileUrl = ""
+        if (workspaceType === 'thesis') {
+            const [file] = await sql`SELECT file_url FROM thesis_files WHERE id = ${fileId}`
+            if (file) fileUrl = file.file_url
+            await sql`DELETE FROM thesis_files WHERE id = ${fileId}`
+        } else if (workspaceType === 'project') {
+            const [file] = await sql`SELECT file_url FROM project_files WHERE id = ${fileId}`
+            if (file) fileUrl = file.file_url
+            await sql`DELETE FROM project_files WHERE id = ${fileId}`
+        } else if (workspaceType === 'publication') {
+            const [file] = await sql`SELECT file_url FROM publication_files WHERE id = ${fileId}`
+            if (file) fileUrl = file.file_url
+            await sql`DELETE FROM publication_files WHERE id = ${fileId}`
+        }
+
+        if (fileUrl) {
+            await sql`DELETE FROM documents WHERE workspace_id = ${workspaceId} AND workspace_type = ${workspaceType} AND file_path = ${fileUrl}`
+            
+            try {
+                const diskPath = path.join(process.cwd(), "public", fileUrl)
+                if (fs.existsSync(diskPath)) {
+                    fs.unlinkSync(diskPath)
+                }
+            } catch (fsErr) {
+                console.error("FS delete error:", fsErr)
+            }
+        }
+
+        revalidateWorkspace(workspaceId, workspaceType)
+        return { success: true, message: "Document deleted successfully" }
+    } catch (error) {
+        console.error("Delete document error:", error)
+        return { success: false, message: "Failed to delete document" }
+    }
+}
+
+export async function uploadPublicationPDF(
+    workspaceId: number,
+    formData: FormData
+) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    const file = formData.get("file") as File
+    if (!file) return { success: false, message: "No file provided" }
+
+    try {
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "publication", workspaceId.toString())
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true })
+        }
+
+        const filePath = path.join(uploadDir, file.name)
+        fs.writeFileSync(filePath, buffer)
+
+        const fileUrl = `/uploads/publication/${workspaceId}/${file.name}`
+
+        await sql`
+            UPDATE publications
+            SET pdf_url = ${fileUrl}, updated_at = NOW()
+            WHERE id = ${workspaceId}
+        `
+
+        revalidateWorkspace(workspaceId, "publication")
+        return { success: true, message: "Main paper PDF uploaded successfully" }
+    } catch (error) {
+        console.error("Upload publication PDF error:", error)
+        return { success: false, message: "Upload failed" }
+    }
+}
+
+export async function deletePublicationPDF(workspaceId: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        const [pub] = await sql`SELECT pdf_url FROM publications WHERE id = ${workspaceId}`
+        if (pub && pub.pdf_url) {
+            try {
+                const diskPath = path.join(process.cwd(), "public", pub.pdf_url)
+                if (fs.existsSync(diskPath)) {
+                    fs.unlinkSync(diskPath)
+                }
+            } catch (fsErr) {
+                console.error("FS delete publication PDF error:", fsErr)
+            }
+        }
+
+        await sql`
+            UPDATE publications
+            SET pdf_url = NULL, updated_at = NOW()
+            WHERE id = ${workspaceId}
+        `
+
+        revalidateWorkspace(workspaceId, "publication")
+        return { success: true, message: "Main paper PDF removed successfully" }
+    } catch (error) {
+        console.error("Delete publication PDF error:", error)
+        return { success: false, message: "Failed to remove PDF" }
+    }
+}
+
+export async function deleteWorkspaceModel(modelId: number, workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        await sql`DELETE FROM models WHERE id = ${modelId}`
+        revalidateWorkspace(workspaceId, workspaceType)
+        return { success: true, message: "Model removed successfully" }
+    } catch (error) {
+        console.error("Delete model error:", error)
+        return { success: false, message: "Failed to delete model" }
     }
 }
 

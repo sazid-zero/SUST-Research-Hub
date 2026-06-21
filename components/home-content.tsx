@@ -26,7 +26,6 @@ import type { Thesis } from "@/lib/data/theses"
 import type { User } from "@/lib/db/users"
 import { GlobalNavbar } from "@/components/global-navbar"
 import { RepositoryShowcase } from "@/components/repository-showcase"
-import { TechStackShowcase } from "@/components/tech-stack-showcase"
 import { FeaturesSection } from "@/components/features-section"
 
 import { getShowcaseStats, ShowcaseStats } from "@/app/actions/stats"
@@ -375,7 +374,7 @@ export function HomeContent({
                         <div className="hero-title space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-8 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-transparent text-xs font-medium text-primary w-fit mx-auto lg:mx-0">
                                 <Zap className="h-3 w-3" />
-                                Next-Gen Research Repository
+                                Official Academic Research Repository
                             </div>
                             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-balance leading-tight text-foreground">
                                 Discover Academic
@@ -397,7 +396,7 @@ export function HomeContent({
                                         size="lg"
                                         className="w-full bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-white text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
                                     >
-                                        Start Publishing
+                                        Submit Research
                                         <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
                                 </Link>
@@ -408,7 +407,7 @@ export function HomeContent({
                                     variant="outline"
                                     className="w-full border-green-600 text-foreground hover:text-white bg-white hover:bg-green-600 hover:scale-105 transition-transform text-xs sm:text-sm md:text-base py-2 sm:py-3 md:py-4"
                                 >
-                                    Explore Repository
+                                    Browse Research
                                 </Button>
                             </Link>
                         </div>
@@ -721,9 +720,7 @@ export function HomeContent({
                 <div className="max-w-8xl mx-auto">
                     <RepositoryShowcase stats={stats} />
                 </div>
-                <div className="relative">
-                    <TechStackShowcase />
-                </div>
+                {/* Tech stack section removed for clean academic aesthetic */}
                 <div className="max-w-8xl mx-auto">
                     <FeaturesSection />
                 </div>
@@ -792,14 +789,23 @@ export function HomeContent({
                                     <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background" />
                                 </div>
                                 <span className="text-muted-foreground">
-                  <span className="font-semibold text-foreground">1,200+</span> researchers
+                  <span className="font-semibold text-foreground">
+                    {stats?.researchersCount !== undefined ? `${stats.researchersCount.toLocaleString()}+` : "1,200+"}
+                  </span>{" "}
+                                    researchers
                 </span>
                             </div>
                             <div className="text-muted-foreground">
-                                <span className="font-semibold text-foreground">5,000+</span> theses published
+                                <span className="font-semibold text-foreground">
+                                    {stats?.theses.count !== undefined ? `${stats.theses.count.toLocaleString()}+` : "5,000+"}
+                                </span>{" "}
+                                theses published
                             </div>
                             <div className="text-muted-foreground">
-                                <span className="font-semibold text-foreground">15+</span> research fields
+                                <span className="font-semibold text-foreground">
+                                    {stats?.researchFieldsCount !== undefined ? `${stats.researchFieldsCount.toLocaleString()}+` : "15+"}
+                                </span>{" "}
+                                research fields
                             </div>
                         </div>
                     </div>
@@ -899,30 +905,36 @@ export function HomeContent({
                             </div>
                         </div>
 
-                        {/* Newsletter - minimal design */}
+                        {/* Official Links & Contact */}
                         <div className="lg:col-span-3 space-y-4">
-                            <h4 className="text-sm font-semibold text-foreground">Stay Connected</h4>
+                            <h4 className="text-sm font-semibold text-foreground">SUST Portal</h4>
                             <p className="text-xs text-muted-foreground leading-relaxed">
-                                Subscribe for research updates and academic insights.
+                                Shahjalal University of Science and Technology, Kumargaon, Sylhet-3114, Bangladesh.
                             </p>
-                            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        placeholder="Email address"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-all"
-                                        required
-                                    />
-                                </div>
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    className="w-full bg-linear-to-r from-primary to-accent hover:scale-105 shadow-xl shadow-primary/20 border-none transition-all duration-300 text-white"
-                                >
-                                    Subscribe
-                                    <ArrowRight className="ml-2 h-3 w-3" />
-                                </Button>
-                            </form>
+                            <ul className="space-y-2">
+                                <li>
+                                    <a
+                                        href="https://www.sust.edu"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                                    >
+                                        SUST Official Website
+                                        <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://www.sust.edu/academic/research_center"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                                    >
+                                        SUST Research Centre
+                                        <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 

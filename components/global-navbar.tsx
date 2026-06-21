@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react"
 import { useTheme } from "next-themes"
 import { AuthButton } from "@/components/auth-button"
 import { UserProfileDropdown } from "@/components/user-profile-dropdown"
-import { useSidebar } from "@/components/sidebar-context"
+import { useSidebarOptional } from "@/components/sidebar-context"
 import { NotificationsPopover } from "@/components/notifications-popover"
 export interface GlobalUser {
     id: string
@@ -42,7 +42,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     const pathname = usePathname()
     const router = useRouter()
 
-    const { toggle } = useSidebar()
+    const sidebar = useSidebarOptional()
 
     useEffect(() => {
         setMounted(true)
@@ -88,6 +88,7 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
     const navItems = [
         { label: "Theses", href: "/theses", icon: BookOpen },
         { label: "Papers", href: "/papers", icon: FileText },
+        { label: "Datasets", href: "/datasets", icon: Database },
         { label: "Models", href: "/models", icon: IconCube },
         { label: "Projects", href: "/projects", icon: Folder },
     ]
@@ -141,9 +142,9 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
                     <div className="flex h-16 items-center justify-between gap-4">
                         {/* Sidebar Toggle & Logo */}
                         <div className="flex items-center gap-4 flex-shrink-0">
-                            {pathname.startsWith("/student") || pathname.startsWith("/supervisor") || pathname.startsWith("/admin") ? (
+                            {sidebar && (pathname.startsWith("/student") || pathname.startsWith("/supervisor") || pathname.startsWith("/admin")) ? (
                                 <button
-                                    onClick={() => toggle()}
+                                    onClick={() => sidebar.toggle()}
                                     className="p-2 hover:bg-muted/50 rounded-lg transition-colors border border-border/50 lg:hidden"
                                     aria-label="Toggle Sidebar"
                                 >

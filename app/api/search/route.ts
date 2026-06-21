@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { getProjects } from "@/lib/data/projects"
 
 interface SearchResult {
   id: string
@@ -29,7 +28,7 @@ export async function GET(req: NextRequest) {
                COALESCE(u.full_name, 'Unknown') as supervisor_name
         FROM theses t
         LEFT JOIN users u ON t.supervisor_id = u.id
-        WHERE t.status = 'published' 
+        WHERE (t.status = 'published' OR t.status = 'approved')
         AND (t.title ILIKE $1 OR t.abstract ILIKE $1 OR t.keywords::text ILIKE $1)
         ORDER BY t.views DESC
         LIMIT $2
@@ -53,7 +52,7 @@ export async function GET(req: NextRequest) {
       const papersQuery = `
         SELECT p.id, p.title, p.journal_name, p.publication_type
         FROM publications p
-        WHERE p.status = 'published'
+        WHERE (p.status = 'published' OR p.status = 'approved')
         AND (p.title ILIKE $1 OR p.abstract ILIKE $1 OR p.keywords::text ILIKE $1)
         ORDER BY p.citations DESC
         LIMIT $2
@@ -120,21 +119,27 @@ export async function GET(req: NextRequest) {
       console.error("Error searching models:", error)
     }
 
-    // Search projects (from mock data)
+    // Search projects
     try {
-      const projects = getProjects()
-      const matchingProjects = projects.filter(p => 
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.abstract.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.keywords.some(k => k.toLowerCase().includes(searchTerm.toLowerCase()))
-      ).slice(0, Math.ceil(limit / 5))
-
-      matchingProjects.forEach(project => {
+      const projectsQuery = `
+        SELECT p.id, p.title, p.description, p.field,
+               COALESCE(u.full_name, 'Unknown') as supervisor_name
+        FROM projects p
+        LEFT JOIN team_members tm ON p.id = tm.project_id AND tm.role = 'supervisor'
+        LEFT JOIN users u ON tm.user_id = u.id
+        WHERE (p.status = 'published' OR p.status = 'approved' OR p.status = 'active')
+        AND (p.title ILIKE $1 OR p.description ILIKE $1 OR p.field ILIKE $1)
+        ORDER BY p.created_at DESC
+        LIMIT $2
+      `
+      const projects = await db.query(projectsQuery, [`%${searchTerm}%`, Math.ceil(limit / 5)])
+      
+      projects.rows.forEach((project: any) => {
         results.push({
-          id: project.id,
+          id: project.id.toString(),
           title: project.title,
           type: "project",
-          subtitle: project.supervisorName || project.field
+          subtitle: project.supervisor_name || project.field
         })
       })
     } catch (error) {

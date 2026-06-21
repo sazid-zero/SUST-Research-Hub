@@ -18,15 +18,18 @@ import {
     CheckCircle2,
     Clock,
     Building2,
+    Lock,
 } from "lucide-react"
 import { GlobalNavbar } from "@/components/global-navbar"
 import type { ThesisWithAuthors } from "@/lib/db/theses"
 import type { User } from "@supabase/supabase-js"
 import type { Publication } from "@/lib/db/publications"
 import { FileIconBadge, getFileIcon } from "@/components/file-icon-helper"
+import { SecureDocumentViewer } from "@/components/secure-document-viewer"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { svgTextToDataUri } from "@/lib/utils"
 import { useContentTracking } from "@/hooks/use-content-tracking"
+import { ClaimAuthorshipButton } from "@/components/claim-authorship-button"
 import { useState } from "react"
 
 export function ThesisDetailEnhanced({
@@ -41,6 +44,17 @@ export function ThesisDetailEnhanced({
     const [viewCount, setViewCount] = useState(thesis.views || 0)
     const [downloadCount, setDownloadCount] = useState(thesis.downloads || 0)
     
+    const [secureViewerOpen, setSecureViewerOpen] = useState(false)
+    const [currentDocUrl, setCurrentDocUrl] = useState("")
+    const [currentDocTitle, setCurrentDocTitle] = useState("")
+
+    const openSecureViewer = (url: string, title: string, e: React.MouseEvent) => {
+        e.preventDefault()
+        setCurrentDocUrl(url)
+        setCurrentDocTitle(title)
+        setSecureViewerOpen(true)
+    }
+
     // Track view on mount and updating local state on success
     const { trackDownload } = useContentTracking("thesis", thesis.id, {
         onView: () => setViewCount(prev => prev + 1)
@@ -124,12 +138,166 @@ export function ThesisDetailEnhanced({
 
     const citations = generateCitations()
 
+    const linkToFiles = (links: any[] = [], expectedCategory: string) => 
+        links.filter(l => l.category === expectedCategory).map(l => ({
+            file_name: l.title,
+            external_url: l.url,
+            resource_type: l.category
+        }))
+
+    const modelToFiles = (modelsList: any[] = []) => 
+        modelsList.map(m => ({
+            file_name: m.name,
+            external_url: m.external_url || m.file_url,
+            resource_type: 'model',
+            description: m.description
+        }))
+
     const categorizedFiles = {
-        documents: thesis.files?.filter((f) => (f.resource_type || "document") === "document") || [],
-        code: thesis.files?.filter((f) => f.resource_type === "code") || [],
-        datasets: thesis.files?.filter((f) => f.resource_type === "dataset") || [],
-        models: thesis.files?.filter((f) => f.resource_type === "model") || [],
-        results: thesis.files?.filter((f) => f.resource_type === "result") || [],
+        documents: [
+            ...(thesis.files?.filter((f) => (f.resource_type || "document") === "document") || []),
+            ...linkToFiles(thesis.resource_links, 'document')
+        ],
+        code: [
+            ...(thesis.files?.filter((f) => f.resource_type === "code") || []),
+            ...linkToFiles(thesis.resource_links, 'code')
+        ],
+        datasets: [
+            ...(thesis.files?.filter((f) => f.resource_type === "dataset") || []),
+            ...linkToFiles(thesis.resource_links, 'dataset')
+        ],
+        models: [
+            ...(thesis.files?.filter((f) => f.resource_type === "model") || []),
+            ...modelToFiles(thesis.models),
+            ...linkToFiles(thesis.resource_links, 'model')
+        ],
+    }
+
+    const renderResources = () => {
+        if (!user) {
+            return (
+                <Card className="border border-border bg-card p-6 shadow-md relative overflow-hidden h-[400px]">
+                    <div className="absolute inset-0 bg-background/50 backdrop-blur-md z-10 flex flex-col items-center justify-center p-6 text-center">
+                        <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                            <Lock className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Login Required</h3>
+                        <p className="text-muted-foreground mb-6 max-w-sm">
+                            Thesis resources, datasets, models, and unpublished documents are restricted to SUST students and faculty.
+                        </p>
+                        <Button asChild>
+                            <Link href="/login">Sign In to Access Resources</Link>
+                        </Button>
+                    </div>
+                    <div className="space-y-4 opacity-50 blur-sm select-none pointer-events-none">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                                <div className="w-10 h-10 rounded bg-muted"></div>
+                                <div className="space-y-2 flex-1">
+                                    <div className="h-4 bg-muted rounded w-1/3"></div>
+                                    <div className="h-3 bg-muted rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+            )
+        }
+
+        return (
+            <>
+                {[
+                    { type: "documents" as const, title: "Documents", icon: "pdf", msg: "No documents uploaded" },
+                    { type: "code" as const, title: "Code", icon: "code", msg: "No code linked" },
+                    { type: "datasets" as const, title: "Datasets", icon: "dataset", msg: "No datasets available" },
+                    { type: "models" as const, title: "Models", icon: "model", msg: "No trained models shared" },
+                ].map(({ type, title, icon, msg }) => {
+                    const files = categorizedFiles[type]
+                    return (
+                        <Card
+                            key={type}
+                            className="border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow mb-6"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <FileIconBadge fileType={icon} />
+                                    <h3 className="font-bold text-foreground">{title}</h3>
+                                    <Badge variant="secondary" className="text-xs font-semibold">
+                                        {files.length}
+                                    </Badge>
+                                </div>
+                            </div>
+                            {files.length > 0 ? (
+                                <div className="space-y-3">
+                                    {files.map((file, idx) => {
+                                        const isExternal = !!file.external_url
+                                        const config = getFileIcon(file.file_type || file.file_name, isExternal)
+                                        const IconComponent = config.icon
+                                        const isDocument = type === "documents"
+                                        const linkHref = file.external_url || file.file_url || file.url || ""
+
+                                        return (
+                                            <div key={idx} className="space-y-2">
+                                                <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors border border-transparent hover:border-border">
+                                                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
+                                                            <FileIconBadge fileType={file.file_type || file.file_name} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-foreground truncate">
+                                                                {file.file_name || "External Link"}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground mt-1">
+                                                                {isExternal
+                                                                    ? "External Repository"
+                                                                    : `${(file.file_size / 1024 / 1024).toFixed(1)} MB`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {(isExternal || isDocument) && (
+                                                        <Button
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            className="h-8 shrink-0 hover:bg-primary/10"
+                                                            onClick={(e) => {
+                                                                if (isDocument && !isExternal) {
+                                                                    openSecureViewer(linkHref, file.file_name, e)
+                                                                } else if (isExternal) {
+                                                                    window.open(linkHref, "_blank")
+                                                                }
+                                                            }}
+                                                        >
+                                                            {isExternal ? (
+                                                                <ExternalLink className="h-4 w-4 text-primary" />
+                                                            ) : (
+                                                                <Eye className="h-4 w-4 text-primary" />
+                                                            )}
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                {isExternal && (
+                                                    <div className="ml-11 px-3 py-2 bg-muted rounded border border-border text-xs text-muted-foreground break-all font-mono hover:bg-muted/80 transition-colors">
+                                                        {file.external_url}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-muted-foreground">
+                                    <div className="bg-muted/50 border-2 border-dashed border-border rounded-xl w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                        <FileText className="h-8 w-8 text-muted-foreground/60" />
+                                    </div>
+                                    <p className="text-sm font-medium">{msg}</p>
+                                    <p className="text-xs mt-1">This section will appear when resources are added</p>
+                                </div>
+                            )}
+                        </Card>
+                    )
+                })}
+            </>
+        )
     }
 
     return (
@@ -178,22 +346,33 @@ export function ThesisDetailEnhanced({
                     <Eye className="h-4 w-4" />
                     <span className="font-medium text-foreground">{viewCount}</span> views
                   </span>
-                                    <span className="flex items-center gap-1.5">
-                    <Download className="h-4 w-4" />
-                    <span className="font-medium text-foreground">{downloadCount}</span> downloads
-                  </span>
+
                                 </div>
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" onClick={() => {}}>
-                                        <FileText className="h-4 w-4" />
-                                        View Full Thesis
-                                    </Button>
-                                    <Button variant="outline" className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all" onClick={() => handleDownload()}>
-                                        <Download className="h-4 w-4" />
-                                        Download PDF
-                                    </Button>
+                                    {(() => {
+                                        const primaryDoc = categorizedFiles.documents?.[0]
+                                        return (
+                                            <Button 
+                                                className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" 
+                                                onClick={(e) => {
+                                                    if (primaryDoc) {
+                                                        const href = primaryDoc.external_url || primaryDoc.file_url || primaryDoc.url || ""
+                                                        if (!primaryDoc.external_url) {
+                                                            openSecureViewer(href, primaryDoc.file_name, e)
+                                                        } else {
+                                                            window.open(href, "_blank")
+                                                        }
+                                                    }
+                                                }}
+                                                disabled={!primaryDoc}
+                                            >
+                                                <FileText className="h-4 w-4" />
+                                                View Full Thesis
+                                            </Button>
+                                        )
+                                    })()}
                                     <Button variant="outline" className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all">
                                         <Bookmark className="h-4 w-4" />
                                         Save
@@ -246,9 +425,9 @@ export function ThesisDetailEnhanced({
                                         </p>
                                         {thesis.authors?.length > 0 ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {thesis.authors.map((author) => (
+                                                {thesis.authors.map((author, index) => (
                                                     <Link
-                                                        key={author.id}
+                                                        key={author.id || `ghost-${index}`}
                                                         href={`/student/profile/${author.student_id}`}
                                                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors group"
                                                     >
@@ -267,10 +446,25 @@ export function ThesisDetailEnhanced({
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <div>
-                                                            <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
-                                                                {author.full_name}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground">{author.student_id}</p>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
+                                                                    {author.full_name}
+                                                                </p>
+                                                                {/* author.user_id is coming from our modified SQL query */}
+                                                                {!(author as any).user_id && !!user && (
+                                                                    <div onClick={(e) => e.preventDefault()}>
+                                                                        <ClaimAuthorshipButton
+                                                                            workspaceType="thesis"
+                                                                            workspaceId={thesis.id}
+                                                                            authorName={author.full_name}
+                                                                            isLoggedIn={!!user}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {author.student_id && (
+                                                                <p className="text-xs text-muted-foreground">{author.student_id}</p>
+                                                            )}
                                                         </div>
                                                     </Link>
                                                 ))}
@@ -327,8 +521,8 @@ export function ThesisDetailEnhanced({
                                                         </h3>
                                                         <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                                                             {pub.authors && pub.authors.length > 0 && (
-                                                                pub.authors.map((author: any) => (
-                                                                        <span key={author.id} className="flex items-center gap-1">
+                                                                pub.authors.map((author: any, idx: number) => (
+                                                                        <span key={author.id || `pub-ghost-${idx}`} className="flex items-center gap-1">
                                                                             <UserIcon className="h-3.5 w-3.5 text-primary/70" />
                                                                             {author.author_name}
                                                                         </span>
@@ -419,97 +613,7 @@ export function ThesisDetailEnhanced({
                     </div>
 
                     <div className="hidden lg:block space-y-6 overflow-y-auto pl-2 no-scrollbar">
-
-                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all shadow-md shadow-primary/10">
-                            <Download className="h-5 w-5" />
-                            Download All Files
-                        </Button>
-
-                        {[
-                            { type: "documents" as const, title: "Documents", icon: "pdf", msg: "No documents uploaded" },
-                            { type: "code" as const, title: "Code", icon: "code", msg: "No code linked" },
-                            { type: "datasets" as const, title: "Datasets", icon: "dataset", msg: "No datasets available" },
-                            { type: "models" as const, title: "Models", icon: "model", msg: "No trained models shared" },
-                            { type: "results" as const, title: "Results", icon: "result", msg: "No results or visualizations" },
-                        ].map(({ type, title, icon, msg }) => {
-                            const files = categorizedFiles[type]
-                            return (
-                                <Card
-                                    key={type}
-                                    className="border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow"
-                                >
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <FileIconBadge fileType={icon} />
-                                            <h3 className="font-bold text-foreground">{title}</h3>
-                                            <Badge variant="secondary" className="text-xs font-semibold">
-                                                {files.length}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    {files.length > 0 ? (
-                                        <div className="space-y-3">
-                                            {files.map((file, idx) => {
-                                                const isExternal = !!file.external_url
-                                                const config = getFileIcon(file.file_type || file.file_name, isExternal)
-                                                const IconComponent = config.icon
-
-                                                return (
-                                                    <div key={idx} className="space-y-2">
-                                                        <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors border border-transparent hover:border-border">
-                                                            <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
-                                                                    <FileIconBadge fileType={file.file_type || file.file_name} />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-medium text-foreground truncate">
-                                                                        {file.file_name || "External Link"}
-                                                                    </p>
-                                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                                        {isExternal
-                                                                            ? "External Repository"
-                                                                            : `${(file.file_size / 1024 / 1024).toFixed(1)} MB`}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost" 
-                                                                size="sm" 
-                                                                className="h-8 shrink-0 hover:bg-primary/10"
-                                                                onClick={() => {
-                                                                    if (!isExternal) {
-                                                                        handleDownload(file.file_size)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {isExternal ? (
-                                                                    <ExternalLink className="h-4 w-4 text-primary" />
-                                                                ) : (
-                                                                    <Download className="h-4 w-4 text-primary" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        {isExternal && (
-                                                            <div className="ml-11 px-3 py-2 bg-muted rounded border border-border text-xs text-muted-foreground break-all font-mono hover:bg-muted/80 transition-colors">
-                                                                {file.external_url}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <div className="bg-muted/50 border-2 border-dashed border-border rounded-xl w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                                                <FileText className="h-8 w-8 text-muted-foreground/60" />
-                                            </div>
-                                            <p className="text-sm font-medium">{msg}</p>
-                                            <p className="text-xs mt-1">This section will appear when resources are added</p>
-                                        </div>
-                                    )}
-                                </Card>
-                            )
-                        })}
+                        {renderResources()}
                     </div>
                 </div>
 
@@ -554,10 +658,7 @@ export function ThesisDetailEnhanced({
                 <Eye className="h-4 w-4" />
                 <span className="font-medium text-foreground">{viewCount}</span> views
               </span>
-                                <span className="flex items-center gap-1.5">
-                <Download className="h-4 w-4" />
-                <span className="font-medium text-foreground">{downloadCount}</span> downloads
-              </span>
+
                             </div>
 
                             {/* Action Buttons */}
@@ -566,10 +667,7 @@ export function ThesisDetailEnhanced({
                                     <FileText className="h-4 w-4" />
                                     View Full Thesis
                                 </Button>
-                                <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleDownload()}>
-                                    <Download className="h-4 w-4" />
-                                    Download PDF
-                                </Button>
+
                                 <Button variant="outline" className="gap-2 bg-transparent">
                                     <Bookmark className="h-4 w-4" />
                                     Save
@@ -622,9 +720,9 @@ export function ThesisDetailEnhanced({
                                     </p>
                                     {thesis.authors?.length > 0 ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {thesis.authors.map((author) => (
+                                            {thesis.authors.map((author, index) => (
                                                 <Link
-                                                    key={author.id}
+                                                    key={author.id || `ghost-${index}`}
                                                     href={`/student/profile/${author.student_id}`}
                                                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors group"
                                                 >
@@ -643,10 +741,24 @@ export function ThesisDetailEnhanced({
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
-                                                            {author.full_name}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">{author.student_id}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
+                                                                {author.full_name}
+                                                            </p>
+                                                            {!(author as any).user_id && !!user && (
+                                                                <div onClick={(e) => e.preventDefault()}>
+                                                                    <ClaimAuthorshipButton
+                                                                        workspaceType="thesis"
+                                                                        workspaceId={thesis.id}
+                                                                        authorName={author.full_name}
+                                                                        isLoggedIn={!!user}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {author.student_id && (
+                                                            <p className="text-xs text-muted-foreground">{author.student_id}</p>
+                                                        )}
                                                     </div>
                                                 </Link>
                                             ))}
@@ -693,8 +805,8 @@ export function ThesisDetailEnhanced({
                                                     </h3>
                                                     <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                                                         {pub.authors && pub.authors.length > 0 && (
-                                                            pub.authors.map((author: any) => (
-                                                                <span key={author.id} className="flex items-center gap-1">
+                                                            pub.authors.map((author: any, idx: number) => (
+                                                                <span key={author.id || `pub-ghost-${idx}`} className="flex items-center gap-1">
                                                                     <UserIcon className="h-3.5 w-3.5 text-primary/70" />
                                                                     {author.author_name}
                                                                 </span>
@@ -785,99 +897,17 @@ export function ThesisDetailEnhanced({
 
                     {/* Resources on Mobile */}
                     <div className="space-y-6">
-                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
-                            <Download className="h-5 w-5" />
-                            Download All Files
-                        </Button>
-
-                        {[
-                            { type: "documents" as const, title: "Documents", icon: "pdf", msg: "No documents uploaded" },
-                            { type: "code" as const, title: "Code", icon: "code", msg: "No code linked" },
-                            { type: "datasets" as const, title: "Datasets", icon: "dataset", msg: "No datasets available" },
-                            { type: "models" as const, title: "Models", icon: "model", msg: "No trained models shared" },
-                            { type: "results" as const, title: "Results", icon: "result", msg: "No results or visualizations" },
-                        ].map(({ type, title, icon, msg }) => {
-                            const files = categorizedFiles[type]
-                            return (
-                                <Card
-                                    key={type}
-                                    className="border border-border bg-card p-6 shadow-md hover:shadow-lg transition-shadow"
-                                >
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <FileIconBadge fileType={icon} />
-                                            <h3 className="font-bold text-foreground">{title}</h3>
-                                            <Badge variant="secondary" className="text-xs font-semibold">
-                                                {files.length}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    {files.length > 0 ? (
-                                        <div className="space-y-3">
-                                            {files.map((file, idx) => {
-                                                const isExternal = !!file.external_url
-                                                const config = getFileIcon(file.file_type || file.file_name, isExternal)
-                                                const IconComponent = config.icon
-
-                                                return (
-                                                    <div key={idx} className="space-y-2">
-                                                        <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors border border-transparent hover:border-border">
-                                                            <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0 mt-0.5">
-                                                                    <FileIconBadge fileType={file.file_type || file.file_name} />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-medium text-foreground truncate">
-                                                                        {file.file_name || "External Link"}
-                                                                    </p>
-                                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                                        {isExternal
-                                                                            ? "External Repository"
-                                                                            : `${(file.file_size / 1024 / 1024).toFixed(1)} MB`}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost" 
-                                                                size="sm" 
-                                                                className="h-8 shrink-0 hover:bg-primary/10"
-                                                                onClick={() => {
-                                                                    if (!isExternal) {
-                                                                        handleDownload(file.file_size)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {isExternal ? (
-                                                                    <ExternalLink className="h-4 w-4 text-primary" />
-                                                                ) : (
-                                                                    <Download className="h-4 w-4 text-primary" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                        {isExternal && (
-                                                            <div className="ml-11 px-3 py-2 bg-muted rounded border border-border text-xs text-muted-foreground break-all font-mono hover:bg-muted/80 transition-colors">
-                                                                {file.external_url}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <div className="bg-muted/50 border-2 border-dashed border-border rounded-xl w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                                                <FileText className="h-8 w-8 text-muted-foreground/60" />
-                                            </div>
-                                            <p className="text-sm font-medium">{msg}</p>
-                                            <p className="text-xs mt-1">This section will appear when resources are added</p>
-                                        </div>
-                                    )}
-                                </Card>
-                            )
-                        })}
+                        {renderResources()}
                     </div>
                 </div>
             </div>
+
+            <SecureDocumentViewer
+                url={currentDocUrl}
+                title={currentDocTitle}
+                isOpen={secureViewerOpen}
+                onClose={() => setSecureViewerOpen(false)}
+            />
         </div>
     )
 }

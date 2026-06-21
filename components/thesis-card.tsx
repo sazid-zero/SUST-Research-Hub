@@ -87,10 +87,6 @@ export function ThesisCard({ thesis }: ThesisCardProps) {
               <Eye className="h-4 w-4" />
               <span>{thesis.views} views</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              <span>{thesis.downloads} downloads</span>
-            </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Link
@@ -108,13 +104,6 @@ export function ThesisCard({ thesis }: ThesisCardProps) {
                 View
               </Button>
             </Link>
-            <Button
-              size="sm"
-              className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs md:text-sm"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
           </div>
         </div>
       </div>

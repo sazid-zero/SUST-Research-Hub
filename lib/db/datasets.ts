@@ -42,15 +42,14 @@ export interface DatasetFile {
 export async function getDatasets(filters?: {
   search?: string
   type?: string
-  accessibility?: string
   sortBy?: string
   limit?: number
   offset?: number
-}): Promise<Dataset[]> {
+}): Promise<any[]> {
   try {
     let query = `
-      SELECT * FROM datasets 
-      WHERE status = 'published'
+      SELECT * FROM datasets
+      WHERE 1=1
     `
 
     const params: any[] = []
@@ -61,34 +60,23 @@ export async function getDatasets(filters?: {
     }
 
     if (filters?.type && filters.type !== "all") {
-      query += ` AND dataset_type = $${params.length + 1}`
+      query += ` AND type = $${params.length + 1}`
       params.push(filters.type)
-    }
-
-    if (filters?.accessibility && filters.accessibility !== "all") {
-      query += ` AND accessibility_level = $${params.length + 1}`
-      params.push(filters.accessibility)
     }
 
     // Sorting
     switch (filters?.sortBy) {
-      case "trending":
-        query += ` ORDER BY (views + downloads * 2) DESC`
-        break
-      case "most_viewed":
-        query += ` ORDER BY views DESC`
-        break
-      case "most_downloaded":
-        query += ` ORDER BY downloads DESC`
-        break
       case "newest":
         query += ` ORDER BY created_at DESC`
         break
       case "oldest":
         query += ` ORDER BY created_at ASC`
         break
+      case "title":
+        query += ` ORDER BY title ASC`
+        break
       default:
-        query += ` ORDER BY (views + downloads * 2) DESC`
+        query += ` ORDER BY created_at DESC`
     }
 
     // Pagination
@@ -101,7 +89,7 @@ export async function getDatasets(filters?: {
     return result.rows
   } catch (error) {
     console.error("Error fetching datasets:", error)
-    throw error
+    return []
   }
 }
 
@@ -109,23 +97,14 @@ export async function getDatasetById(id: number): Promise<Dataset | null> {
   try {
     const query = `
       SELECT * FROM datasets 
-      WHERE id = $1 AND status = 'published'
+      WHERE id = $1
     `
     const result = await db.query(query, [id])
     if (result.rows.length === 0) return null
     
     const dataset = result.rows[0]
     
-    // Fetch files
-    const filesQuery = `
-        SELECT * FROM dataset_files WHERE dataset_id = $1 ORDER BY uploaded_at DESC
-    `
-    const filesResult = await db.query(filesQuery, [id])
-    
-    return {
-        ...dataset,
-        files: filesResult.rows
-    } as Dataset
+    return dataset as Dataset
   } catch (error) {
     console.error("Error fetching dataset:", error)
     throw error

@@ -19,6 +19,7 @@ export interface Project {
   objectives: string[]
   created_at: string
   updated_at: string
+  supervisor_name?: string
   
   // Relations (populated via joins/subqueries)
   team: ProjectMember[]
@@ -27,6 +28,12 @@ export interface Project {
   datasets: Dataset[]
   models: Model[]
   files: any[]
+  resource_links?: Array<{
+    id: number
+    title: string
+    url: string
+    category: string
+  }>
   keywords?: string[]
   collaborations?: string[] // Derived or stored in JSON
   views?: number // Need to add views column to projects if tracking
@@ -46,7 +53,7 @@ export async function getProjectById(id: number): Promise<Project | null> {
   try {
     // 1. Fetch Core Project Data with supervisor info if applicable
     const projectResult = await sql`
-      SELECT p.*, u.full_name as supervisor_name
+      SELECT p.*, COALESCE(u.full_name, p.ghost_supervisor) as supervisor_name
       FROM projects p
       LEFT JOIN users u ON p.supervisor_id = u.id
       WHERE p.id = ${id}
@@ -65,7 +72,7 @@ export async function getProjectById(id: number): Promise<Project | null> {
     
     // 3. Fetch Related Theses
     const thesesResult = await sql`
-        SELECT t.*, u.full_name as supervisor_name
+        SELECT t.*, COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name
         FROM theses t
         LEFT JOIN users u ON t.supervisor_id = u.id
         WHERE t.project_id = ${id}
@@ -82,7 +89,7 @@ export async function getProjectById(id: number): Promise<Project | null> {
 
     // 5. Fetch Datasets
     const datasetsResult = await sql`
-        SELECT d.*
+        SELECT d.id, d.title as name, d.download_url as external_url
         FROM datasets d
         WHERE d.workspace_id = ${id} AND d.workspace_type = 'project'
         ORDER BY d.created_at DESC
@@ -90,7 +97,7 @@ export async function getProjectById(id: number): Promise<Project | null> {
 
     // 6. Fetch Models
     const modelsResult = await sql`
-        SELECT m.*
+        SELECT m.id, m.title as name, m.description, m.model_url as external_url, m.download_url as file_url, m.framework
         FROM models m
         WHERE m.workspace_id = ${id} AND m.workspace_type = 'project'
         ORDER BY m.created_at DESC
@@ -103,6 +110,13 @@ export async function getProjectById(id: number): Promise<Project | null> {
         ORDER BY uploaded_at DESC
     `
 
+    // Fetch resource links
+    const linksResult = await sql`
+        SELECT id, title, url, category FROM resource_links
+        WHERE workspace_id = ${id} AND workspace_type = 'project'
+        ORDER BY created_at DESC
+    `
+
     return {
       ...project,
       team: teamResult as ProjectMember[],
@@ -111,6 +125,7 @@ export async function getProjectById(id: number): Promise<Project | null> {
       datasets: datasetsResult as any[],
       models: modelsResult as any[],
       files: filesResult as any[],
+      resource_links: linksResult as any[],
       objectives: project.objectives || [],
       keywords: project.keywords || [],
       views: project.views || 0,
@@ -124,11 +139,18 @@ export async function getProjectById(id: number): Promise<Project | null> {
 
 export async function getAllProjects(): Promise<Project[]> {
     try {
-        const result = await sql`SELECT * FROM projects WHERE status = 'published' ORDER BY created_at DESC`;
+        const result = await sql`
+            SELECT p.*, COALESCE(u.full_name, p.ghost_supervisor) as supervisor_name 
+            FROM projects p 
+            LEFT JOIN users u ON p.supervisor_id = u.id 
+            WHERE p.status = 'approved' 
+            ORDER BY p.created_at DESC
+        `;
         return result.map((p: any) => ({
             id: p.id,
             title: p.title,
             description: p.description,
+            supervisor_name: p.supervisor_name,
             status: p.status,
             department: p.department,
             field: p.field,

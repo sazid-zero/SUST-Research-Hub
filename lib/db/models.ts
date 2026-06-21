@@ -50,17 +50,17 @@ export async function getModels(filters?: {
   sortBy?: string
   limit?: number
   offset?: number
-}): Promise<Model[]> {
+}): Promise<any[]> {
   try {
     let query = `
-      SELECT * FROM models 
-      WHERE status = 'published'
+      SELECT * FROM models
+      WHERE 1=1
     `
 
     const params: any[] = []
 
     if (filters?.search) {
-      query += ` AND (title ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
+      query += ` AND (COALESCE(title, name) ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
       params.push(`%${filters.search}%`)
     }
 
@@ -76,26 +76,17 @@ export async function getModels(filters?: {
 
     // Sorting
     switch (filters?.sortBy) {
-      case "trending":
-        query += ` ORDER BY (views + downloads * 2) DESC`
-        break
-      case "most_viewed":
-        query += ` ORDER BY views DESC`
-        break
-      case "most_downloaded":
-        query += ` ORDER BY downloads DESC`
-        break
       case "newest":
         query += ` ORDER BY created_at DESC`
         break
       case "oldest":
         query += ` ORDER BY created_at ASC`
         break
-      case "most_accurate":
-        query += ` ORDER BY accuracy DESC NULLS LAST`
+      case "title":
+        query += ` ORDER BY COALESCE(title, name) ASC`
         break
       default:
-        query += ` ORDER BY (views + downloads * 2) DESC`
+        query += ` ORDER BY created_at DESC`
     }
 
     // Pagination
@@ -108,7 +99,7 @@ export async function getModels(filters?: {
     return result.rows
   } catch (error) {
     console.error("Error fetching models:", error)
-    throw error
+    return []
   }
 }
 
@@ -116,23 +107,14 @@ export async function getModelById(id: number): Promise<Model | null> {
   try {
     const query = `
       SELECT * FROM models 
-      WHERE id = $1 AND status = 'published'
+      WHERE id = $1
     `
     const result = await db.query(query, [id])
     if (result.rows.length === 0) return null
     
     const model = result.rows[0]
     
-    // Fetch files
-    const filesQuery = `
-        SELECT * FROM model_files WHERE model_id = $1 ORDER BY uploaded_at DESC
-    `
-    const filesResult = await db.query(filesQuery, [id])
-    
-    return {
-        ...model,
-        files: filesResult.rows
-    } as Model
+    return model as Model
   } catch (error) {
     console.error("Error fetching model:", error)
     throw error

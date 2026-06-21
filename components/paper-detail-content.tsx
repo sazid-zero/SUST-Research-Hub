@@ -34,6 +34,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { User } from "@supabase/supabase-js"
 import { svgTextToDataUri } from "@/lib/utils"
 import { useContentTracking } from "@/hooks/use-content-tracking"
+import { SecureDocumentViewer } from "@/components/secure-document-viewer"
+import { ClaimAuthorshipButton } from "@/components/claim-authorship-button"
 
 interface PaperDetailContentProps {
     publication: any
@@ -44,6 +46,18 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
     const [copied, setCopied] = useState(false)
     const [bookmarked, setBookmarked] = useState(false)
     const { trackDownload } = useContentTracking("publication", publication.id)
+
+    const [secureViewerOpen, setSecureViewerOpen] = useState(false)
+    const [currentDocUrl, setCurrentDocUrl] = useState("")
+    const [currentDocTitle, setCurrentDocTitle] = useState("")
+
+    const openSecureViewer = (url: string, title: string, e?: React.MouseEvent) => {
+        if (e) e.preventDefault()
+        if (!url || url === "#") return
+        setCurrentDocUrl(url)
+        setCurrentDocTitle(title)
+        setSecureViewerOpen(true)
+    }
 
     const handleCopyDOI = () => {
         if (publication.doi) {
@@ -90,15 +104,35 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
         return `${mb.toFixed(1)} MB`
     }
 
+    const linkToFiles = (links: any[] = [], expectedCategory: string) => 
+        links.filter(l => l.category === expectedCategory).map(l => ({
+            file_name: l.title,
+            external_url: l.url,
+            resource_type: l.category
+        }))
+
+    const modelToFiles = (modelsList: any[] = []) => 
+        modelsList.map(m => ({
+            file_name: m.name,
+            external_url: m.external_url || m.file_url,
+            resource_type: 'model',
+            description: m.description
+        }))
+
     const categorizedFiles = {
-        code: publication.files?.filter((f: any) => f.resource_type === "code") || [],
-        datasets: publication.files?.filter((f: any) => f.resource_type === "dataset") || [],
-        models: publication.files?.filter((f: any) => f.resource_type === "model") || [],
-        supplementary: publication.files?.filter((f: any) => 
-            f.resource_type === "supplementary" || 
-            f.resource_type === "result" || 
-            f.resource_type === "document"
-        ) || [],
+        code: [
+            ...(publication.files?.filter((f: any) => f.resource_type === "code") || []),
+            ...linkToFiles(publication.resource_links, 'code')
+        ],
+        datasets: [
+            ...(publication.files?.filter((f: any) => f.resource_type === "dataset") || []),
+            ...linkToFiles(publication.resource_links, 'dataset')
+        ],
+        models: [
+            ...(publication.files?.filter((f: any) => f.resource_type === "model") || []),
+            ...modelToFiles(publication.models),
+            ...linkToFiles(publication.resource_links, 'model')
+        ],
     }
 
     return (
@@ -191,17 +225,22 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
                                     <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-                                        <a href={publication.url || "#"} target={publication.url ? "_blank" : undefined} rel={publication.url ? "noopener noreferrer" : undefined}>
+                                        <a 
+                                            href={publication.url ? publication.url : "#"} 
+                                            target={publication.url ? "_blank" : undefined} 
+                                            rel={publication.url ? "noopener noreferrer" : undefined}
+                                            onClick={(e) => {
+                                                if (!publication.url && publication.pdf_url) {
+                                                    trackDownload()
+                                                    openSecureViewer(publication.pdf_url, publication.title, e)
+                                                }
+                                            }}
+                                        >
                                             <ExternalLink className="h-4 w-4" />
                                             View Full Paper
                                         </a>
                                     </Button>
-                                    <Button variant="outline" className="gap-2 bg-transparent" asChild>
-                                        <a onClick={() => trackDownload()} href={publication.pdf_url || "#"} target={publication.pdf_url ? "_blank" : undefined} rel={publication.pdf_url ? "noopener noreferrer" : undefined}>
-                                            <Download className="h-4 w-4" />
-                                            Download PDF
-                                        </a>
-                                    </Button>
+
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}
@@ -273,7 +312,16 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                                             <p className="text-sm text-muted-foreground mt-1">{author.affiliation}</p>
                                                         )}
                                                     </div>
-                                                    <Badge className="text-xs">
+                                                    <div className="flex items-center gap-2">
+                                                        {!author.user_id && !!user && (
+                                                            <ClaimAuthorshipButton
+                                                                workspaceType="publication"
+                                                                workspaceId={publication.id}
+                                                                authorName={author.author_name}
+                                                                isLoggedIn={!!user}
+                                                            />
+                                                        )}
+                                                        <Badge className="text-xs">
                                                         {author.author_order === 1
                                                             ? "1st"
                                                             : author.author_order === 2
@@ -281,6 +329,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                                                 : `${author.author_order}th`}{" "}
                                                         Author
                                                     </Badge>
+                                                    </div>
                                                 </div>
                                             )
 
@@ -408,7 +457,9 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                     <div className="space-y-6 overflow-y-auto pl-2 no-scrollbar">
                         {/* Paper Thumbnail / Preview Card */}
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                            <Card className="overflow-hidden border-border bg-card/50 backdrop-blur-xl group cursor-pointer" onClick={() => publication.pdf_url && window.open(publication.pdf_url, '_blank')}>
+                            <Card className="overflow-hidden border-border bg-card/50 backdrop-blur-xl group cursor-pointer" onClick={() => {
+                                if (publication.pdf_url) openSecureViewer(publication.pdf_url, publication.title)
+                            }}>
                                 <div className="aspect-3/4 relative bg-linear-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-8 overflow-hidden">
                                     {/* Glass Overlay Effect */}
                                     <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-50" />
@@ -438,7 +489,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                     {/* Play/Download Overlay */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/20 backdrop-blur-[2px]">
                                         <div className="h-14 w-14 rounded-full bg-primary shadow-xl flex items-center justify-center transform scale-90 group-hover:scale-100 transition-transform">
-                                            <Download className="h-6 w-6 text-primary-foreground" />
+                                            <Eye className="h-6 w-6 text-primary-foreground" />
                                         </div>
                                     </div>
                                 </div>
@@ -521,14 +572,7 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                 icon: Brain,
                                 color: "text-green-500",
                                 msg: "No trained models shared",
-                            },
-                            {
-                                type: "supplementary" as const,
-                                title: "Supplementary Materials",
-                                icon: FileBox,
-                                color: "text-orange-500",
-                                msg: "No supplementary materials",
-                            },
+                            }
                         ].map(({ type, title, icon: Icon, color, msg }, index) => {
                             const files = categorizedFiles[type]
                             return (
@@ -741,17 +785,22 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
                                     <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-                                        <a href={publication.url || "#"} target={publication.url ? "_blank" : undefined} rel={publication.url ? "noopener noreferrer" : undefined}>
+                                        <a 
+                                            href={publication.url ? publication.url : "#"} 
+                                            target={publication.url ? "_blank" : undefined} 
+                                            rel={publication.url ? "noopener noreferrer" : undefined}
+                                            onClick={(e) => {
+                                                if (!publication.url && publication.pdf_url) {
+                                                    trackDownload()
+                                                    openSecureViewer(publication.pdf_url, publication.title, e)
+                                                }
+                                            }}
+                                        >
                                             <ExternalLink className="h-4 w-4" />
                                             View Full Paper
                                         </a>
                                     </Button>
-                                    <Button variant="outline" className="gap-2 bg-transparent" asChild>
-                                        <a onClick={() => trackDownload()} href={publication.pdf_url || "#"} target={publication.pdf_url ? "_blank" : undefined} rel={publication.pdf_url ? "noopener noreferrer" : undefined}>
-                                            <Download className="h-4 w-4" />
-                                            Download PDF
-                                        </a>
-                                    </Button>
+
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}
@@ -994,6 +1043,13 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                     </div>
                 </div>
             </div>
+
+            <SecureDocumentViewer
+                url={currentDocUrl}
+                title={currentDocTitle}
+                isOpen={secureViewerOpen}
+                onClose={() => setSecureViewerOpen(false)}
+            />
         </div>
     )
 }

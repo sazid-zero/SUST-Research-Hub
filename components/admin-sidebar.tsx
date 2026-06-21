@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
-import { BookOpen, FileText, LayoutDashboard, LogOut, Settings, Users, BarChart3, Menu, X, Moon, Sun, ClipboardList } from 'lucide-react'
+import { BookOpen, FileText, LayoutDashboard, LogOut, Settings, Users, BarChart3, Menu, X, Moon, Sun, ClipboardList, UserCheck, UploadCloud } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -32,6 +32,8 @@ function SidebarContent({ setIsOpen }: SidebarContentProps) {
         { href: "/admin/users", label: "User Management", icon: Users },
         { href: "/admin/theses", label: "Research Management", icon: FileText },
         { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+        { href: "/admin/claims", label: "Authorship Claims", icon: UserCheck },
+        { href: "/admin/upload", label: "Legacy Upload", icon: UploadCloud },
         { href: "/admin/settings", label: "Settings", icon: Settings },
     ]
 

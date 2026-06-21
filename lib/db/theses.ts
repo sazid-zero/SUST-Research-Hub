@@ -37,6 +37,20 @@ export interface ThesisWithAuthors {
         external_url?: string
         description?: string
     }>
+    resource_links?: Array<{
+        id: number
+        title: string
+        url: string
+        category: string
+    }>
+    models?: Array<{
+        id: number
+        name: string
+        description: string
+        external_url?: string
+        file_url?: string
+        framework?: string
+    }>
 }
 
 async function executeQueryWithRetry<T>(queryFn: () => Promise<T>, maxRetries = 3, baseDelay = 100): Promise<T> {
@@ -85,13 +99,13 @@ export async function getAllPublishedTheses(): Promise<ThesisWithAuthors[]> {
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -154,13 +168,13 @@ export async function getRecentTheses(limit = 9): Promise<ThesisWithAuthors[]> {
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -223,13 +237,13 @@ export async function getThesesByDepartment(department: string): Promise<ThesisW
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -293,13 +307,13 @@ export async function searchTheses(query: string): Promise<ThesisWithAuthors[]> 
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -375,13 +389,13 @@ export async function getThesisById(id: number): Promise<ThesisWithAuthors | nul
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -421,7 +435,25 @@ export async function getThesisById(id: number): Promise<ThesisWithAuthors | nul
 
         if (result.length === 0) return null
 
-        return result[0] as ThesisWithAuthors
+        const thesis = result[0] as ThesisWithAuthors
+        
+        // Fetch additional workspace metadata
+        const links = await sql`SELECT id, title, url, category FROM resource_links WHERE workspace_id = ${id} AND workspace_type = 'thesis'`
+        const models = await sql`SELECT id, title as name, description, model_url as external_url, download_url as file_url, framework FROM models WHERE workspace_id = ${id} AND workspace_type = 'thesis'`
+        const datasets = await sql`SELECT id, title as name, download_url as external_url FROM datasets WHERE workspace_id = ${id} AND workspace_type = 'thesis'`
+
+        thesis.resource_links = links as any
+        thesis.models = models as any
+        // Datasets can be added to models/links or a separate property if needed, 
+        // we'll map datasets into resource_links for the frontend since category='dataset'
+        if (datasets.length > 0) {
+            thesis.resource_links = [
+                ...(thesis.resource_links || []),
+                ...datasets.map((d: any) => ({ id: d.id, title: d.name, url: d.external_url, category: 'dataset' }))
+            ]
+        }
+
+        return thesis
     }).catch((error: any) => {
         console.error("[v0] Database error in getThesisById after retries:", error)
         return null
@@ -446,13 +478,13 @@ export async function getThesesByStudentId(studentId: string): Promise<ThesisWit
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic
@@ -519,13 +551,13 @@ export async function getThesesBySupervisorId(supervisorId: number): Promise<The
                 t.keywords,
                 t.created_at,
                 t.updated_at,
-                u.full_name as supervisor_name,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
                 COALESCE(
                         (
                             SELECT json_agg(
                                            json_build_object(
-                                                   'id', u2.id,
-                                                   'full_name', u2.full_name,
+                                                   'id', u2.id, 'user_id', u2.id,
+                                                   'full_name', COALESCE(u2.full_name, ta.author_name),
                                                    'student_id', u2.student_id,
                                                    'author_order', ta.author_order,
                                                    'profile_pic', u2.profile_pic

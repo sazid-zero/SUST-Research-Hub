@@ -41,6 +41,20 @@ export interface Publication {
     }
     project_id?: number
     files?: PublicationFile[]
+    resource_links?: Array<{
+        id: number
+        title: string
+        url: string
+        category: string
+    }>
+    models?: Array<{
+        id: number
+        name: string
+        description: string
+        external_url?: string
+        file_url?: string
+        framework?: string
+    }>
 }
 
 export interface PublicationAuthor {
@@ -110,7 +124,7 @@ export async function getAllPublications(): Promise<Publication[]> {
             SELECT p.*, t.department as thesis_department
             FROM publications p
             LEFT JOIN theses t ON p.thesis_id = t.id
-            WHERE p.status = 'published'
+            WHERE p.status IN ('published', 'approved')
             ORDER BY p.published_date DESC, p.year DESC
         `
 
@@ -185,10 +199,24 @@ export async function getPublicationById(publicationId: number): Promise<Publica
             ORDER BY resource_type, uploaded_at DESC
         `
 
+        const links = await sql`SELECT id, title, url, category FROM resource_links WHERE workspace_id = ${publicationId} AND workspace_type = 'publication'`
+        const models = await sql`SELECT id, title as name, description, model_url as external_url, download_url as file_url, framework FROM models WHERE workspace_id = ${publicationId} AND workspace_type = 'publication'`
+        const datasets = await sql`SELECT id, title as name, download_url as external_url FROM datasets WHERE workspace_id = ${publicationId} AND workspace_type = 'publication'`
+
+        let resource_links = links as any
+        if (datasets.length > 0) {
+            resource_links = [
+                ...resource_links,
+                ...datasets.map((d: any) => ({ id: d.id, title: d.name, url: d.external_url, category: 'dataset' }))
+            ]
+        }
+
         return {
             ...pub,
             authors: authors as PublicationAuthor[],
             files: files as PublicationFile[],
+            resource_links: resource_links,
+            models: models as any,
             thesis: pub.thesis_id
                 ? {
                     id: pub.thesis_id,

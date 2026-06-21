@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -16,6 +17,12 @@ const nextConfig = {
   // <CHANGE> Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
+  },
+  serverActions: {
+    bodySizeLimit: '100mb',
   },
 }
 

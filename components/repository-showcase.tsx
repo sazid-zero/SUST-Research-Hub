@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import React from "react"
+import { motion } from "framer-motion"
 import Link from "next/link"
-import Image from "next/image"
 import {
     ArrowRight,
     ChevronLeft,
@@ -22,15 +21,15 @@ import { ShowcaseStats } from "@/app/actions/stats"
 const getCarouselData = (stats: ShowcaseStats | null) => [
     {
         id: "models",
-        title: "State-of-the-Art AI Models",
-        headline: "Benchmark-Topping Architecture",
-        description: "Access pre-trained weights and architectures for machine learning models, optimized for both accuracy and efficiency.",
+        title: "Scientific Artifacts & Models",
+        headline: "Computational Models & Tools",
+        description: "Access simulation parameters, dataset pipelines, software packages, and machine learning models created during research.",
         image: "/model.png",
         icon: Brain,
         color: "text-rose-500",
         href: "/models",
         stats: [
-            { label: "Accuracy", value: stats?.models.maxAccuracy ? (stats.models.maxAccuracy * 100).toFixed(1) + "%" : "99.1%" },
+            { label: "Scope", value: "Multi-Field" },
             { label: "Models", value: stats?.models.count?.toString() || "12+" },
             { label: "Downloads", value: stats ? (stats.models.count * 120).toLocaleString() : "8.5k" }, // Estimated multiplier
         ]
@@ -101,51 +100,90 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
 ]
 
 export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
-    const carouselData = getCarouselData(stats)
-    const [activeIndex, setActiveIndex] = useState(0)
-    const [isMobile, setIsMobile] = useState(false)
-    const [isTablet, setIsTablet] = useState(false)
+    const data = getCarouselData(stats)
 
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768)
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024)
+    const getColorTheme = (colorText: string) => {
+        if (colorText.includes('rose')) return {
+            shadow: 'shadow-rose-500 hover:shadow-rose-500',
+            gradient: 'from-rose-500/10',
+            iconBg: 'bg-rose-500/10',
+            iconText: 'text-rose-500',
+            arrowHover: 'group-hover:bg-rose-500 group-hover:border-rose-500',
+            titleText: 'text-rose-500/80',
+            headlineHover: 'group-hover:text-rose-500',
+            pillBg: 'bg-rose-500/5 dark:bg-rose-500/10',
+            pillText: 'text-rose-500',
         }
-        handleResize()
-        window.addEventListener("resize", handleResize)
-        return () => window.removeEventListener("resize", handleResize)
-    }, [])
-
-    const nextSlide = () => {
-        setActiveIndex((prev) => (prev + 1) % carouselData.length)
+        if (colorText.includes('emerald')) return {
+            shadow: 'shadow-emerald-500 hover:shadow-emerald-500',
+            gradient: 'from-emerald-500/10',
+            iconBg: 'bg-emerald-500/10',
+            iconText: 'text-emerald-500',
+            arrowHover: 'group-hover:bg-emerald-500 group-hover:border-emerald-500',
+            titleText: 'text-emerald-500/80',
+            headlineHover: 'group-hover:text-emerald-500',
+            pillBg: 'bg-emerald-500/5 dark:bg-emerald-500/10',
+            pillText: 'text-emerald-500',
+        }
+        if (colorText.includes('purple')) return {
+            shadow: 'shadow-purple-500 hover:shadow-purple-500',
+            gradient: 'from-purple-500/10',
+            iconBg: 'bg-purple-500/10',
+            iconText: 'text-purple-500',
+            arrowHover: 'group-hover:bg-purple-500 group-hover:border-purple-500',
+            titleText: 'text-purple-500/80',
+            headlineHover: 'group-hover:text-purple-500',
+            pillBg: 'bg-purple-500/5 dark:bg-purple-500/10',
+            pillText: 'text-purple-500',
+        }
+        if (colorText.includes('blue')) return {
+            shadow: 'shadow-blue-500 hover:shadow-blue-500',
+            gradient: 'from-blue-500/10',
+            iconBg: 'bg-blue-500/10',
+            iconText: 'text-blue-500',
+            arrowHover: 'group-hover:bg-blue-500 group-hover:border-blue-500',
+            titleText: 'text-blue-500/80',
+            headlineHover: 'group-hover:text-blue-500',
+            pillBg: 'bg-blue-500/5 dark:bg-blue-500/10',
+            pillText: 'text-blue-500',
+        }
+        if (colorText.includes('amber')) return {
+            shadow: 'shadow-amber-500 hover:shadow-amber-500',
+            gradient: 'from-amber-500/10',
+            iconBg: 'bg-amber-500/10',
+            iconText: 'text-amber-500',
+            arrowHover: 'group-hover:bg-amber-500 group-hover:border-amber-500',
+            titleText: 'text-amber-500/80',
+            headlineHover: 'group-hover:text-amber-500',
+            pillBg: 'bg-amber-500/5 dark:bg-amber-500/10',
+            pillText: 'text-amber-500',
+        }
+        // default primary
+        return {
+            shadow: 'shadow-primary hover:shadow-primary',
+            gradient: 'from-primary/10',
+            iconBg: 'bg-primary/10',
+            iconText: 'text-primary',
+            arrowHover: 'group-hover:bg-primary group-hover:border-primary',
+            titleText: 'text-primary/80',
+            headlineHover: 'group-hover:text-primary',
+            pillBg: 'bg-primary/5 dark:bg-primary/10',
+            pillText: 'text-primary',
+        }
     }
-
-    const prevSlide = () => {
-        setActiveIndex((prev) => (prev - 1 + carouselData.length) % carouselData.length)
-    }
-
-    useEffect(() => {
-        const timer = setInterval(nextSlide, 6000)
-        return () => clearInterval(timer)
-    }, [])
 
     return (
-        <section className="relative py-16 md:py-24 bg-slate-950 overflow-hidden border-t-20 border-gray-600 rounded-t-3xl md:rounded-t-4xl">
-            {/* Background Ambience */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-[200px] md:w-[800px] h-[200px] md:h-[800px] bg-primary/5 rounded-full blur-[80px] md:blur-[120px] -translate-y-1/2" />
-                <div className="absolute bottom-0 right-1/4 w-[150px] md:w-[600px] h-[150px] md:h-[600px] bg-blue-500/5 rounded-full blur-[60px] md:blur-[100px] translate-y-1/2" />
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="text-center mb-10 md:mb-16 lg:mb-8">
+        <section className="relative py-16 md:py-24 bg-slate-50/50 dark:bg-background overflow-hidden border-t border-border/40">
+            <div className="container mx-auto px-4 relative z-10 max-w-7xl">
+                {/* Header Section */}
+                <div className="text-center mb-12 md:mb-20">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-4"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-muted/80 backdrop-blur-sm border border-white/50 dark:border-border text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm"
                     >
-                        <Globe className="w-3 h-3 text-emerald-500" />
+                        <Globe className="w-3 h-3 text-primary" />
                         Research Impact
                     </motion.div>
                     <motion.h2
@@ -153,156 +191,85 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-4"
+                        className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4"
                     >
                         Pioneering the future of <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-500 via-gray-300 to-green-500">
-                            Scientific Discovery
-                        </span>
+                        Scientific Discovery
                     </motion.h2>
                     <motion.p
                          initial={{ opacity: 0, y: 20 }}
                          whileInView={{ opacity: 1, y: 0 }}
                          viewport={{ once: true }}
                          transition={{ delay: 0.2 }}
-                         className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg leading-relaxed px-4"
+                         className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg leading-relaxed px-4"
                     >
                         Driving distinct contributions to global knowledge through rigorous research, open collaboration, and reproducible methodologies.
                     </motion.p>
                 </div>
 
-                {/* Carousel Area */}
-                <div className="relative h-[550px] sm:h-[600px] md:h-[650px] lg:h-[580px] flex items-center justify-center">
-                    <AnimatePresence mode="popLayout">
-                        {carouselData.map((item, index) => {
-                            // Calculate position relative to active index
-                            const offset = (index - activeIndex + carouselData.length) % carouselData.length
-                            const isCenter = offset === 0
-                            const isNext = offset === 1
-                            const isPrev = offset === carouselData.length - 1
+                {/* Bento Grid Area */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    {data.map((item, index) => {
+                        // Create spanning logic for Bento box: first item spans 2 columns on lg
+                        const isLarge = index === 0 
+                        const gridItemClass = isLarge 
+                            ? "md:col-span-2 lg:col-span-2" 
+                            : "col-span-1"
+                        
+                        const theme = getColorTheme(item.color)
 
-                            // Only render active, prev, and next slides for performance/visuals
-                            if (!isCenter && !isNext && !isPrev) return null
+                        return (
+                            <motion.div
+                                key={item.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className={`group relative bg-white/60 dark:bg-card/40 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-lg/20 ${theme.shadow} hover:shadow-xl/30 hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 flex flex-col justify-between overflow-hidden ${gridItemClass}`}
+                            >
+                                {/* Permanent subtle background gradient glow */}
+                                <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} to-transparent pointer-events-none`} />
 
-                            // Responsive offsets
-                            let x = "0%"
-                            if (isPrev) x = isMobile ? "-100%" : isTablet ? "-40%" : "-60%"
-                            if (isNext) x = isMobile ? "100%" : isTablet ? "40%" : "60%"
-
-                            let scale = 1
-                            if (!isCenter) scale = isMobile ? 0.8 : 0.85
-
-                            let zIndex = isCenter ? 20 : 10
-                            let opacity = isCenter ? 1 : (isMobile ? 0 : 0.4)
-                            let rotateY = isCenter ? 0 : (isNext ? -5 : 5)
-
-                            return (
-                                <motion.div
-                                    key={item.id}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{
-                                        x,
-                                        scale,
-                                        zIndex,
-                                        opacity,
-                                        rotateY
-                                    }}
-                                    transition={{
-                                        duration: 0.6,
-                                        ease: [0.32, 0.72, 0, 1]
-                                    }}
-                                    className="absolute w-[95%] sm:w-[90%] md:w-[75%] lg:w-[65%] max-w-5xl h-[500px] sm:h-[550px] md:h-[500px] rounded-3xl md:rounded-4xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden cursor-pointer"
-                                    onClick={() => setActiveIndex(index)}
-                                >
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 h-full overflow-y-auto lg:overflow-hidden no-scrollbar">
-                                        {/* Image Section */}
-                                        <div className="relative h-[200px] sm:h-[250px] lg:h-full group shrink-0 overflow-hidden">
-                                            <Image
-                                                src={item.image}
-                                                alt={item.title}
-                                                fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                            />
-                                            {/* Gradient Fade Out at Bottom */}
-                                            <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/40 to-transparent lg:bg-linear-to-r lg:from-transparent lg:via-slate-900/20 lg:to-slate-900 pointer-events-none" />
+                                <div className="relative z-10 mb-8">
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div className={`w-12 h-12 rounded-2xl ${theme.iconBg} backdrop-blur-sm flex items-center justify-center`}>
+                                            <item.icon className={`w-6 h-6 ${theme.iconText}`} />
                                         </div>
-
-                                        {/* Content Section */}
-                                        <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-between relative bg-slate-900 h-full lg:h-auto">
-                                            {/* Top Right: Description & Arrow */}
-                                            <div className="flex justify-between items-start gap-4 mb-6 lg:mb-0">
-                                                <p className="text-slate-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[85%]">
-                                                    {item.description}
-                                                </p>
-                                                <Link href={item.href}>
-                                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-rotate-45 shrink-0">
-                                                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                                                    </div>
-                                                </Link>
+                                        <Link href={item.href}>
+                                            <div className={`w-10 h-10 rounded-full bg-white/80 dark:bg-muted/50 backdrop-blur-sm border border-white/50 dark:border-border text-foreground flex items-center justify-center ${theme.arrowHover} group-hover:text-white transition-all duration-300 transform group-hover:scale-110 group-hover:-rotate-45 shrink-0 shadow-sm`}>
+                                                <ArrowRight className="w-4 h-4" />
                                             </div>
-
-                                            {/* Bottom Left: Headline */}
-                                            <div className="mb-6 lg:mb-0 relative z-10">
-                                                <div className="flex flex-col gap-1 sm:gap-2">
-                                                    <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${item.color}`}>
-                                                        {item.title}
-                                                    </span>
-                                                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-                                                        {item.headline}
-                                                    </h3>
-                                                </div>
-                                            </div>
-
-                                            {/* Bottom Right: Stats Grid */}
-                                            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-auto lg:mt-0">
-                                                {item.stats.map((stat, idx) => (
-                                                    <div key={idx} className="p-2 sm:p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center lg:text-left">
-                                                        <div className="text-base sm:text-xl lg:text-2xl font-bold text-white mb-0.5 sm:mb-1">
-                                                            {stat.value}
-                                                        </div>
-                                                        <p className="text-[8px] sm:text-[10px] lg:text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                                            {stat.label}
-                                                        </p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        </Link>
                                     </div>
-                                </motion.div>
-                            )
-                        })}
-                    </AnimatePresence>
-                </div>
+                                    
+                                    <div className="flex flex-col gap-1.5 mb-3">
+                                        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${theme.titleText}`}>
+                                            {item.title}
+                                        </span>
+                                        <h3 className={`text-xl sm:text-2xl font-bold text-foreground ${theme.headlineHover} transition-colors`}>
+                                            {item.headline}
+                                        </h3>
+                                    </div>
+                                    <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mt-2">
+                                        {item.description}
+                                    </p>
+                                </div>
 
-                {/* Carousel Navigation */}
-                <div className="flex justify-center items-center gap-4 sm:gap-8 mt-4 md:mt-8 lg:mt-4">
-                    <button
-                        onClick={prevSlide}
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-white flex items-center justify-center transition-all"
-                    >
-                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    
-                    <div className="flex gap-1.5 sm:gap-2">
-                        {carouselData.map((_, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => setActiveIndex(idx)}
-                                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
-                                    idx === activeIndex 
-                                        ? "w-6 sm:w-8 bg-white" 
-                                        : "bg-slate-700 hover:bg-slate-600"
-                                }`}
-                            />
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={nextSlide}
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-white flex items-center justify-center transition-all"
-                    >
-                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                                {/* Stats as compact inline pills */}
+                                <div className="flex flex-wrap items-center gap-2 mt-auto pt-4 relative z-10">
+                                    {item.stats.map((stat, idx) => (
+                                        <span
+                                            key={idx}
+                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${theme.pillBg} text-xs font-semibold text-foreground/80 tracking-wide`}
+                                        >
+                                            <span className={`${theme.pillText} font-bold`}>{stat.value}</span>
+                                            <span className="text-muted-foreground font-medium">{stat.label}</span>
+                                        </span>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )
+                    })}
                 </div>
             </div>
         </section>

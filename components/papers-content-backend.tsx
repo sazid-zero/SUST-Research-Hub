@@ -302,25 +302,14 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
                         <div className="flex gap-2 w-full sm:w-auto">
                           <Link href={`/paper/${paper.id}`} className="flex-1 sm:flex-none">
                             <Button
-                              variant="outline"
                               size="sm"
-                              className="border-border hover:bg-muted bg-transparent w-full sm:w-auto text-xs"
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto text-xs"
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
                           </Link>
-                          {paper.pdf_url && (
-                            <Link href={paper.pdf_url} target="_blank" className="flex-1 sm:flex-none">
-                              <Button
-                                size="sm"
-                                className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground text-xs w-full"
-                              >
-                                <DownloadIcon className="h-4 w-4 mr-1" />
-                                Download
-                              </Button>
-                            </Link>
-                          )}
+
                         </div>
                       </div>
                     </div>

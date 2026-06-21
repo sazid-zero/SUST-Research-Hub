@@ -10,34 +10,34 @@ import {scrollToExplore} from "@/components/scroll-to-section";
 const features = [
     {
         icon: FileText,
-        title: "Multi-Repository Support",
-        description: "Upload and manage theses, papers, projects, ML models, and datasets all in one unified platform.",
+        title: "Unified Academic Archive",
+        description: "Upload and manage undergraduate/postgraduate theses, publications, projects, models, and datasets in one place.",
     },
     {
         icon: Search,
-        title: "Advanced Discovery",
+        title: "Cross-Disciplinary Search",
         description:
-            "Search across all repository types with intelligent filtering by department, field, keywords, and more.",
+            "Browse research across various fields, departments, and keywords with intelligent filtering and suggestion features.",
     },
     {
         icon: Shield,
-        title: "Secure Collaboration",
-        description: "Role-based access with detailed review workflows for supervisors, admins, and researchers.",
+        title: "Supervised Workflow",
+        description: "Enforce academic standards with structured student-supervisor workflows, comments, and reviewer approvals.",
     },
     {
         icon: BookOpen,
-        title: "Rich Media Storage",
-        description: "Store research in multiple formats: PDFs, videos, audio, interactive models, and more.",
+        title: "Data & Media Repository",
+        description: "Attach code repositories, full text PDFs, research datasets, video presentations, and supplementary assets.",
     },
     {
         icon: Video,
-        title: "Interactive Browsing",
-        description: "Beautiful interfaces to explore theses, papers, datasets, models, and projects with ease.",
+        title: "Accessible Open Science",
+        description: "Discover and read publications and completed theses easily with built-in secure document readers.",
     },
     {
         icon: BarChart3,
-        title: "Analytics & Insights",
-        description: "Track submissions, approvals, views, downloads, and repository growth with detailed metrics.",
+        title: "Research Metrics & Impact",
+        description: "Track university-wide research statistics, submission volumes, view counts, and citation downloads over time.",
     },
 ]
 

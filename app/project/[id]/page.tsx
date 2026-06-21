@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import ProjectDetailContent from "@/components/project-detail-content"
 import { getProjectById } from "@/lib/db/projects"
+import { getCurrentUser } from "@/lib/auth"
 import { unstable_cache } from "next/cache"
 
 export const metadata: Metadata = {
@@ -32,15 +33,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailsPagePr
         notFound()
     }
 
-    const project = await getCachedProject(projectId)
+    const [project, user] = await Promise.all([
+        getCachedProject(projectId),
+        getCurrentUser()
+    ])
 
     if (!project) {
         notFound()
     }
 
-    // Mapping database field names to what ProjectDetailContent expects if they differ
-    // ProjectDetailContent expects: startDate, endDate, funding, fundingSource
-    // DB returns: start_date, end_date, funding_amount, funding_source
     const formattedProject = {
         ...project,
         startDate: project.start_date,
@@ -49,5 +50,5 @@ export default async function ProjectDetailPage({ params }: ProjectDetailsPagePr
         fundingSource: project.funding_source,
     }
 
-    return <ProjectDetailContent project={formattedProject as any} />
+    return <ProjectDetailContent project={formattedProject as any} user={user} />
 }

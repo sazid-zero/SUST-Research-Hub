@@ -29,6 +29,9 @@ import {
     DollarSign,
 } from "lucide-react"
 import { getFileIcon } from "@/components/file-icon-helper"
+import { Lock } from "lucide-react"
+import { ClaimAuthorshipButton } from "@/components/claim-authorship-button"
+import { SecureDocumentViewer } from "@/components/secure-document-viewer"
 
 interface ProjectMember {
     id: number
@@ -80,10 +83,21 @@ interface Project {
 
 interface ProjectDetailContentProps {
     project: Project
+    user?: any
 }
 
-export default function ProjectDetailContent({ project }: ProjectDetailContentProps) {
+export default function ProjectDetailContent({ project, user }: ProjectDetailContentProps) {
     const [activeTab, setActiveTab] = useState("overview")
+    const [secureViewerOpen, setSecureViewerOpen] = useState(false)
+    const [currentDocUrl, setCurrentDocUrl] = useState("")
+    const [currentDocTitle, setCurrentDocTitle] = useState("")
+
+    const openSecureViewer = (url: string, title: string, e: React.MouseEvent) => {
+        e.preventDefault()
+        setCurrentDocUrl(url)
+        setCurrentDocTitle(title)
+        setSecureViewerOpen(true)
+    }
 
     const getResourceIcon = (type: string) => {
         switch (type) {
@@ -132,12 +146,39 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
         }
     }
 
+    const linkToFiles = (links: any[] = [], expectedCategory: string) => 
+        links.filter(l => l.category === expectedCategory).map(l => ({
+            file_name: l.title,
+            external_url: l.url,
+            resource_type: l.category
+        }))
+
+    const modelToFiles = (modelsList: any[] = []) => 
+        modelsList.map(m => ({
+            file_name: m.name,
+            external_url: m.external_url || m.file_url,
+            resource_type: 'model',
+            description: m.description
+        }))
+
     const categorizedFiles = {
-        documents: project.files?.filter((f) => (f.resource_type || f.type || "document") === "document") || [],
-        code: project.files?.filter((f) => (f.resource_type || f.type) === "code") || [],
-        datasets: project.files?.filter((f) => (f.resource_type || f.type) === "dataset") || [],
-        models: project.files?.filter((f) => (f.resource_type || f.type) === "model") || [],
-        results: project.files?.filter((f) => (f.resource_type || f.type) === "result") || [],
+        documents: [
+            ...(project.files?.filter((f) => (f.resource_type || "document") === "document") || []),
+            ...linkToFiles(project.resource_links, 'document')
+        ],
+        code: [
+            ...(project.files?.filter((f) => f.resource_type === "code") || []),
+            ...linkToFiles(project.resource_links, 'code')
+        ],
+        datasets: [
+            ...(project.files?.filter((f) => f.resource_type === "dataset") || []),
+            ...linkToFiles(project.resource_links, 'dataset')
+        ],
+        models: [
+            ...(project.files?.filter((f) => f.resource_type === "model") || []),
+            ...modelToFiles(project.models),
+            ...linkToFiles(project.resource_links, 'model')
+        ],
     }
 
     const resourceSections = [
@@ -157,16 +198,40 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
             msg: "No datasets available",
         },
         { type: "models" as const, singularType: "model", title: "Model", icon: Brain, msg: "No trained models shared" },
-        {
-            type: "results" as const,
-            singularType: "result",
-            title: "Result",
-            icon: FileBox,
-            msg: "No results or visualizations",
-        },
     ]
 
     const renderResources = () => {
+        if (!user) {
+            return (
+                <Card className="border border-border bg-card p-6 shadow-md relative overflow-hidden h-[400px]">
+                    <div className="absolute inset-0 bg-background/50 backdrop-blur-md z-10 flex flex-col items-center justify-center p-6 text-center">
+                        <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                            <Lock className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Login Required</h3>
+                        <p className="text-muted-foreground mb-6 max-w-sm">
+                            Project resources, datasets, models, and unpublished documents are restricted to SUST students and faculty.
+                        </p>
+                        <Button asChild>
+                            <Link href="/login">Sign In to Access Resources</Link>
+                        </Button>
+                    </div>
+                    {/* Blurred background content mockup */}
+                    <div className="space-y-4 opacity-50 blur-sm select-none pointer-events-none">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                                <div className="w-10 h-10 rounded bg-muted"></div>
+                                <div className="space-y-2 flex-1">
+                                    <div className="h-4 bg-muted rounded w-1/3"></div>
+                                    <div className="h-3 bg-muted rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+            )
+        }
+
         return resourceSections.map(({ type, singularType, title, icon, msg }) => {
             const files = categorizedFiles[type]
             const resourceStyle = getResourceIcon(singularType)
@@ -197,12 +262,18 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                 const IconComponent = config.icon
 
                                 const linkHref = file.external_url || file.url || "#"
+                                const isDocument = type === "documents"
 
                                 return (
                                     <a
                                         key={idx}
-                                        href={linkHref}
-                                        target={isExternal ? "_blank" : "_self"}
+                                        href={isDocument ? "#" : linkHref}
+                                        onClick={(e) => {
+                                            if (isDocument && !isExternal) {
+                                                openSecureViewer(linkHref, file.file_name || file.title, e)
+                                            }
+                                        }}
+                                        target={isExternal && !isDocument ? "_blank" : "_self"}
                                         rel={isExternal ? "noopener noreferrer" : ""}
                                         className={`block p-3 rounded-lg border ${resourceStyle.border} ${resourceStyle.bg} hover:scale-[1.02] transition-transform group`}
                                     >
@@ -226,13 +297,15 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Button variant="ghost" size="sm" className="h-8 shrink-0 hover:bg-primary/10">
-                                                {isExternal ? (
-                                                    <ExternalLink className="h-4 w-4 text-primary" />
-                                                ) : (
-                                                    <Download className="h-4 w-4 text-primary" />
-                                                )}
-                                            </Button>
+                                            {(isExternal || isDocument) && (
+                                                <Button variant="ghost" size="sm" className="h-8 shrink-0 hover:bg-primary/10">
+                                                    {isExternal ? (
+                                                        <ExternalLink className="h-4 w-4 text-primary" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4 text-primary" />
+                                                    )}
+                                                </Button>
+                                            )}
                                         </div>
                                         {isExternal && (
                                             <div className="pt-2 pl-11 pr-3 text-xs text-muted-foreground break-all font-mono">
@@ -312,10 +385,6 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                     <Eye className="h-4 w-4" />
                     <span className="font-medium text-foreground">{project.views || 0}</span> views
                   </span>
-                                    <span className="flex items-center gap-1.5">
-                    <Download className="h-4 w-4" />
-                    <span className="font-medium text-foreground">0</span> downloads
-                  </span>
                                 </div>
 
                                 {/* Funding Badge (if applicable) */}
@@ -336,14 +405,6 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                     <Button className="gap-2 bg-primary hover:bg-primary/90">
                                         <ExternalLink className="h-4 w-4" />
                                         View Project Details
-                                    </Button>
-                                    <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" onClick={() => {}}>
-                                        <Code2 className="h-4 w-4" />
-                                        View Codebase
-                                    </Button>
-                                    <Button variant="outline" className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all">
-                                        <Bookmark className="h-4 w-4" />
-                                        Save Project
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -394,9 +455,21 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
-                                                    {member.full_name}
-                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
+                                                        {member.full_name}
+                                                    </p>
+                                                    {!member.student_id && !!user && (
+                                                        <div onClick={(e) => e.preventDefault()}>
+                                                            <ClaimAuthorshipButton
+                                                                workspaceType="project"
+                                                                workspaceId={project.id}
+                                                                authorName={member.full_name}
+                                                                isLoggedIn={!!user}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <p className="text-xs text-muted-foreground">{member.role}</p>
                                             </div>
                                         </Link>
@@ -521,10 +594,7 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                     </div>
 
                     <div className="hidden lg:block space-y-6 overflow-y-auto pl-2 no-scrollbar">
-                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
-                            <Download className="h-5 w-5" />
-                            Download All Files
-                        </Button>
+
                         {renderResources()}
                     </div>
                 </div>
@@ -579,10 +649,7 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                 <Eye className="h-4 w-4" />
                 <span className="font-medium text-foreground">{project.views || 0}</span> views
               </span>
-                                <span className="flex items-center gap-1.5">
-                <Download className="h-4 w-4" />
-                <span className="font-medium text-foreground">0</span> downloads
-              </span>
+
                             </div>
 
                             {/* Funding Badge (if applicable) */}
@@ -604,14 +671,7 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                     <ExternalLink className="h-4 w-4" />
                                     View Project Details
                                 </Button>
-                                <Button variant="outline" className="gap-2 bg-transparent">
-                                    <Download className="h-4 w-4" />
-                                    Download Resources
-                                </Button>
-                                <Button variant="outline" className="gap-2 bg-transparent">
-                                    <Bookmark className="h-4 w-4" />
-                                    Save
-                                </Button>
+
                                 <Button
                                     variant="outline"
                                     className="gap-2 bg-transparent"
@@ -669,7 +729,19 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
                                             </AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <p className="font-medium text-foreground text-sm">{member.full_name}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-medium text-foreground text-sm">{member.full_name}</p>
+                                                {!member.student_id && !!user && (
+                                                    <div onClick={(e) => e.preventDefault()}>
+                                                        <ClaimAuthorshipButton
+                                                            workspaceType="project"
+                                                            workspaceId={project.id}
+                                                            authorName={member.full_name}
+                                                            isLoggedIn={!!user}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
                                             <p className="text-xs text-muted-foreground">{member.role}</p>
                                         </div>
                                     </div>
@@ -760,14 +832,18 @@ export default function ProjectDetailContent({ project }: ProjectDetailContentPr
 
                     {/* Resources on Mobile */}
                     <div className="space-y-6">
-                        <Button className="w-full bg-linear-to-r from-primary to-accent hover:shadow-lg hover:scale-[1.02] text-primary-foreground gap-2 h-12 rounded-lg font-semibold transition-all">
-                            <Download className="h-5 w-5" />
-                            Download All Files
-                        </Button>
+
                         {renderResources()}
                     </div>
                 </div>
             </div>
+
+            <SecureDocumentViewer
+                url={currentDocUrl}
+                title={currentDocTitle}
+                isOpen={secureViewerOpen}
+                onClose={() => setSecureViewerOpen(false)}
+            />
         </div>
     )
 }

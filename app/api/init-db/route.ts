@@ -1,0 +1,30 @@
+import { neon } from "@neondatabase/serverless"
+import { NextResponse } from "next/server"
+
+export async function GET() {
+    try {
+        const sql = neon(process.env.DATABASE_URL!)
+        
+        await sql`
+        CREATE TABLE IF NOT EXISTS public.authorship_claims (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+            workspace_type VARCHAR(50) NOT NULL CHECK (workspace_type IN ('thesis', 'publication')),
+            workspace_id INTEGER NOT NULL,
+            author_name_matched VARCHAR(255) NOT NULL,
+            status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+            created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            resolved_at TIMESTAMP WITHOUT TIME ZONE,
+            resolved_by INTEGER REFERENCES public.users(id) ON DELETE SET NULL,
+            notes TEXT
+        );
+        `
+        
+        await sql`CREATE INDEX IF NOT EXISTS idx_authorship_claims_status ON public.authorship_claims(status);`
+        await sql`CREATE INDEX IF NOT EXISTS idx_authorship_claims_user_id ON public.authorship_claims(user_id);`
+        
+        return NextResponse.json({ success: true, message: "Table created" })
+    } catch (e: any) {
+        return NextResponse.json({ success: false, error: e.message })
+    }
+}

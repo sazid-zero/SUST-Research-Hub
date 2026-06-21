@@ -1,11 +1,9 @@
 'use server'
 
-import { neon } from '@neondatabase/serverless'
+import { sql } from '@/lib/db'
 import { getCurrentUser } from './auth'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
-
-const sql = neon(process.env.DATABASE_URL!)
 
 
 export async function getSupervisorStats() {
