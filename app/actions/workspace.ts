@@ -424,6 +424,7 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
     const description = formData.get("description") as string
     const keywordsStr = formData.get("keywords") as string
     const paperSubtype = formData.get("paper_subtype") as string
+    const visibility = formData.get("visibility") as string
 
     if (!id || !type || !title) return { message: "Missing required fields", success: false }
 
@@ -433,7 +434,7 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
         if (type === 'thesis') {
             await sql`
                 UPDATE theses 
-                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, updated_at = NOW()
+                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, visibility = COALESCE(${visibility}, visibility), updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'project') {
@@ -928,6 +929,7 @@ export async function updateWorkspaceSettings(id: number, type: string, data: { 
             await sql`
                 UPDATE theses 
                 SET department = ${data.department || 'CSE'},
+                    visibility = COALESCE(${data.visibility}, visibility),
                     updated_at = NOW()
                 WHERE id = ${id}
             `

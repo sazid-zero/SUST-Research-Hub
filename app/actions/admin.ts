@@ -3,6 +3,7 @@
 import { sql } from '@/lib/db'
 import { getCurrentUser } from './auth'
 import { sendApprovalEmail, sendRejectionEmail } from '@/lib/utils/email'
+import { revalidatePath } from 'next/cache'
 
 export async function getPendingRegistrations() {
   try {
@@ -194,14 +195,14 @@ export async function getAllUsers(search?: string) {
     }
 
     let query = sql`
-      SELECT id, full_name, email, role, department, is_approved, created_at
+      SELECT id, full_name, email, role, department, is_approved, is_department_head, created_at
       FROM users
       WHERE role != 'admin'
     `
     
     if (search) {
       query = sql`
-        SELECT id, full_name, email, role, department, is_approved, created_at
+        SELECT id, full_name, email, role, department, is_approved, is_department_head, created_at
         FROM users
         WHERE role != 'admin' 
         AND (LOWER(full_name) LIKE ${'%' + search.toLowerCase() + '%'} 
@@ -210,7 +211,7 @@ export async function getAllUsers(search?: string) {
       `
     } else {
       query = sql`
-        SELECT id, full_name, email, role, department, is_approved, created_at
+        SELECT id, full_name, email, role, department, is_approved, is_department_head, created_at
         FROM users
         WHERE role != 'admin'
         ORDER BY created_at DESC
@@ -397,6 +398,22 @@ export async function deleteThesis(thesisId: number) {
   }
 }
 
+export async function setThesisVisibility(thesisId: number, visibility: 'visible' | 'hidden') {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+    await sql`UPDATE theses SET visibility = ${visibility}, updated_at = NOW() WHERE id = ${thesisId}`
+    revalidatePath('/admin/theses')
+    revalidatePath(`/theses/${thesisId}`)
+    return { success: true, message: `Thesis set to ${visibility}` }
+  } catch (error: any) {
+    console.error('Set thesis visibility error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
 export async function getSupportStats() {
   try {
     const admin = await getCurrentUser()
@@ -446,6 +463,22 @@ export async function getSystemHealth() {
     }
   } catch (error: any) {
     console.error('Get system health error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+export async function toggleDepartmentHead(userId: number, isDeptHead: boolean) {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    await sql`UPDATE users SET is_department_head = ${isDeptHead} WHERE id = ${userId}`
+    
+    return { success: true, message: `Department Head status updated successfully` }
+  } catch (error: any) {
+    console.error('Update department head error:', error)
     return { success: false, error: error.message }
   }
 }

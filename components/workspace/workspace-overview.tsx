@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { updateWorkspaceDetails, getRelatedWork, submitForReview } from "@/app/actions/workspace"
 import { syncPublicationCitations } from "@/app/actions/citations"
+import { getPendingRequests, updateRequestStatus } from "@/app/actions/requests"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Link as LinkIcon, X, FileText, GraduationCap, CheckCircle2, ChevronRight, History, Send, AlertCircle, Users, ExternalLink, RefreshCw } from "lucide-react"
+import { Link as LinkIcon, X, FileText, GraduationCap, CheckCircle2, ChevronRight, History, Send, AlertCircle, Users, ExternalLink, RefreshCw, ShieldCheck, ShieldX, Loader2, MessageSquare } from "lucide-react"
 import { toast } from "sonner"
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog"
 import { SupervisionRequestDialog } from "@/components/workspace/supervision-request-dialog"
@@ -30,14 +31,33 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSyncingCitations, setIsSyncingCitations] = useState(false)
   const [citationCount, setCitationCount] = useState<number>(workspace.citations || 0)
+  const [accessRequests, setAccessRequests] = useState<any[]>([])
+  const [processingRequestId, setProcessingRequestId] = useState<number | null>(null)
   
   useEffect(() => {
      fetchRelatedWork()
+     if (workspace.type === 'thesis') {
+         fetchAccessRequests()
+     }
   }, [workspace.id])
 
   const fetchRelatedWork = async () => {
       const data = await getRelatedWork(workspace.id, workspace.type)
       setRelatedWork(data)
+  }
+
+  const fetchAccessRequests = async () => {
+      const data = await getPendingRequests(workspace.id)
+      setAccessRequests(data)
+  }
+
+  const handleRequestAction = async (requestId: number, status: 'approved' | 'rejected') => {
+      setProcessingRequestId(requestId)
+      const result = await updateRequestStatus(requestId, workspace.id, status)
+      if (result.success) {
+          setAccessRequests(prev => prev.filter(r => r.id !== requestId))
+      }
+      setProcessingRequestId(null)
   }
 
   const handleSaveChanges = async () => {
@@ -404,6 +424,77 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* Access Requests Card (Thesis only) */}
+                        {workspace.type === 'thesis' && workspace.visibility === 'hidden' && (
+                            <Card className="shadow-sm border-amber-500/20">
+                                <div className="bg-amber-500 h-1" />
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                        <MessageSquare className="w-4 h-4 text-amber-500" />
+                                        Access Requests
+                                        {accessRequests.length > 0 && (
+                                            <Badge variant="destructive" className="ml-auto text-[10px] h-5 px-1.5">
+                                                {accessRequests.length}
+                                            </Badge>
+                                        )}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {accessRequests.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {accessRequests.map((req: any) => (
+                                                <div key={req.id} className="p-3 rounded-xl border bg-muted/30 space-y-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-[10px]">
+                                                            {req.full_name?.charAt(0) || '?'}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-xs font-semibold truncate">{req.full_name}</p>
+                                                            <p className="text-[10px] text-muted-foreground">
+                                                                {new Date(req.created_at).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {req.message && (
+                                                        <p className="text-xs text-muted-foreground bg-background rounded-lg p-2 border italic">
+                                                            "{req.message}"
+                                                        </p>
+                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            className="h-7 text-[10px] flex-1 gap-1"
+                                                            onClick={() => handleRequestAction(req.id, 'approved')}
+                                                            disabled={processingRequestId === req.id}
+                                                        >
+                                                            {processingRequestId === req.id ? (
+                                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                                            ) : (
+                                                                <ShieldCheck className="w-3 h-3" />
+                                                            )}
+                                                            Approve
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-7 text-[10px] flex-1 gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
+                                                            onClick={() => handleRequestAction(req.id, 'rejected')}
+                                                            disabled={processingRequestId === req.id}
+                                                        >
+                                                            <ShieldX className="w-3 h-3" />
+                                                            Deny
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-muted-foreground italic">No pending access requests.</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
 
                     </div>
                 </div>

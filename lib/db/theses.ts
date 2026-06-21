@@ -15,6 +15,7 @@ export interface ThesisWithAuthors {
     supervisor_id: number
     supervisor_name: string
     status: string
+    visibility?: string
     views: number
     downloads: number
     keywords: string[]
@@ -94,6 +95,7 @@ export async function getAllPublishedTheses(): Promise<ThesisWithAuthors[]> {
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -163,6 +165,7 @@ export async function getRecentTheses(limit = 9): Promise<ThesisWithAuthors[]> {
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -232,6 +235,7 @@ export async function getThesesByDepartment(department: string): Promise<ThesisW
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -302,6 +306,7 @@ export async function searchTheses(query: string): Promise<ThesisWithAuthors[]> 
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -384,6 +389,7 @@ export async function getThesisById(id: number): Promise<ThesisWithAuthors | nul
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -473,6 +479,7 @@ export async function getThesesByStudentId(studentId: string): Promise<ThesisWit
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,
@@ -521,7 +528,7 @@ export async function getThesesByStudentId(studentId: string): Promise<ThesisWit
                      LEFT JOIN users u2 ON ta.author_id = u2.id
             WHERE u2.student_id = ${studentId}
             GROUP BY t.id, t.title, t.abstract, t.department, t.field, t.year, t.submitted_date,
-                     t.supervisor_id, t.status, t.views, t.downloads, t.keywords, t.created_at,
+                     t.supervisor_id, t.status, t.visibility, t.views, t.downloads, t.keywords, t.created_at,
                      t.updated_at, u.full_name
             ORDER BY t.created_at DESC
         `
@@ -546,6 +553,7 @@ export async function getThesesBySupervisorId(supervisorId: number): Promise<The
                 t.submitted_date,
                 t.supervisor_id,
                 t.status,
+                t.visibility,
                 t.views,
                 t.downloads,
                 t.keywords,

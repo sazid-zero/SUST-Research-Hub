@@ -21,6 +21,7 @@ export interface Thesis {
   year: number
   submitted: string
   status: "approved" | "pending" | "rejected" | "in-review"
+  visibility?: string
   abstract: string
   keywords: string[]
   views: number
@@ -93,6 +94,7 @@ function formatThesisForDisplay(thesis: any): Thesis {
     year: new Date(thesis.created_at).getFullYear(),
     submitted: thesis.created_at,
     status: thesis.status as "approved" | "pending" | "rejected" | "in-review",
+    visibility: thesis.visibility || 'visible',
     abstract: thesis.abstract,
     keywords: thesis.keywords || [],
     views: thesis.views,

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Edit, Trash2, Plus, Loader2, Users, LayoutDashboard, Sparkles, Filter } from "lucide-react"
-import { updateUserStatus, deleteUser } from "@/app/actions/admin"
+import { updateUserStatus, deleteUser, toggleDepartmentHead } from "@/app/actions/admin"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -17,6 +17,7 @@ interface User {
   role: string
   department: string
   is_approved: boolean
+  is_department_head?: boolean
   created_at: string | Date
 }
 
@@ -65,6 +66,23 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
       }
     } catch (err) {
       toast.error("Failed to update status")
+    } finally {
+      setIsLoading(null)
+    }
+  }
+
+  const handleToggleDeptHead = async (userId: number, currentStatus: boolean) => {
+    setIsLoading(userId)
+    try {
+      const res = await toggleDepartmentHead(userId, !currentStatus)
+      if (res.success) {
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_department_head: !currentStatus } : u))
+        toast.success(res.message)
+      } else {
+        toast.error(res.error)
+      }
+    } catch (err) {
+      toast.error("Failed to update department head status")
     } finally {
       setIsLoading(null)
     }
@@ -185,10 +203,25 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
                                     </div>
                                 </div>
                             </td>
-                            <td className="px-6 py-6">
+                            <td className="px-6 py-6 space-y-2">
                                 <Badge className={cn("text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-lg border", getRoleColor(user.role))}>
                                     {user.role}
                                 </Badge>
+                                {user.role === 'supervisor' && (
+                                    <div className="mt-2">
+                                        <Badge 
+                                            onClick={() => handleToggleDeptHead(user.id, !!user.is_department_head)}
+                                            className={cn(
+                                                "cursor-pointer text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-lg border transition-colors",
+                                                user.is_department_head 
+                                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20" 
+                                                    : "bg-slate-500/10 text-slate-500 border-slate-500/20 hover:bg-slate-500/20"
+                                            )}
+                                        >
+                                            {user.is_department_head ? "Dept Head" : "Make Head"}
+                                        </Badge>
+                                    </div>
+                                )}
                             </td>
                             <td className="px-6 py-6 text-xs font-semibold text-muted-foreground/80">
                                 {user.department || "General"}

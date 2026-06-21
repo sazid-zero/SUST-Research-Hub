@@ -131,12 +131,41 @@ export async function resolveAuthorshipClaim(
                     LIMIT 1
                 `
             } else if (claim.workspace_type === "thesis") {
-                // Add the user as a team member
+                // Link user to thesis_authors (for hasAccess check) by matching ghost author name
+                await sql`
+                    UPDATE thesis_authors 
+                    SET author_id = ${claim.user_id}
+                    WHERE thesis_id = ${claim.workspace_id}
+                      AND LOWER(TRIM(author_name)) = LOWER(TRIM(${claim.author_name_matched}))
+                      AND (author_id IS NULL)
+                `
+                // Also add to team_members for workspace access
                 await sql`
                     INSERT INTO team_members (thesis_id, user_id, role, status, joined_at)
                     VALUES (${claim.workspace_id}, ${claim.user_id}, 'member', 'active', NOW())
                     ON CONFLICT (thesis_id, user_id) DO NOTHING
                 `
+
+                // Check if there are pending resource_requests for this thesis
+                // and notify the new author so they can review them
+                const pendingRequests = await sql`
+                    SELECT r.id, u.full_name as requester_name
+                    FROM resource_requests r
+                    JOIN users u ON r.requester_id = u.id
+                    WHERE r.thesis_id = ${claim.workspace_id} AND r.status = 'pending'
+                `
+                
+                if (pendingRequests.length > 0) {
+                    const thesis = await sql`SELECT title FROM theses WHERE id = ${claim.workspace_id}`
+                    const thesisTitle = thesis[0]?.title || 'your thesis'
+                    await createNotification({
+                        userId: claim.user_id,
+                        type: "access_request",
+                        title: `${pendingRequests.length} Pending Access Request${pendingRequests.length > 1 ? 's' : ''}`,
+                        message: `Now that you're linked as an author of "${thesisTitle}", you have ${pendingRequests.length} pending access request${pendingRequests.length > 1 ? 's' : ''} to review.`,
+                        link: `/student/workspace/thesis/${claim.workspace_id}`
+                    })
+                }
             }
         }
 

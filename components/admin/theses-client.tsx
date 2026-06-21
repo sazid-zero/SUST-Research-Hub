@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FileText, Search, Eye, Trash2, Download, Loader2, Sparkles, Filter, LayoutDashboard, GraduationCap } from "lucide-react"
-import { deleteThesis } from "@/app/actions/admin"
+import { FileText, Search, Eye, EyeOff, Trash2, Download, Loader2, Sparkles, Filter, LayoutDashboard, GraduationCap } from "lucide-react"
+import { deleteThesis, setThesisVisibility } from "@/app/actions/admin"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -18,6 +18,7 @@ interface Thesis {
   supervisor: string
   department: string
   status: string
+  visibility: string
   submittedDate: string
   approvedDate?: string | null
 }
@@ -31,6 +32,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [isLoading, setIsLoading] = useState<number | null>(null)
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState<number | null>(null)
 
   const filteredTheses = theses.filter(t => {
     const matchesSearch = 
@@ -72,6 +74,24 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
       toast.error("Failed to delete research")
     } finally {
       setIsLoading(null)
+    }
+  }
+
+  const handleToggleVisibility = async (id: number, current: string) => {
+    const next = current === 'visible' ? 'hidden' : 'visible'
+    setIsTogglingVisibility(id)
+    try {
+      const res = await setThesisVisibility(id, next)
+      if (res.success) {
+        setTheses(prev => prev.map(t => t.id === id ? { ...t, visibility: next } : t))
+        toast.success(res.message)
+      } else {
+        toast.error(res.error)
+      }
+    } catch (err) {
+      toast.error("Failed to update visibility")
+    } finally {
+      setIsTogglingVisibility(null)
     }
   }
 
@@ -215,9 +235,25 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
                                             Inspect Work
                                         </Button>
                                     </Link>
-                                    <Button variant="outline" className="rounded-2xl h-11 px-6 border-border/50 hover:bg-muted font-bold transition-all">
-                                        <Download className="h-4 w-4 mr-2" />
-                                        Archive
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "rounded-2xl h-11 px-6 font-bold transition-all gap-2",
+                                            thesis.visibility === 'hidden'
+                                                ? "border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
+                                                : "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                                        )}
+                                        onClick={() => handleToggleVisibility(thesis.id, thesis.visibility || 'visible')}
+                                        disabled={isTogglingVisibility === thesis.id}
+                                    >
+                                        {isTogglingVisibility === thesis.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : thesis.visibility === 'hidden' ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                        {thesis.visibility === 'hidden' ? 'Hidden' : 'Visible'}
                                     </Button>
                                 </div>
                                 

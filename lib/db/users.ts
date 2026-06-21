@@ -10,6 +10,7 @@ export interface User {
     profile_pic: string | null
     specialization: string | null
     student_id?: string
+    is_department_head?: boolean
 }
 
 export async function getSupervisors(department?: string): Promise<User[]> {
@@ -17,7 +18,7 @@ export async function getSupervisors(department?: string): Promise<User[]> {
         // Fetch users with role 'supervisor', 'faculty', 'professor' etc.
         // Assuming 'supervisor' role for now.
         let query = sql`
-            SELECT id, full_name, email, role, department, profile_pic, specialization
+            SELECT id, full_name, email, role, department, profile_pic, specialization, is_department_head
             FROM users
             WHERE role IN ('supervisor', 'faculty', 'professor')
         `
@@ -36,7 +37,7 @@ export async function getSupervisors(department?: string): Promise<User[]> {
         }
 
         const result = await sql`
-            SELECT id, full_name, email, role, department, profile_pic, specialization
+            SELECT id, full_name, email, role, department, profile_pic, specialization, is_department_head
             FROM users
             WHERE role IN ('supervisor', 'faculty', 'professor')
             ORDER BY full_name ASC
@@ -51,7 +52,7 @@ export async function getSupervisors(department?: string): Promise<User[]> {
 export async function getAllUsers(): Promise<User[]> {
     try {
         const result = await sql`
-            SELECT id, full_name, student_id, email, role, department, profile_pic
+            SELECT id, full_name, student_id, email, role, department, profile_pic, is_department_head
             FROM users
             ORDER BY full_name ASC
         `

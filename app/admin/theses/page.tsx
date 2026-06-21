@@ -13,8 +13,9 @@ export default async function AdminThesesPage() {
     supervisor: thesis.supervisor,
     department: thesis.department,
     status: thesis.status,
+    visibility: thesis.visibility || 'visible',
     submittedDate: thesis.submitted,
-    approvedDate: thesis.status === "approved" ? thesis.submitted : null, // Simplified as we don't track separate approval dates yet
+    approvedDate: thesis.status === "approved" ? thesis.submitted : null,
   }))
 
   return <ThesesManagementClient initialTheses={formattedTheses} />

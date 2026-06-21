@@ -226,7 +226,7 @@ async function DashboardContent() {
              </div>
              <div className="p-0 max-h-[280px] overflow-y-auto no-scrollbar">
                 {recentActivity.map((activity, idx) => (
-                  <div key={activity.id} className={cn(
+                  <div key={`${activity.type}-${activity.id}-${idx}`} className={cn(
                     "p-4 flex items-start gap-4 hover:bg-muted/30 transition-all",
                     idx !== recentActivity.length - 1 && "border-b border-border/20"
                   )}>

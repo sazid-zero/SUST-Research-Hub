@@ -82,29 +82,31 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                             <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Visibility Control</Label>
-                             <div className="flex gap-4 p-4 rounded-xl bg-muted border">
-                                <div className="flex items-center gap-3 flex-1">
-                                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                        <Globe className="w-4 h-4" />
+                        {workspace.type === 'thesis' && (
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Visibility Control</Label>
+                                <div className="flex gap-4 p-4 rounded-xl bg-muted border">
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                            <Globe className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold">Public Discoverability</p>
+                                            <p className="text-[10px] text-muted-foreground">Allow others to find this Hub</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold">Public Discoverability</p>
-                                        <p className="text-[10px] text-muted-foreground">Allow others to find this Hub</p>
-                                    </div>
+                                    <Select name="visibility" defaultValue={workspace.visibility || "visible"}>
+                                        <SelectTrigger className="w-32 border-0 bg-transparent shadow-none focus:ring-0 text-xs font-bold">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="visible">Visible</SelectItem>
+                                            <SelectItem value="hidden">Hidden</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                                <Select name="visibility" defaultValue="public">
-                                    <SelectTrigger className="w-32 border-0 bg-transparent shadow-none focus:ring-0 text-xs font-bold">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="public">Public</SelectItem>
-                                        <SelectItem value="private">Private</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                             </div>
-                        </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-6 border-t space-y-4">

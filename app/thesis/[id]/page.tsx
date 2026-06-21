@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth"
 import { notFound } from "next/navigation"
 import { ThesisDetailEnhanced } from "@/components/thesis-detail-enhanced"
 import { unstable_cache } from "next/cache"
+import { getRequestStatus } from "@/app/actions/requests"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 60
@@ -42,5 +43,9 @@ export default async function ThesisDetailsPage({ params }: { params: Promise<{ 
         notFound()
     }
 
-    return <ThesisDetailEnhanced thesis={thesis} user={user} publications={publications} />
+    // Check if user has an existing access request for hidden theses
+    const requestStatus = user ? await getRequestStatus(thesisId) : 'none'
+    const hasApprovedRequest = requestStatus === 'approved'
+
+    return <ThesisDetailEnhanced thesis={thesis} user={user} publications={publications} hasApprovedRequest={hasApprovedRequest} initialRequestStatus={requestStatus} />
 }

@@ -28,6 +28,7 @@ export async function uploadLegacyWorkspace(formData: FormData) {
     const field = formData.get("field") as string || ""
     const year = parseInt(formData.get("year") as string) || new Date().getFullYear()
     const status = formData.get("status") as string || "approved"
+    const visibility = formData.get("visibility") as string || "visible"
     const keywordsRaw = formData.get("keywords") as string || ""
     const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(Boolean) : []
     
@@ -117,12 +118,12 @@ export async function uploadLegacyWorkspace(formData: FormData) {
                 INSERT INTO theses (
                     title, abstract, department, field,
                     year, submitted_date,
-                    status, supervisor_id, ghost_supervisor, keywords, created_at, updated_at
+                    status, visibility, supervisor_id, ghost_supervisor, keywords, created_at, updated_at
                 )
                 VALUES (
                     ${title}, ${abstract}, ${department}, ${field},
                     ${year}, CURRENT_DATE,
-                    ${status}, ${finalSupervisorId}, ${finalGhostSupervisor}, ${keywords}, NOW(), NOW()
+                    ${status}, ${visibility}, ${finalSupervisorId}, ${finalGhostSupervisor}, ${keywords}, NOW(), NOW()
                 )
                 RETURNING id
             `

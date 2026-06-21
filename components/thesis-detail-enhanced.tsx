@@ -19,6 +19,9 @@ import {
     Clock,
     Building2,
     Lock,
+    Send,
+    Loader2,
+    ShieldCheck,
 } from "lucide-react"
 import { GlobalNavbar } from "@/components/global-navbar"
 import type { ThesisWithAuthors } from "@/lib/db/theses"
@@ -31,15 +34,25 @@ import { svgTextToDataUri } from "@/lib/utils"
 import { useContentTracking } from "@/hooks/use-content-tracking"
 import { ClaimAuthorshipButton } from "@/components/claim-authorship-button"
 import { useState } from "react"
+import { requestThesisAccess } from "@/app/actions/requests"
+import {
+    Dialog, DialogContent, DialogHeader,
+    DialogTitle, DialogDescription, DialogFooter
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 export function ThesisDetailEnhanced({
                                          thesis,
                                          user,
                                          publications = [],
+                                         hasApprovedRequest = false,
+                                         initialRequestStatus = 'none',
                                      }: {
     thesis: ThesisWithAuthors
     user?: User | null
     publications?: Publication[]
+    hasApprovedRequest?: boolean
+    initialRequestStatus?: 'none' | 'pending' | 'approved' | 'rejected'
 }) {
     const [viewCount, setViewCount] = useState(thesis.views || 0)
     const [downloadCount, setDownloadCount] = useState(thesis.downloads || 0)
@@ -47,6 +60,12 @@ export function ThesisDetailEnhanced({
     const [secureViewerOpen, setSecureViewerOpen] = useState(false)
     const [currentDocUrl, setCurrentDocUrl] = useState("")
     const [currentDocTitle, setCurrentDocTitle] = useState("")
+
+    // Request Access state — initialized from server to persist across reloads
+    const [requestDialogOpen, setRequestDialogOpen] = useState(false)
+    const [requestMessage, setRequestMessage] = useState("")
+    const [requestLoading, setRequestLoading] = useState(false)
+    const [requestSent, setRequestSent] = useState(initialRequestStatus === 'pending')
 
     const openSecureViewer = (url: string, title: string, e: React.MouseEvent) => {
         e.preventDefault()
@@ -173,6 +192,39 @@ export function ThesisDetailEnhanced({
         ],
     }
 
+    const hasAccess = () => {
+        if (thesis.visibility !== 'hidden') return true;
+        if (!user) return false;
+        
+        // 1. Check if user is an author
+        const isAuthor = thesis.authors?.some(a => a.id === user.id);
+        if (isAuthor) return true;
+        
+        // 2. Check if user is the supervisor
+        if (thesis.supervisor_id === user.id) return true;
+        
+        // 3. Check if user is department head of the same department
+        // @ts-ignore - is_department_head added to user model but may not be in type
+        const isDeptHead = user.is_department_head === true && user.department === thesis.department;
+        if (isDeptHead) return true;
+
+        // 4. Check if user has an approved access request
+        if (hasApprovedRequest) return true;
+        
+        return false;
+    }
+
+    const handleRequestAccess = async () => {
+        setRequestLoading(true)
+        const result = await requestThesisAccess(thesis.id, requestMessage)
+        setRequestLoading(false)
+        if (result.success) {
+            setRequestSent(true)
+            setRequestDialogOpen(false)
+            setRequestMessage("")
+        }
+    }
+
     const renderResources = () => {
         if (!user) {
             return (
@@ -201,6 +253,87 @@ export function ThesisDetailEnhanced({
                         ))}
                     </div>
                 </Card>
+            )
+        }
+
+        if (!hasAccess()) {
+            return (
+                <>
+                    <Card className="border border-border bg-card p-6 shadow-md relative overflow-hidden h-[400px]">
+                        <div className="absolute inset-0 bg-background/50 backdrop-blur-md z-10 flex flex-col items-center justify-center p-6 text-center">
+                            <div className="bg-destructive/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                                <Lock className="w-8 h-8 text-destructive" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Restricted Access</h3>
+                            <p className="text-muted-foreground mb-6 max-w-sm">
+                                This thesis is marked as Hidden. Only the authors, supervisor, and the department head have access to its resources.
+                            </p>
+                            {requestSent ? (
+                                <div className="flex items-center gap-2 text-sm font-semibold text-amber-600 bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/20">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Request Sent — Awaiting Author Approval
+                                </div>
+                            ) : initialRequestStatus === 'rejected' ? (
+                                <div className="space-y-3 text-center">
+                                    <div className="flex items-center justify-center gap-2 text-sm text-destructive">
+                                        <Lock className="w-4 h-4" />
+                                        Previous request was declined
+                                    </div>
+                                    <Button onClick={() => setRequestDialogOpen(true)} variant="outline" className="gap-2">
+                                        <Send className="w-4 h-4" />
+                                        Request Again
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Button onClick={() => setRequestDialogOpen(true)} className="gap-2">
+                                    <Send className="w-4 h-4" />
+                                    Request Access
+                                </Button>
+                            )}
+                        </div>
+                        <div className="space-y-4 opacity-50 blur-sm select-none pointer-events-none">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                                    <div className="w-10 h-10 rounded bg-muted"></div>
+                                    <div className="space-y-2 flex-1">
+                                        <div className="h-4 bg-muted rounded w-1/3"></div>
+                                        <div className="h-3 bg-muted rounded w-1/4"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+
+                    {/* Request Access Dialog */}
+                    <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+                        <DialogContent className="sm:max-w-[480px]">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <Send className="w-5 h-5 text-primary" />
+                                    Request Access
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Send a message to the authors explaining why you'd like access to this thesis's resources.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <Textarea
+                                    placeholder="e.g. I am a fellow researcher working on a similar topic and would like to review your methodology..."
+                                    value={requestMessage}
+                                    onChange={(e) => setRequestMessage(e.target.value)}
+                                    className="min-h-[120px] resize-none"
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setRequestDialogOpen(false)}>Cancel</Button>
+                                <Button onClick={handleRequestAccess} disabled={requestLoading || !requestMessage.trim()} className="gap-2">
+                                    {requestLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                    Send Request
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </>
             )
         }
 

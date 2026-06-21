@@ -207,7 +207,7 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                     <CardTitle className="text-base">Core Metadata</CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-4 space-y-3">
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className={`grid gap-3 ${workspaceType === 'thesis' ? 'grid-cols-3' : 'grid-cols-2'}`}>
                                         <div className="space-y-1">
                                             <Label className="text-xs">Type *</Label>
                                             <Select name="type" required value={workspaceType} onValueChange={setWorkspaceType}>
@@ -229,6 +229,18 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        {workspaceType === 'thesis' && (
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">Visibility</Label>
+                                                <Select name="visibility" defaultValue="visible">
+                                                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="visible" className="text-xs">Visible</SelectItem>
+                                                        <SelectItem value="hidden" className="text-xs">Hidden</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="space-y-1">
