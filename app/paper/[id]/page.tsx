@@ -3,6 +3,8 @@ import { PaperDetailContent } from "@/components/paper-detail-content"
 import { getPublicationById } from "@/lib/db/publications"
 import { getCurrentUser } from "@/lib/auth"
 
+export const dynamic = "force-dynamic"
+
 export default async function PaperDetailPage({ params }: {params: Promise<{ id: string }> }) {
     const { id } = await params
     const publicationId = Number(id)

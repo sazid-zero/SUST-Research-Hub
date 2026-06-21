@@ -2,6 +2,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { PapersContentBackend } from "@/components/papers-content-backend"
 import { getAllPublications } from "@/lib/db/publications"
 
+export const dynamic = "force-dynamic"
+
 export default async function PapersRepositoryPage() {
     const user = await getCurrentUser()
 

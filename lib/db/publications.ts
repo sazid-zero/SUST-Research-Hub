@@ -21,6 +21,7 @@ export interface Publication {
     url?: string
     pdf_url?: string
     citations: number
+    views?: number
     impact_factor?: number
     abstract?: string
     keywords?: string[]
