@@ -177,8 +177,8 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
     }
 
     return (
-        <div className="flex-1 bg-background min-h-screen p-4 md:p-6 text-sm">
-            <div className="max-w-5xl mx-auto space-y-4">
+        <div className="flex-1 bg-background min-h-screen p-4 md:p-8 lg:p-12 text-sm">
+            <div className="max-w-[1400px] mx-auto space-y-6">
                 <div className="mb-4">
                     <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
                         <UploadCloud className="w-6 h-6 text-primary" />
@@ -208,10 +208,10 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                 </CardHeader>
                                 <CardContent className="p-4 space-y-3">
                                     <div className={`grid gap-3 ${workspaceType === 'thesis' ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">Type *</Label>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Type *</Label>
                                             <Select name="type" required value={workspaceType} onValueChange={setWorkspaceType}>
-                                                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Type" /></SelectTrigger>
+                                                <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue placeholder="Type" /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="thesis" className="text-xs">Thesis</SelectItem>
                                                     <SelectItem value="publication" className="text-xs">Publication</SelectItem>
@@ -219,10 +219,10 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">Status</Label>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Status</Label>
                                             <Select name="status" defaultValue="approved">
-                                                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="approved" className="text-xs">Approved / Published</SelectItem>
                                                     <SelectItem value="active" className="text-xs">Active</SelectItem>
@@ -230,10 +230,10 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                             </Select>
                                         </div>
                                         {workspaceType === 'thesis' && (
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Visibility</Label>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Visibility</Label>
                                                 <Select name="visibility" defaultValue="visible">
-                                                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                    <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="visible" className="text-xs">Visible</SelectItem>
                                                         <SelectItem value="hidden" className="text-xs">Hidden</SelectItem>
@@ -243,43 +243,43 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                         )}
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">Title *</Label>
-                                        <Input name="title" required className="h-8 text-xs" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Title *</Label>
+                                        <Input name="title" required className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">Abstract / Description</Label>
-                                        <Textarea name="abstract" className="min-h-[80px] text-xs resize-none" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Abstract / Description</Label>
+                                        <Textarea name="abstract" className="min-h-[100px] text-xs resize-none border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all leading-relaxed" />
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">Keywords</Label>
-                                        <Input name="keywords" placeholder="e.g. Deep Learning, NLP, Computer Vision (comma separated)" className="h-8 text-xs" />
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Keywords</Label>
+                                        <Input name="keywords" placeholder="e.g. Deep Learning, NLP, Computer Vision (comma separated)" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                     </div>
 
-                                    <div className="grid grid-cols-3 gap-3">
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">Department</Label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Department</Label>
                                             <Select name="department" defaultValue={DEPARTMENTS[0]}>
-                                                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     {DEPARTMENTS.map(d => <SelectItem key={d} value={d} className="text-xs">{d}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">Field of Study</Label>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Field of Study</Label>
                                             <Select name="field" defaultValue={FIELDS_OF_STUDY[0]}>
-                                                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     {FIELDS_OF_STUDY.map(f => <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="space-y-1">
-                                            <Label className="text-xs">Year</Label>
-                                            <Input name="year" type="number" defaultValue={new Date().getFullYear()} className="h-8 text-xs" />
+                                        <div className="space-y-1.5 md:col-span-2">
+                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Year</Label>
+                                            <Input name="year" type="number" defaultValue={new Date().getFullYear()} className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all w-full md:w-1/2" />
                                         </div>
                                     </div>
                                 </CardContent>
@@ -291,58 +291,58 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                 </CardHeader>
                                 <CardContent className="p-4 space-y-3">
                                     {workspaceType === "publication" && (
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Publication Type</Label>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Publication Type</Label>
                                                 <Select name="publication_type" defaultValue="journal">
-                                                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                                    <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all"><SelectValue /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="journal" className="text-xs">Journal</SelectItem>
                                                         <SelectItem value="conference" className="text-xs">Conference</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="space-y-1 col-span-2">
-                                                <Label className="text-xs">Journal / Conference Name</Label>
-                                                <Input name="journal_name" className="h-8 text-xs" />
+                                            <div className="space-y-1.5 md:col-span-2">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Journal / Conference Name</Label>
+                                                <Input name="journal_name" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">DOI</Label>
-                                                <Input name="doi" className="h-8 text-xs" />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">DOI</Label>
+                                                <Input name="doi" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Citations</Label>
-                                                <Input name="citations" type="number" defaultValue={0} className="h-8 text-xs" />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Citations</Label>
+                                                <Input name="citations" type="number" defaultValue={0} className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">External URL</Label>
-                                                <Input name="url" type="url" className="h-8 text-xs" />
+                                            <div className="space-y-1.5 md:col-span-3">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">External URL</Label>
+                                                <Input name="url" type="url" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
                                         </div>
                                     )}
 
                                     {(workspaceType === "thesis" || workspaceType === "project") && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Supervisor Name *</Label>
-                                                <Input name="supervisor" list="all-users-list" type="text" placeholder="Search user or type ghost name..." required={workspaceType === "thesis"} className="h-8 text-xs" />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Supervisor Name *</Label>
+                                                <Input name="supervisor" list="all-users-list" type="text" placeholder="Search user or type ghost name..." required={workspaceType === "thesis"} className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Linked Publication ID</Label>
-                                                <Input name="linkedPublicationId" type="number" className="h-8 text-xs" />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Linked Publication ID</Label>
+                                                <Input name="linkedPublicationId" type="number" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
                                         </div>
                                     )}
 
                                     {workspaceType === "project" && (
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Funding (USD)</Label>
-                                                <Input name="funding" type="number" className="h-8 text-xs" />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Funding (USD)</Label>
+                                                <Input name="funding" type="number" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Start Date</Label>
-                                                <Input name="startDate" type="date" className="h-8 text-xs" />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Start Date</Label>
+                                                <Input name="startDate" type="date" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                             </div>
                                         </div>
                                     )}
@@ -370,13 +370,13 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                     value={author.name}
                                                     onChange={e => updateAuthor(author.id, "name", e.target.value)}
                                                     placeholder="Search user or type ghost name..." 
-                                                    className="h-7 text-xs border-transparent hover:border-border focus:border-primary flex-1"
+                                                    className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all flex-1"
                                                 />
                                                 <Input 
                                                     value={author.regNo || ''}
                                                     onChange={e => updateAuthor(author.id, "regNo", e.target.value)}
                                                     placeholder="Reg No (if ghost)" 
-                                                    className="h-7 text-xs border-transparent hover:border-border focus:border-primary w-32"
+                                                    className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all w-32"
                                                 />
                                                 <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-rose-500" onClick={() => removeAuthor(author.id)}>
                                                     <Trash2 className="w-3 h-3" />
@@ -400,39 +400,39 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                     
                                     {(workspaceType === "thesis" || workspaceType === "project") && (
                                         <>
-                                            <div className="space-y-1">
-                                                <Label className="text-xs">Primary Document (PDF)</Label>
-                                                <Input type="file" className="text-xs h-8" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} />
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Primary Document (PDF)</Label>
+                                                <Input type="file" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} />
                                             </div>
                                             <div className="space-y-3 pt-2 border-t">
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs font-bold text-primary">Code Link (GitHub)</Label>
-                                                    <Input type="url" value={codeUrl} onChange={(e) => setCodeUrl(e.target.value)} placeholder="https://github.com/..." className="text-xs h-8" />
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[11px] font-bold uppercase tracking-wider text-primary">Code Link (GitHub)</Label>
+                                                    <Input type="url" value={codeUrl} onChange={(e) => setCodeUrl(e.target.value)} placeholder="https://github.com/..." className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                 </div>
                                                 {codeUrl && (
-                                                    <div className="space-y-1 pl-4 border-l-2 border-muted">
-                                                        <Label className="text-xs">Repository Title</Label>
-                                                        <Input value={codeTitle} onChange={(e) => setCodeTitle(e.target.value)} placeholder="e.g. YOLOv8 Implementation" className="text-xs h-8" />
+                                                    <div className="space-y-1.5 pl-4 border-l-2 border-muted">
+                                                        <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Repository Title</Label>
+                                                        <Input value={codeTitle} onChange={(e) => setCodeTitle(e.target.value)} placeholder="e.g. YOLOv8 Implementation" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                     </div>
                                                 )}
                                             </div>
                                             
                                             <div className="space-y-3 pt-2 border-t">
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs font-bold text-primary">Dataset Link</Label>
-                                                    <Input type="url" value={datasetUrl} onChange={(e) => setDatasetUrl(e.target.value)} placeholder="https://..." className="text-xs h-8" />
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[11px] font-bold uppercase tracking-wider text-primary">Dataset Link</Label>
+                                                    <Input type="url" value={datasetUrl} onChange={(e) => setDatasetUrl(e.target.value)} placeholder="https://..." className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                 </div>
                                                 {datasetUrl && (
-                                                    <div className="space-y-2 pl-4 border-l-2 border-muted">
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Dataset Title</Label>
-                                                            <Input value={datasetTitle} onChange={(e) => setDatasetTitle(e.target.value)} placeholder="Dataset Title" className="text-xs h-8" />
+                                                    <div className="space-y-3 pl-4 border-l-2 border-muted">
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Dataset Title</Label>
+                                                            <Input value={datasetTitle} onChange={(e) => setDatasetTitle(e.target.value)} placeholder="Dataset Title" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Modality / Type</Label>
+                                                            <div className="space-y-1.5">
+                                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Modality / Type</Label>
                                                                 <Select value={datasetType} onValueChange={setDatasetType}>
-                                                                    <SelectTrigger className="text-xs h-8">
+                                                                    <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all">
                                                                         <SelectValue placeholder="Select type..." />
                                                                     </SelectTrigger>
                                                                     <SelectContent className="text-xs">
@@ -448,38 +448,38 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Size (approx.)</Label>
-                                                                <Input value={datasetSize} onChange={(e) => setDatasetSize(e.target.value)} placeholder="e.g. 2.5 GB" className="text-xs h-8" />
+                                                            <div className="space-y-1.5">
+                                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Size (approx.)</Label>
+                                                                <Input value={datasetSize} onChange={(e) => setDatasetSize(e.target.value)} placeholder="e.g. 2.5 GB" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Description</Label>
-                                                            <Textarea value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder="Brief description..." className="text-xs min-h-[60px]" />
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Description</Label>
+                                                            <Textarea value={datasetDescription} onChange={(e) => setDatasetDescription(e.target.value)} placeholder="Brief description..." className="min-h-[60px] text-xs resize-none border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Tags</Label>
-                                                            <Input value={datasetTags} onChange={(e) => setDatasetTags(e.target.value)} placeholder="NLP, Bangla (comma separated)" className="text-xs h-8" />
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Tags</Label>
+                                                            <Input value={datasetTags} onChange={(e) => setDatasetTags(e.target.value)} placeholder="NLP, Bangla (comma separated)" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="space-y-3 pt-2 border-t">
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs font-bold text-primary">Model Link</Label>
-                                                    <Input type="url" value={modelUrl} onChange={(e) => setModelUrl(e.target.value)} placeholder="https://..." className="text-xs h-8" />
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-[11px] font-bold uppercase tracking-wider text-primary">Model Link</Label>
+                                                    <Input type="url" value={modelUrl} onChange={(e) => setModelUrl(e.target.value)} placeholder="https://..." className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                 </div>
                                                 {modelUrl && (
-                                                    <div className="space-y-2 pl-4 border-l-2 border-muted">
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Model Title</Label>
-                                                            <Input value={modelTitle} onChange={(e) => setModelTitle(e.target.value)} placeholder="Model Title" className="text-xs h-8" />
+                                                    <div className="space-y-3 pl-4 border-l-2 border-muted">
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Model Title</Label>
+                                                            <Input value={modelTitle} onChange={(e) => setModelTitle(e.target.value)} placeholder="Model Title" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Model Type / Task</Label>
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Model Type / Task</Label>
                                                             <Select value={modelType} onValueChange={setModelType}>
-                                                                <SelectTrigger className="text-xs h-8">
+                                                                <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all">
                                                                     <SelectValue placeholder="Select type..." />
                                                                 </SelectTrigger>
                                                                 <SelectContent className="text-xs max-h-[200px]">
@@ -502,10 +502,10 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                             </Select>
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Framework</Label>
+                                                            <div className="space-y-1.5">
+                                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Framework</Label>
                                                                 <Select value={modelFramework} onValueChange={setModelFramework}>
-                                                                    <SelectTrigger className="text-xs h-8">
+                                                                    <SelectTrigger className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all">
                                                                         <SelectValue placeholder="Select framework..." />
                                                                     </SelectTrigger>
                                                                     <SelectContent className="text-xs">
@@ -519,18 +519,18 @@ export function AdminUploadClient({ allUsers = [] }: AdminUploadClientProps) {
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-xs">Accuracy (%)</Label>
-                                                                <Input type="number" step="0.1" value={modelAccuracy} onChange={(e) => setModelAccuracy(e.target.value)} placeholder="95.5" className="text-xs h-8" />
+                                                            <div className="space-y-1.5">
+                                                                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Accuracy (%)</Label>
+                                                                <Input type="number" step="0.1" value={modelAccuracy} onChange={(e) => setModelAccuracy(e.target.value)} placeholder="95.5" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Description</Label>
-                                                            <Textarea value={modelDescription} onChange={(e) => setModelDescription(e.target.value)} placeholder="Brief description..." className="text-xs min-h-[60px]" />
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Description</Label>
+                                                            <Textarea value={modelDescription} onChange={(e) => setModelDescription(e.target.value)} placeholder="Brief description..." className="min-h-[60px] text-xs resize-none border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <Label className="text-xs">Tags</Label>
-                                                            <Input value={modelTags} onChange={(e) => setModelTags(e.target.value)} placeholder="NLP, BERT (comma separated)" className="text-xs h-8" />
+                                                        <div className="space-y-1.5">
+                                                            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Tags</Label>
+                                                            <Input value={modelTags} onChange={(e) => setModelTags(e.target.value)} placeholder="NLP, BERT (comma separated)" className="h-9 text-xs border-border/50 shadow-xs focus:ring-1 focus:ring-primary/20 transition-all" />
                                                         </div>
                                                     </div>
                                                 )}

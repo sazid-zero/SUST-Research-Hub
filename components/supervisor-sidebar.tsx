@@ -54,14 +54,14 @@ function SidebarContent({ setIsOpen }: { setIsOpen?: (open: boolean) => void }) 
                             href={item.href}
                             onClick={() => setIsOpen?.(false)}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
                                 isActive
-                                    ? "bg-gradient-to-br from-primary to-accent text-primary-foreground"
+                                    ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-sm"
                                     : "text-foreground hover:bg-accent hover:text-accent-foreground",
                             )}
                         >
-                            <Icon className="h-5 w-5" />
-                            <span className="font-medium text-base">{item.label}</span>
+                            <Icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-accent-foreground")} />
+                            <span className="font-medium text-sm">{item.label}</span>
                         </Link>
                     )
                 })}
@@ -69,10 +69,10 @@ function SidebarContent({ setIsOpen }: { setIsOpen?: (open: boolean) => void }) 
                     onClick={() => {
                         setTheme(theme === "dark" ? "light" : "dark")
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-foreground hover:bg-accent hover:text-accent-foreground transition-colors group"
                 >
-                    {mounted && theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                    <span className="font-medium text-base">Dark Mode</span>
+                    {mounted && theme === "dark" ? <Sun className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" /> : <Moon className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground" />}
+                    <span className="font-medium text-sm">Dark Mode</span>
                 </button>
             </nav>
 

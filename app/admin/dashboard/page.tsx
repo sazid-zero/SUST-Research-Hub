@@ -64,7 +64,7 @@ async function DashboardContent() {
   return (
     <div className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Hero Banner Section */}
-      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-10 sm:py-12 md:py-16">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0f172a] border-b border-border/50 px-6 py-6 sm:py-8 md:py-10">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -73,17 +73,17 @@ async function DashboardContent() {
                           <Sparkles className="h-3 w-3" />
                           System Intelligence
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+                      <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         Admin <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Command Center</span>
                       </h1>
-                      <p className="text-muted-foreground font-medium max-w-lg">
+                      <p className="text-sm text-muted-foreground font-medium max-w-lg">
                         Welcome back, {user?.full_name?.split(' ')[0]}. Oversee the entire research ecosystem, manage users, and monitor system performance.
                       </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <Link href="/admin/settings">
-                        <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-primary/20 border-none">
-                            <SettingsIcon className="h-5 w-5 mr-2" />
+                        <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none">
+                            <SettingsIcon className="h-4 w-4 mr-2" />
                             Security Protocol
                         </Button>
                     </Link>
@@ -92,7 +92,7 @@ async function DashboardContent() {
           </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 sm:p-8 space-y-12 mb-20">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 mb-10">
         {/* Stats Grid */}
         <section className="space-y-6">
             <div className="flex items-center gap-2 px-2">
@@ -110,7 +110,7 @@ async function DashboardContent() {
                             </div>
                             <div>
                                 <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-3xl font-black text-foreground mt-1">
+                                <p className="text-2xl font-black text-foreground mt-1">
                                     {stat.value}
                                 </p>
                             </div>
@@ -122,7 +122,7 @@ async function DashboardContent() {
         </section>
 
         {/* Quick Actions & System Health */}
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* Quick Actions Table Style */}
           <Card className="md:col-span-2 border-border/50 bg-background/80 backdrop-blur-sm rounded-3xl shadow-sm ring-1 ring-primary/5 overflow-hidden">
              <div className="p-6 border-b border-border/50 bg-muted/10 flex items-center justify-between">
@@ -138,10 +138,10 @@ async function DashboardContent() {
                       variant="outline"
                       className="w-full h-16 justify-start gap-4 border-border/50 bg-muted/5 hover:bg-primary hover:text-white hover:border-primary transition-all rounded-2xl font-bold group"
                     >
-                      <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/10 group-hover:bg-white/20 transition-colors">
-                        <action.icon className="h-5 w-5 text-primary group-hover:text-white" />
+                      <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 group-hover:bg-white/20 transition-colors">
+                        <action.icon className="h-4 w-4 text-primary group-hover:text-white" />
                       </div>
-                      {action.label}
+                      <span className="text-sm">{action.label}</span>
                     </Button>
                   </Link>
                 ))}
@@ -185,7 +185,7 @@ async function DashboardContent() {
         </div>
 
         {/* Support & Activity */}
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Support Stats */}
            <Card className="border-border/50 bg-background/80 backdrop-blur-sm p-6 rounded-3xl shadow-sm ring-1 ring-primary/5">
             <div className="flex items-center justify-between mb-6 px-1">

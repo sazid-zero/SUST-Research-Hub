@@ -45,14 +45,14 @@ function SidebarContent({ setIsOpen }: { setIsOpen?: (open: boolean) => void }) 
                             href={item.href}
                             onClick={() => setIsOpen?.(false)}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
                                 isActive
-                                    ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-md"
+                                    ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-sm"
                                     : "text-foreground hover:bg-accent hover:text-accent-foreground",
                             )}
                         >
-                            <Icon className={cn("h-5 w-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-accent-foreground")} />
-                            <span className="font-medium text-base">{item.label}</span>
+                            <Icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-accent-foreground")} />
+                            <span className="font-medium text-sm">{item.label}</span>
                         </Link>
                     )
                 })}
