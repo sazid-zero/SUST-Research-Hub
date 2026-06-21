@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { sql } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
@@ -14,43 +14,49 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = await getCurrentUser()
+    // Validate contentType
+    const validTypes = ["thesis", "publication", "dataset", "model", "project"]
+    if (!validTypes.includes(contentType)) {
+      return NextResponse.json(
+        { error: "Invalid contentType" },
+        { status: 400 }
+      )
+    }
+
+    let userId: number | null = null
+    try {
+      const user = await getCurrentUser()
+      userId = user?.id || null
+    } catch {
+      // Not logged in or cookies unavailable — continue with null
+    }
+
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
 
     // Log view count
-    const query = `
+    await sql`
       INSERT INTO view_counts (content_type, content_id, user_id, ip_address)
-      VALUES ($1, $2, $3, $4)
+      VALUES (${contentType}, ${contentId}, ${userId}, ${ipAddress})
     `
 
-    await db.query(query, [contentType, contentId, user?.id || null, ipAddress])
-
-    // Update views counter based on content type
-    let updateQuery = ""
+    // Update views counter based on content type using tagged template
     switch (contentType) {
       case "thesis":
-        updateQuery = "UPDATE theses SET views = views + 1 WHERE id = $1"
+        await sql`UPDATE theses SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
         break
       case "publication":
-        updateQuery = "UPDATE publications SET views = views + 1 WHERE id = $1"
+        await sql`UPDATE publications SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
         break
       case "dataset":
-        updateQuery = "UPDATE datasets SET views = views + 1 WHERE id = $1"
+        await sql`UPDATE datasets SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
         break
       case "model":
-        updateQuery = "UPDATE models SET views = views + 1 WHERE id = $1"
+        await sql`UPDATE models SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
         break
       case "project":
-        updateQuery = "UPDATE projects SET views = views + 1 WHERE id = $1"
+        await sql`UPDATE projects SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
         break
-      default:
-        return NextResponse.json(
-          { error: "Invalid contentType" },
-          { status: 400 }
-        )
     }
-
-    await db.query(updateQuery, [contentId])
 
     return NextResponse.json({ success: true })
   } catch (error) {
