@@ -39,23 +39,31 @@ export async function POST(request: NextRequest) {
       VALUES (${contentType}, ${contentId}, ${userId}, ${ipAddress})
     `
 
-    // Update views counter based on content type using tagged template
-    switch (contentType) {
-      case "thesis":
-        await sql`UPDATE theses SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
-        break
-      case "publication":
-        await sql`UPDATE publications SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
-        break
-      case "dataset":
-        await sql`UPDATE datasets SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
-        break
-      case "model":
-        await sql`UPDATE models SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
-        break
-      case "project":
-        await sql`UPDATE projects SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
-        break
+    // Update views counter — each update is isolated so a missing column on one
+    // table doesn't prevent the log or other table updates from succeeding.
+    try {
+      switch (contentType) {
+        case "thesis":
+          await sql`UPDATE theses SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
+          break
+        case "publication":
+          // Ensure the column exists (idempotent)
+          await sql`ALTER TABLE publications ADD COLUMN IF NOT EXISTS views integer DEFAULT 0`
+          await sql`UPDATE publications SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
+          break
+        case "dataset":
+          await sql`UPDATE datasets SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
+          break
+        case "model":
+          await sql`UPDATE models SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
+          break
+        case "project":
+          await sql`UPDATE projects SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
+          break
+      }
+    } catch (updateError) {
+      // Log the error but still return success — the view_counts row was already inserted.
+      console.error("Error updating views counter (non-fatal):", updateError)
     }
 
     return NextResponse.json({ success: true })
