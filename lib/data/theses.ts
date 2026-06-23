@@ -16,6 +16,7 @@ export interface Thesis {
     author_order: number
   }>
   department: string
+  field: string
   supervisor: string
   supervisorUsername?: string
   year: number
@@ -89,6 +90,7 @@ function formatThesisForDisplay(thesis: any): Thesis {
     authorId: thesis.authors?.[0]?.student_id || "",
     authors: thesis.authors,
     department: thesis.department,
+    field: thesis.field,
     supervisor: thesis.supervisor_name,
     supervisorUsername: thesis.supervisor_username,
     year: new Date(thesis.created_at).getFullYear(),

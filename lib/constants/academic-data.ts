@@ -47,10 +47,11 @@ export const FIELDS_OF_STUDY = [
   "Digital Image Processing",
   "High Performance Computing",
   "Cloud Computing",
-  "Cyber Security",
+  "Cybersecurity",
   "Blockchain",
   "Bioinformatics",
   "Internet of Things",
+  "Software Engineering",
 
   // EEE
   "Power Systems",
