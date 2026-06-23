@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
+import { searchUsers as dbSearchUsers } from "@/lib/db/users"
 import { z } from "zod"
 import fs from "fs"
 import path from "path"
@@ -134,22 +135,24 @@ export async function inviteMember(prevState: any, formData: FormData) {
     const user = await getCurrentUser()
     if (!user) return { message: "Unauthorized", success: false }
 
-    const email = formData.get("email") as string
+    const userId = formData.get("userId") as string
     const role = formData.get("role") as string
     const workspaceId = parseInt(formData.get("workspaceId") as string)
     const type = formData.get("type") as string
 
-    if (!email || !workspaceId || !type) {
+    if (!userId || !workspaceId || !type) {
         return { message: "Missing fields", success: false }
     }
 
     try {
-        // 1. Find User
-        const userResult = await sql`SELECT id, full_name FROM users WHERE email = ${email}`
+        const inviteeId = parseInt(userId)
+        
+        // 1. Find User to verify exists
+        const userResult = await sql`SELECT id, full_name, email FROM users WHERE id = ${inviteeId}`
         if (userResult.length === 0) {
-            return { message: "User not found with that email", success: false }
+            return { message: "User not found", success: false }
         }
-        const inviteeId = userResult[0].id
+        const email = userResult[0].email
 
         if (inviteeId === user.id) {
              return { message: "You cannot invite yourself", success: false }
@@ -1382,5 +1385,59 @@ export async function getPendingCoauthorRequests(publicationId: number) {
     } catch (error) {
         console.error("Get pending coauthor requests error:", error)
         return { success: false, requests: [] }
+    }
+}
+
+export async function searchUsersAction(query: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, users: [] }
+
+    try {
+        const users = await dbSearchUsers(query, 15)
+        // Exclude current user from results
+        const filtered = users.filter(u => u.id !== user.id)
+        return { success: true, users: filtered }
+    } catch (error) {
+        console.error("Search users error:", error)
+        return { success: false, users: [] }
+    }
+}
+
+export async function deleteWorkspace(workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        // Verify user is owner/leader of the workspace
+        let isOwner = false
+        if (workspaceType === 'thesis') {
+            const [thesis] = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId} AND user_id = ${user.id} AND role = 'leader'`
+            isOwner = !!thesis
+        } else if (workspaceType === 'project') {
+            const [project] = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId} AND user_id = ${user.id} AND role = 'leader'`
+            isOwner = !!project
+        } else if (workspaceType === 'publication') {
+            const [pub] = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${workspaceId} AND user_id = ${user.id} AND corresponding_author = true`
+            isOwner = !!pub
+        }
+
+        if (!isOwner) {
+            return { success: false, message: "You can only delete your own workspaces" }
+        }
+
+        // Delete the workspace
+        if (workspaceType === 'thesis') {
+            await sql`DELETE FROM theses WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            await sql`DELETE FROM projects WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            await sql`DELETE FROM publications WHERE id = ${workspaceId}`
+        }
+
+        revalidatePath('/student/dashboard')
+        return { success: true, message: "Workspace deleted successfully" }
+    } catch (error) {
+        console.error("Delete workspace error:", error)
+        return { success: false, message: "Failed to delete workspace" }
     }
 }
