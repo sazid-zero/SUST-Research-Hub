@@ -91,9 +91,9 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                         <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Department</Label>
-                                <Select name="department" defaultValue={workspace.department}>
+                                <Select name="department" defaultValue={workspace.department || ""}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select Dept" />
+                                        <SelectValue placeholder="Select Department" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="CSE">Computer Science & Engineering</SelectItem>
@@ -105,6 +105,31 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                                 </Select>
                             </div>
                         </div>
+
+                        {(workspace.type === 'thesis' || workspace.type === 'project') && (
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Field of Study</Label>
+                                    <Select name="field" defaultValue={workspace.field || ""}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Field" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="AI">Artificial Intelligence</SelectItem>
+                                            <SelectItem value="ML">Machine Learning</SelectItem>
+                                            <SelectItem value="WEB">Web Development</SelectItem>
+                                            <SelectItem value="MOBILE">Mobile Development</SelectItem>
+                                            <SelectItem value="DATABASE">Database Systems</SelectItem>
+                                            <SelectItem value="NETWORK">Networking</SelectItem>
+                                            <SelectItem value="SECURITY">Cybersecurity</SelectItem>
+                                            <SelectItem value="POWER">Power Systems</SelectItem>
+                                            <SelectItem value="COMMUNICATION">Communications</SelectItem>
+                                            <SelectItem value="CONTROL">Control Systems</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
 
                         {workspace.type === 'thesis' && (
                             <div className="space-y-2">

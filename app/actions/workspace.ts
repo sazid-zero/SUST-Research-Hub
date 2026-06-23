@@ -203,16 +203,38 @@ export async function inviteMember(prevState: any, formData: FormData) {
         
         revalidatePath(`/student/workspace/${type}/${workspaceId}`)
 
+        // Get workspace title for notification
+        let workspaceTitle = 'Research Workspace'
+        try {
+            if (type === 'thesis') {
+                const [thesis] = await sql`SELECT title FROM theses WHERE id = ${workspaceId}`
+                workspaceTitle = thesis?.title || 'Thesis'
+            } else if (type === 'project') {
+                const [project] = await sql`SELECT title FROM projects WHERE id = ${workspaceId}`
+                workspaceTitle = project?.title || 'Project'
+            } else if (type === 'publication') {
+                const [pub] = await sql`SELECT title FROM publications WHERE id = ${workspaceId}`
+                workspaceTitle = pub?.title || 'Publication'
+            }
+        } catch (err) {
+            console.error("[v0] Error fetching workspace title:", err)
+        }
+
         // Send Notification
-        await createNotification({
-            userId: inviteeId,
-            type: 'invite',
-            title: 'Workspace Invitation',
-            message: `${user.full_name} invited you to join the ${type}: ${formData.get('workspaceTitle') || 'Research Workspace'}`,
-            link: `/student/workspace/${type}/${workspaceId}`,
-            sourceId: workspaceId,
-            sourceType: type
-        })
+        try {
+            await createNotification({
+                userId: inviteeId,
+                type: 'invite',
+                title: 'Workspace Invitation',
+                message: `${user.full_name} invited you to join the ${type}: ${workspaceTitle}`,
+                link: `/student/workspace/${type}/${workspaceId}`,
+                sourceId: workspaceId,
+                sourceType: type
+            })
+            console.log("[v0] Notification created for user:", inviteeId)
+        } catch (notifyErr) {
+            console.error("[v0] Failed to create notification:", notifyErr)
+        }
 
         // Send Email
         await sendEmail({
@@ -223,9 +245,11 @@ export async function inviteMember(prevState: any, formData: FormData) {
 
         return { message: `Invited ${userResult[0].full_name} successfully`, success: true }
 
-    } catch (error) {
-        console.error("Invite error:", error)
-        return { message: "Failed to invite member", success: false }
+    } catch (error: any) {
+        console.error("[v0] Invite error:", error)
+        console.error("[v0] Error message:", error?.message)
+        console.error("[v0] Error details:", JSON.stringify(error))
+        return { message: error?.message || "Failed to invite member", success: false }
     }
 }
 
@@ -445,8 +469,10 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
     const keywordsStr = formData.get("keywords") as string
     const paperSubtype = formData.get("paper_subtype") as string
     const visibility = formData.get("visibility") as string
+    const department = formData.get("department") as string
+    const field = formData.get("field") as string
 
-    if (!id || !type || !title) return { message: "Missing required fields", success: false }
+    if (!id || !type) return { message: "Missing required fields", success: false }
 
     const keywords = keywordsStr ? keywordsStr.split(',').map(k => k.trim()).filter(k => k) : []
 
@@ -454,19 +480,38 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
         if (type === 'thesis') {
             await sql`
                 UPDATE theses 
-                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, visibility = COALESCE(${visibility}, visibility), updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    abstract = COALESCE(${description || null}, abstract),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    department = COALESCE(${department || null}, department),
+                    field = COALESCE(${field || null}, field),
+                    visibility = COALESCE(${visibility || null}, visibility),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'project') {
             await sql`
                 UPDATE projects 
-                SET title = ${title}, description = ${description}, keywords = ${keywords}, updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    description = COALESCE(${description || null}, description),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    department = COALESCE(${department || null}, department),
+                    field = COALESCE(${field || null}, field),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'publication') {
             await sql`
                 UPDATE publications 
-                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, paper_subtype = ${paperSubtype}, updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    abstract = COALESCE(${description || null}, abstract),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    paper_subtype = COALESCE(${paperSubtype || null}, paper_subtype),
+                    department = COALESCE(${department || null}, department),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         }
