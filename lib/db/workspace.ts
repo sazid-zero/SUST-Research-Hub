@@ -80,6 +80,31 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
         const pub = await getPublicationById(id)
         if (!pub) return null
 
+        // Get accepted authors
+        const acceptedMembers = (pub.authors || []).map(a => ({
+            user_id: a.user_id || 0, 
+            full_name: a.author_name,
+            role: a.corresponding_author ? 'leader' : 'member',
+            status: 'active' as const,
+            profile_pic: a.profile_pic
+        }))
+
+        // Get pending coauthor requests
+        const pendingRequests = await sql`
+            SELECT cr.*, u.full_name, u.profile_pic
+            FROM coauthor_requests cr
+            JOIN users u ON cr.invited_user_id = u.id
+            WHERE cr.publication_id = ${id} AND cr.status = 'pending'
+        `
+        
+        const pendingMembers = pendingRequests.map((req: any) => ({
+            user_id: req.invited_user_id,
+            full_name: req.full_name,
+            role: 'member',
+            status: 'invited' as const,
+            profile_pic: req.profile_pic
+        }))
+
         return {
             type: "publication",
             id: pub.id,
@@ -90,13 +115,7 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
             field: null,
             created_at: pub.created_at,
             updated_at: pub.updated_at,
-            members: (pub.authors || []).map(a => ({
-                user_id: a.user_id || 0, 
-                full_name: a.author_name,
-                role: a.corresponding_author ? 'leader' : 'member',
-                status: 'active',
-                profile_pic: a.profile_pic
-            })),
+            members: [...acceptedMembers, ...pendingMembers],
             publications: [], 
             models: [], 
             datasets: [], 
@@ -113,6 +132,7 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
             keywords: pub.keywords || [],
             paper_subtype: pub.paper_subtype
         }
+
     } else {
       // Thesis
       const thesis = await getThesisById(id)

@@ -20,9 +20,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 interface WorkspaceOverviewProps {
   workspace: any
   supervisors?: User[]
+  currentUser?: any
 }
 
-export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOverviewProps) {
+export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: WorkspaceOverviewProps) {
   const router = useRouter()
   const [title, setTitle] = useState(workspace.title)
   const [description, setDescription] = useState(workspace.description || "")
@@ -34,6 +35,13 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
   const [citationCount, setCitationCount] = useState<number>(workspace.citations || 0)
   const [accessRequests, setAccessRequests] = useState<any[]>([])
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null)
+  
+  // Determine if current user can manage this workspace
+  const canManageWorkspace = currentUser && (
+    workspace.type === 'publication' 
+      ? workspace.members?.some((m: any) => m.user_id === currentUser.id && m.role === 'leader')
+      : workspace.members?.some((m: any) => m.user_id === currentUser.id && m.role === 'leader')
+  )
   
   useEffect(() => {
      fetchRelatedWork()
@@ -399,12 +407,7 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                         </Card>
 
                         {/* Co-author Requests Section (Publications only) */}
-                        {workspace.type === 'publication' && (
-                            <CoauthorRequestsSection 
-                                publicationId={workspace.id} 
-                                canManage={true}
-                            />
-                        )}
+                        {/* Pending co-author requests are now shown in the "Other Members" card above with "(Pending)" status */}
 
                         {/* Metadata Card */}
                         <Card className="shadow-sm">

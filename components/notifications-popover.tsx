@@ -21,20 +21,45 @@ export function NotificationsPopover() {
 
   const fetchNotifications = async () => {
     setLoading(true)
-    const [data, count] = await Promise.all([
-        getNotifications(),
-        getUnreadCount()
-    ])
-    setNotifications(data)
-    setUnreadCount(count)
+    try {
+      const [data, count] = await Promise.all([
+          getNotifications(),
+          getUnreadCount()
+      ])
+      console.log(`[NotificationsPopover] Fetched ${data.length} notifications, unread: ${count}`, data)
+      setNotifications(data)
+      setUnreadCount(count)
+    } catch (error) {
+      console.error("[NotificationsPopover] Error fetching:", error)
+    }
     setLoading(false)
   }
 
   useEffect(() => {
     fetchNotifications()
-    // Poll every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
+    
+    // Poll more frequently for the first minute, then every 30 seconds
+    let interval: NodeJS.Timeout
+    let initialFetch = true
+    
+    if (initialFetch) {
+      // Poll every 5 seconds for the first 60 seconds
+      const quickInterval = setInterval(() => {
+        fetchNotifications()
+      }, 5000)
+      
+      // After 60 seconds, switch to 30 second polling
+      setTimeout(() => {
+        clearInterval(quickInterval)
+        interval = setInterval(fetchNotifications, 30000)
+        initialFetch = false
+      }, 60000)
+      
+      return () => {
+        clearInterval(quickInterval)
+        if (interval) clearInterval(interval)
+      }
+    }
   }, [])
 
   const handleMarkAsRead = async (id: number) => {

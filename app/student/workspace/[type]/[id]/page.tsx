@@ -61,7 +61,7 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
         </div>
 
         <TabsContent value="overview" className="mt-0 flex-1 overflow-hidden">
-            <WorkspaceOverview workspace={workspace} supervisors={supervisors} />
+            <WorkspaceOverview workspace={workspace} supervisors={supervisors} currentUser={user} />
         </TabsContent>
 
         <TabsContent value="resources" className="mt-0 flex-1 overflow-hidden">

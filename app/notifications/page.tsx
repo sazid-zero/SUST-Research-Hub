@@ -37,7 +37,7 @@ export default async function NotificationsPage() {
                 <div className="grid gap-4">
                     {notifications.length > 0 ? (
                         notifications.map((n) => (
-                            <Card key={n.id} className={`bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 hover:shadow-md transition-all ${!n.is_read ? 'border-l-4 border-l-indigo-500' : ''}`}>
+                            <Card key={n.id} className={`bg-white dark:bg-[#1a2436] border-slate-200 dark:border-slate-800 hover:shadow-md transition-all border-l-4 border-l-indigo-500`}>
                                 <CardContent className="p-6">
                                     <div className="flex gap-4">
                                         <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#111722] border border-slate-100 dark:border-slate-800">
@@ -45,7 +45,7 @@ export default async function NotificationsPage() {
                                         </div>
                                         <div className="flex-1 space-y-1">
                                             <div className="flex items-start justify-between">
-                                                <h3 className={`text-base leading-tight ${!n.is_read ? 'font-bold text-indigo-600 dark:text-indigo-400' : 'font-semibold text-slate-900 dark:text-slate-100'}`}>
+                                                <h3 className={`text-base leading-tight font-bold text-indigo-600 dark:text-indigo-400`}>
                                                     {n.title}
                                                 </h3>
                                                 <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1">

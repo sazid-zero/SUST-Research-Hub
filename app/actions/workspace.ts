@@ -222,7 +222,7 @@ export async function inviteMember(prevState: any, formData: FormData) {
 
         // Send Notification
         try {
-            await createNotification({
+            const notifyResult = await createNotification({
                 userId: inviteeId,
                 type: 'invite',
                 title: 'Workspace Invitation',
@@ -231,8 +231,9 @@ export async function inviteMember(prevState: any, formData: FormData) {
                 sourceId: workspaceId,
                 sourceType: type
             })
+            console.log(`[inviteMember] Notification creation result:`, notifyResult)
         } catch (notifyErr) {
-            console.error("Failed to create notification:", notifyErr)
+            console.error("[inviteMember] Failed to create notification:", notifyErr)
         }
 
         // Send Email
@@ -928,24 +929,24 @@ export async function uploadDocument(
         if (workspaceType === 'thesis') {
             await sql`
                 INSERT INTO thesis_files (thesis_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         } else if (workspaceType === 'project') {
             await sql`
                 INSERT INTO project_files (project_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         } else if (workspaceType === 'publication') {
             await sql`
                 INSERT INTO publication_files (publication_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         }
 
         // Also keep documents table for global search/history if needed
         await sql`
             INSERT INTO documents (workspace_id, workspace_type, name, file_path, file_size, file_type, uploaded_by, created_at)
-            VALUES (${workspaceId}, ${workspaceType}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${file.type}, ${user.id}, NOW())
+            VALUES (${workspaceId}, ${workspaceType}, ${file.name}, ${fileUrl}, ${file.size}, ${file.type}, ${user.id}, NOW())
         `
 
         revalidateWorkspace(workspaceId, workspaceType)
@@ -1427,6 +1428,126 @@ export async function getPendingCoauthorRequests(publicationId: number) {
     } catch (error) {
         console.error("Get pending coauthor requests error:", error)
         return { success: false, requests: [] }
+    }
+}
+
+/**
+ * Get all pending invitations for the current user (across thesis and publications)
+ * Note: Projects don't have a proper invitation status mechanism, so they're excluded
+ */
+export async function getPendingInvitationsForUser() {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, invitations: [] }
+
+    try {
+        const invitations: any[] = []
+
+        // Fetch pending thesis invitations
+        const thesisInvites = await sql`
+            SELECT 
+                tm.id, 
+                tm.thesis_id as workspace_id, 
+                'thesis' as type,
+                t.title as workspace_title,
+                'Thesis Creator' as inviter_name,
+                tm.invited_at as created_at,
+                'invited' as status
+            FROM team_members tm
+            JOIN theses t ON tm.thesis_id = t.id
+            WHERE tm.user_id = ${user.id} AND tm.status = 'invited'
+            ORDER BY tm.invited_at DESC
+        `
+        invitations.push(...thesisInvites)
+
+        // Fetch pending publication (coauthor) invitations
+        const pubInvites = await sql`
+            SELECT 
+                cr.id, 
+                cr.publication_id as workspace_id, 
+                'publication' as type,
+                p.title as workspace_title,
+                u.full_name as inviter_name,
+                cr.created_at,
+                cr.status
+            FROM coauthor_requests cr
+            JOIN publications p ON cr.publication_id = p.id
+            JOIN users u ON cr.invited_by = u.id
+            WHERE cr.invited_user_id = ${user.id} AND cr.status = 'pending'
+            ORDER BY cr.created_at DESC
+        `
+        invitations.push(...pubInvites)
+
+        return { success: true, invitations }
+    } catch (error) {
+        console.error("Get pending invitations error:", error)
+        return { success: false, invitations: [] }
+    }
+}
+
+/**
+ * Accept an invitation (for thesis or publication)
+ */
+export async function acceptInvitation(invitationId: number, type: string, workspaceId?: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        if (type === 'thesis') {
+            await sql`
+                UPDATE team_members 
+                SET status = 'active', joined_at = NOW() 
+                WHERE id = ${invitationId} AND user_id = ${user.id}
+            `
+        } else if (type === 'publication') {
+            if (!workspaceId) {
+                // Fetch publication ID from coauthor_requests
+                const [req] = await sql`SELECT publication_id FROM coauthor_requests WHERE id = ${invitationId}`
+                if (!req) return { success: false, message: "Request not found" }
+                workspaceId = req.publication_id
+            }
+            return await acceptCoauthorRequest(invitationId, workspaceId!)
+        }
+
+        revalidatePath(`/notifications`)
+        revalidatePath(`/student/dashboard`)
+
+        return { success: true, message: "Invitation accepted" }
+    } catch (error) {
+        console.error("Accept invitation error:", error)
+        return { success: false, message: "Failed to accept invitation" }
+    }
+}
+
+/**
+ * Decline an invitation (for thesis or publication)
+ */
+export async function declineInvitation(invitationId: number, type: string, workspaceId?: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        if (type === 'thesis') {
+            await sql`
+                DELETE FROM team_members 
+                WHERE id = ${invitationId} AND user_id = ${user.id} AND status = 'invited'
+            `
+        } else if (type === 'publication') {
+            if (!workspaceId) {
+                // Fetch publication ID from coauthor_requests
+                const [req] = await sql`SELECT publication_id FROM coauthor_requests WHERE id = ${invitationId}`
+                if (!req) return { success: false, message: "Request not found" }
+                workspaceId = req.publication_id
+            }
+            return await declineCoauthorRequest(invitationId, workspaceId!)
+        }
+
+        revalidatePath(`/notifications`)
+        revalidatePath(`/student/dashboard`)
+
+        return { success: true, message: "Invitation declined" }
+    } catch (error) {
+        console.error("Decline invitation error:", error)
+        return { success: false, message: "Failed to decline invitation" }
     }
 }
 

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { sql } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Inbox, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { acceptCoauthorRequest, declineCoauthorRequest } from "@/app/actions/workspace"
+import { getPendingInvitationsForUser, acceptInvitation, declineInvitation } from "@/app/actions/workspace"
 
 interface MyInvitationsDialogProps {
   userId?: number
@@ -26,45 +25,62 @@ export function MyInvitationsDialog({ userId }: MyInvitationsDialogProps) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [processingId, setProcessingId] = useState<number | null>(null)
+  const router = useRouter()
+
+  // Fetch invitations on mount to show badge count
+  useEffect(() => {
+    fetchMyInvitations()
+  }, [])
 
   useEffect(() => {
-    if (open && userId) {
+    if (open) {
+      // Refresh when dialog opens
       fetchMyInvitations()
+      const interval = setInterval(fetchMyInvitations, 5000) // Poll every 5 seconds while open
+      return () => clearInterval(interval)
     }
-  }, [open, userId])
+  }, [open])
 
   const fetchMyInvitations = async () => {
-    if (!userId) return
     setLoading(true)
     try {
-      // This would ideally be a server action, but for now we show it in the dialog
-      setInvitations([])
+      const result = await getPendingInvitationsForUser()
+      setInvitations(result.invitations || [])
     } catch (error) {
       console.error("Failed to fetch invitations:", error)
+      toast.error("Failed to load invitations")
     }
     setLoading(false)
   }
 
-  const handleAccept = async (requestId: number, publicationId: number) => {
-    setProcessingId(requestId)
-    const result = await acceptCoauthorRequest(requestId, publicationId)
-    if (result.success) {
-      toast.success("Invitation accepted!")
-      setInvitations(prev => prev.filter(i => i.id !== requestId))
-    } else {
-      toast.error(result.message)
+  const handleAccept = async (invitationId: number, type: string, workspaceId: number) => {
+    setProcessingId(invitationId)
+    try {
+      const result = await acceptInvitation(invitationId, type, workspaceId)
+      if (result.success) {
+        toast.success("Invitation accepted!")
+        setInvitations(prev => prev.filter(i => i.id !== invitationId))
+      } else {
+        toast.error(result.message)
+      }
+    } catch (error) {
+      toast.error("Failed to accept invitation")
     }
     setProcessingId(null)
   }
 
-  const handleDecline = async (requestId: number, publicationId: number) => {
-    setProcessingId(requestId)
-    const result = await declineCoauthorRequest(requestId, publicationId)
-    if (result.success) {
-      toast.success("Invitation declined")
-      setInvitations(prev => prev.filter(i => i.id !== requestId))
-    } else {
-      toast.error(result.message)
+  const handleDecline = async (invitationId: number, type: string, workspaceId: number) => {
+    setProcessingId(invitationId)
+    try {
+      const result = await declineInvitation(invitationId, type, workspaceId)
+      if (result.success) {
+        toast.success("Invitation declined")
+        setInvitations(prev => prev.filter(i => i.id !== invitationId))
+      } else {
+        toast.error(result.message)
+      }
+    } catch (error) {
+      toast.error("Failed to decline invitation")
     }
     setProcessingId(null)
   }
@@ -81,9 +97,9 @@ export function MyInvitationsDialog({ userId }: MyInvitationsDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Co-author Invitations</DialogTitle>
+          <DialogTitle>Workspace Invitations</DialogTitle>
           <DialogDescription>
-            Manage your pending co-author invitations
+            Manage your pending invitations to join theses, projects, and publications
           </DialogDescription>
         </DialogHeader>
         
@@ -99,23 +115,24 @@ export function MyInvitationsDialog({ userId }: MyInvitationsDialogProps) {
             </div>
           ) : (
             invitations.map(invitation => (
-              <div key={invitation.id} className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-medium text-sm">{invitation.publication_title}</p>
+              <div key={`${invitation.type}-${invitation.id}`} className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{invitation.workspace_title}</p>
                     <p className="text-xs text-muted-foreground">Invited by {invitation.inviter_name}</p>
+                    <Badge variant="outline" className="mt-2 bg-yellow-100 text-yellow-800 text-[10px]">
+                      <Clock className="h-2 w-2 mr-1" />
+                      {invitation.type.charAt(0).toUpperCase() + invitation.type.slice(1)}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-                    <Clock className="h-2 w-2 mr-1" />
-                    Pending
-                  </Badge>
                 </div>
                 <div className="flex items-center gap-2 justify-end">
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDecline(invitation.id, invitation.publication_id)}
+                    onClick={() => handleDecline(invitation.id, invitation.type, invitation.workspace_id)}
                     disabled={processingId === invitation.id}
+                    className="text-red-600 hover:text-red-700"
                   >
                     {processingId === invitation.id ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -126,8 +143,9 @@ export function MyInvitationsDialog({ userId }: MyInvitationsDialogProps) {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => handleAccept(invitation.id, invitation.publication_id)}
+                    onClick={() => handleAccept(invitation.id, invitation.type, invitation.workspace_id)}
                     disabled={processingId === invitation.id}
+                    className="bg-green-600 hover:bg-green-700"
                   >
                     {processingId === invitation.id ? (
                       <Loader2 className="h-3 w-3 animate-spin" />

@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, XCircle, Plus, FileText, BookOpen, Briefcase, GraduationCap, TrendingUp, Sparkles, LayoutDashboard } from "lucide-react"
+import { CheckCircle, Clock, XCircle, Plus, FileText, BookOpen, Briefcase, GraduationCap, TrendingUp, Sparkles, LayoutDashboard, Mail } from "lucide-react"
 import Link from "next/link"
 import type { Thesis } from "@/lib/data/theses"
 import type { WorkspaceData } from "@/lib/db/workspace"
 import { cn } from "@/lib/utils"
+import { MyInvitationsDialog } from "@/components/workspace/my-invitations-dialog"
 
 interface StudentDashboardClientProps {
   allTheses: Thesis[]
@@ -86,7 +87,8 @@ export function StudentDashboardClient({ allTheses, userWorkspaces, userName }: 
                             Manage your academic journey, track your research progress, and collaborate with world-class supervisors.
                         </p>
                     </div>
-                    <div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <MyInvitationsDialog userId={0} />
                         <Link href="/student/workspace/create">
                             <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none">
                                 <Plus className="h-4 w-4 mr-2" />
