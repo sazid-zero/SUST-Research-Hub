@@ -217,7 +217,7 @@ export async function inviteMember(prevState: any, formData: FormData) {
                 workspaceTitle = pub?.title || 'Publication'
             }
         } catch (err) {
-            console.error("[v0] Error fetching workspace title:", err)
+            console.error("Error fetching workspace title:", err)
         }
 
         // Send Notification
@@ -231,9 +231,8 @@ export async function inviteMember(prevState: any, formData: FormData) {
                 sourceId: workspaceId,
                 sourceType: type
             })
-            console.log("[v0] Notification created for user:", inviteeId)
         } catch (notifyErr) {
-            console.error("[v0] Failed to create notification:", notifyErr)
+            console.error("Failed to create notification:", notifyErr)
         }
 
         // Send Email
@@ -246,9 +245,7 @@ export async function inviteMember(prevState: any, formData: FormData) {
         return { message: `Invited ${userResult[0].full_name} successfully`, success: true }
 
     } catch (error: any) {
-        console.error("[v0] Invite error:", error)
-        console.error("[v0] Error message:", error?.message)
-        console.error("[v0] Error details:", JSON.stringify(error))
+        console.error("Invite error:", error)
         return { message: error?.message || "Failed to invite member", success: false }
     }
 }
