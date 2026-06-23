@@ -464,9 +464,43 @@ export async function submitForReview(workspaceId: number, workspaceType: string
     if (!user) return { success: false, message: "Unauthorized" }
 
     try {
-        // Find supervisor
+        // For publications, route to admin review instead of supervisor
+        if (workspaceType === 'publication') {
+            // Update publication status to pending_admin_review
+            await sql`UPDATE publications SET status = 'pending_admin_review', updated_at = NOW() WHERE id = ${workspaceId}`
+            
+            // Create paper review request entry
+            const publication = await sql`SELECT title FROM publications WHERE id = ${workspaceId}`
+            if (publication.length === 0) {
+                return { success: false, message: "Publication not found" }
+            }
+            
+            await sql`
+                INSERT INTO paper_review_requests (publication_id, student_id, submitted_at, status)
+                VALUES (${workspaceId}, ${user.id}, NOW(), 'pending')
+            `
+            
+            // Notify all admins
+            const admins = await sql`SELECT id FROM users WHERE role = 'admin'`
+            for (const admin of admins) {
+                await createNotification({
+                    userId: admin.id,
+                    type: 'info',
+                    title: 'Paper Submitted for Review',
+                    message: `${user.full_name} has submitted "${publication[0].title}" for review.`,
+                    link: `/admin/papers`,
+                    sourceId: workspaceId,
+                    sourceType: 'publication'
+                })
+            }
+            
+            revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+            return { success: true, message: "Paper submitted for admin review successfully" }
+        }
+        
+        // Find supervisor for thesis/project
         const supervisorId = await getWorkspaceSupervisorId(workspaceId, workspaceType)
-        if (!supervisorId && workspaceType !== 'publication') { // Publications might go to admin
+        if (!supervisorId) {
             return { success: false, message: "Please request a supervisor first." }
         }
 
@@ -475,25 +509,21 @@ export async function submitForReview(workspaceId: number, workspaceType: string
             await sql`UPDATE theses SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
         } else if (workspaceType === 'project') {
             await sql`UPDATE projects SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
-        } else if (workspaceType === 'publication') {
-            await sql`UPDATE publications SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
         }
 
         revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
 
         // Notify supervisor
-        if (supervisorId) {
-            const title = await getWorkspaceTitle(workspaceId, workspaceType)
-            await createNotification({
-                userId: supervisorId,
-                type: 'info',
-                title: 'Review Requested',
-                message: `${user.full_name} has submitted "${title || 'their workspace'}" for review.`,
-                link: `/supervisor/review/${workspaceType}/${workspaceId}`,
-                sourceId: workspaceId,
-                sourceType: workspaceType
-            })
-        }
+        const title = await getWorkspaceTitle(workspaceId, workspaceType)
+        await createNotification({
+            userId: supervisorId,
+            type: 'info',
+            title: 'Review Requested',
+            message: `${user.full_name} has submitted "${title || 'their workspace'}" for review.`,
+            link: `/supervisor/review/${workspaceType}/${workspaceId}`,
+            sourceId: workspaceId,
+            sourceType: workspaceType
+        })
 
         return { success: true, message: "Submitted for review successfully" }
     } catch (error) {

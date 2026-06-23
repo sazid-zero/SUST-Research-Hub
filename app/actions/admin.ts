@@ -4,6 +4,7 @@ import { sql } from '@/lib/db'
 import { getCurrentUser } from './auth'
 import { sendApprovalEmail, sendRejectionEmail } from '@/lib/utils/email'
 import { revalidatePath } from 'next/cache'
+import { createNotification } from './notifications'
 
 export async function getPendingRegistrations() {
   try {
@@ -479,6 +480,150 @@ export async function toggleDepartmentHead(userId: number, isDeptHead: boolean) 
     return { success: true, message: `Department Head status updated successfully` }
   } catch (error: any) {
     console.error('Update department head error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+// Paper Review Functions
+export async function getPendingPaperSubmissions() {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const results = await sql`
+      SELECT 
+        prr.id as review_id,
+        prr.publication_id,
+        prr.student_id,
+        prr.submitted_at,
+        prr.status,
+        p.title as publication_title,
+        p.abstract,
+        p.year,
+        u.full_name as student_name,
+        u.email as student_email
+      FROM paper_review_requests prr
+      JOIN publications p ON prr.publication_id = p.id
+      JOIN users u ON prr.student_id = u.id
+      WHERE prr.status = 'pending'
+      ORDER BY prr.submitted_at DESC
+    `
+
+    return { success: true, submissions: results }
+  } catch (error: any) {
+    console.error('Get pending papers error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+export async function approvePaperSubmission(publicationId: number, reviewRequestId: number) {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Get the paper review request and publication info
+    const reviewRequest = await sql`
+      SELECT prr.*, p.title, u.id as student_id, u.email, u.full_name
+      FROM paper_review_requests prr
+      JOIN publications p ON prr.publication_id = p.id
+      JOIN users u ON prr.student_id = u.id
+      WHERE prr.id = ${reviewRequestId} AND prr.publication_id = ${publicationId}
+    `
+
+    if (reviewRequest.length === 0) {
+      return { success: false, error: 'Review request not found' }
+    }
+
+    const request = reviewRequest[0]
+
+    // Update publication status to published
+    await sql`
+      UPDATE publications 
+      SET status = 'published', updated_at = NOW() 
+      WHERE id = ${publicationId}
+    `
+
+    // Update review request status
+    await sql`
+      UPDATE paper_review_requests 
+      SET status = 'approved', reviewed_by = ${admin.id}, reviewed_at = NOW()
+      WHERE id = ${reviewRequestId}
+    `
+
+    // Notify student of approval
+    await createNotification({
+      userId: request.student_id,
+      type: 'success',
+      title: 'Paper Approved',
+      message: `Your paper "${request.title}" has been approved and published!`,
+      link: `/student/workspace/publication/${publicationId}`,
+      sourceId: publicationId,
+      sourceType: 'publication'
+    })
+
+    revalidatePath('/admin/papers')
+    return { success: true, message: 'Paper approved and published successfully' }
+  } catch (error: any) {
+    console.error('Approve paper error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+export async function rejectPaperSubmission(publicationId: number, reviewRequestId: number, feedback: string) {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    // Get the paper review request and publication info
+    const reviewRequest = await sql`
+      SELECT prr.*, p.title, u.id as student_id, u.email, u.full_name
+      FROM paper_review_requests prr
+      JOIN publications p ON prr.publication_id = p.id
+      JOIN users u ON prr.student_id = u.id
+      WHERE prr.id = ${reviewRequestId} AND prr.publication_id = ${publicationId}
+    `
+
+    if (reviewRequest.length === 0) {
+      return { success: false, error: 'Review request not found' }
+    }
+
+    const request = reviewRequest[0]
+
+    // Update publication status to rejected
+    await sql`
+      UPDATE publications 
+      SET status = 'rejected', updated_at = NOW() 
+      WHERE id = ${publicationId}
+    `
+
+    // Update review request status with feedback
+    await sql`
+      UPDATE paper_review_requests 
+      SET status = 'rejected', reviewed_by = ${admin.id}, reviewed_at = NOW(), admin_feedback = ${feedback}
+      WHERE id = ${reviewRequestId}
+    `
+
+    // Notify student of rejection with feedback
+    await createNotification({
+      userId: request.student_id,
+      type: 'error',
+      title: 'Paper Rejected',
+      message: `Your paper "${request.title}" has been rejected. Feedback: ${feedback}`,
+      link: `/student/workspace/publication/${publicationId}`,
+      sourceId: publicationId,
+      sourceType: 'publication'
+    })
+
+    revalidatePath('/admin/papers')
+    return { success: true, message: 'Paper rejected successfully' }
+  } catch (error: any) {
+    console.error('Reject paper error:', error)
     return { success: false, error: error.message }
   }
 }
