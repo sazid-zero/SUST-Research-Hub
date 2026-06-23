@@ -3,177 +3,121 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import {
     ArrowRight,
-    ChevronLeft,
-    ChevronRight,
-    Database,
-    FileText,
-    Folder,
-    GraduationCap,
-    Zap,
-    Brain,
-    Users,
-    Globe,
-    Award
+    Globe
 } from "lucide-react"
 
 import { ShowcaseStats } from "@/app/actions/stats"
 
 const getCarouselData = (stats: ShowcaseStats | null) => [
     {
-        id: "models",
-        title: "Scientific Artifacts & Models",
-        headline: "Computational Models & Tools",
-        description: "Access simulation parameters, dataset pipelines, software packages, and machine learning models created during research.",
-        image: "/model.png",
-        icon: Brain,
-        color: "text-[#f7ea92]",
-        href: "/models",
-        stats: [
-            { label: "Scope", value: "Multi-Field" },
-            { label: "Models", value: stats?.models.count?.toString() || "12+" },
-            { label: "Downloads", value: stats ? (stats.models.count * 120).toLocaleString() : "8.5k" }, // Estimated multiplier
-        ]
-    },
-    {
         id: "projects",
         title: "Active Research Initiatives",
-        headline: "Driving Innovation Forward",
+        headline: "Projects",
         description: "Explore ongoing collaborative projects across multiple departments, featuring live updates and funding status.",
-        image: "/projectdetail.png",
-        icon: Folder,
-        color: "text-emerald-500",
+        theme: {
+            bg: "bg-[#fdf6ec] dark:bg-[#fdf6ec]/10",
+            pillBg: "bg-white/80 dark:bg-black/30",
+            pillDot: "bg-[#d98b53]",
+        },
         href: "/projects",
         stats: [
-            { label: "Research Domains", value: "15+" },
+            { label: "Domains", value: "15+" },
             { label: "Projects", value: stats?.projects.count?.toString() || "45" },
             { label: "Partners", value: "18" },
         ]
     },
     {
-        id: "theses",
-        title: "Academic Theses Archive",
-        headline: "Foundational Knowledge Base",
-        description: "A comprehensive collection of undergraduate and postgraduate dissertations, representing years of academic excellence.",
-        image: "/thesis.png",
-        icon: GraduationCap,
-        color: "text-[#4fc5f7]",
-        href: "/theses",
-        stats: [
-            { label: "Theses", value: stats?.theses.count?.toString() || "300+" },
-            { label: "Depts.", value: "12" },
-            { label: "Citations", value: stats ? (stats.theses.count * 40).toLocaleString() : "12k" }, // Estimated multiplier
-        ]
-    },
-    {
         id: "papers",
         title: "Scholarly Publications",
-        headline: "Global Research Impact",
+        headline: "Papers & Articles",
         description: "Peer-reviewed journal articles and conference papers published by our faculty and students in top-tier venues.",
-        image: "/papers.png",
-        icon: FileText,
-        color: "text-blue-500",
+        theme: {
+            bg: "bg-[#f5f5f5] dark:bg-[#f5f5f5]/10",
+            pillBg: "bg-white/80 dark:bg-black/30",
+            pillDot: "bg-[#1a1a1a]",
+        },
         href: "/papers",
         stats: [
             { label: "Papers", value: stats?.publications.count?.toString() || "850+" },
             { label: "h-index", value: "42" },
-            { label: "Reads", value: stats ? (stats.publications.count * 180).toLocaleString() : "150k" }, // Estimated multiplier
+            { label: "Reads", value: stats ? (stats.publications.count * 180).toLocaleString() : "150k" },
         ]
     },
     {
-        id: "supplements",
-        title: "Research Supplements",
-        headline: "Code, Data & Documentation",
-        description: "Complete access to supplementary research materials including datasets, codebases, and project documentation.",
-        image: "/suplement.png",
-        icon: Database,
-        color: "text-amber-500",
-        href: "/supplements",
+        id: "theses",
+        title: "Academic Theses Archive",
+        headline: "Theses",
+        description: "A comprehensive collection of undergraduate and postgraduate dissertations, representing years of academic excellence.",
+        theme: {
+            bg: "bg-[#f0eaff] dark:bg-[#f0eaff]/10",
+            pillBg: "bg-white/80 dark:bg-black/30",
+            pillDot: "bg-[#8b5cf6]",
+        },
+        href: "/theses",
         stats: [
-            { 
-                label: "Research", 
-                value: stats ? (stats.theses.count + stats.projects.count + stats.publications.count).toString() : "850+" 
-            },
-            { label: "Repos", value: stats?.supplements.count?.toString() || "500+" },
-            { label: "Docs", value: "2.5k+" },
+            { label: "Theses", value: stats?.theses.count?.toString() || "300+" },
+            { label: "Depts.", value: "12" },
+            { label: "Citations", value: stats ? (stats.theses.count * 40).toLocaleString() : "12k" },
+        ]
+    },
+    {
+        id: "models",
+        title: "Scientific Artifacts",
+        headline: "Datasets & Models",
+        description: "Access simulation parameters, dataset pipelines, software packages, and machine learning models created during research.",
+        theme: {
+            bg: "bg-[#eef5ed] dark:bg-[#eef5ed]/10",
+            pillBg: "bg-white/80 dark:bg-black/30",
+            pillDot: "bg-[#4ade80]",
+        },
+        href: "/models",
+        stats: [
+            { label: "Scope", value: "Multi-Field" },
+            { label: "Models", value: stats?.models.count?.toString() || "12+" },
+            { label: "Downloads", value: stats ? (stats.models.count * 120).toLocaleString() : "8.5k" },
         ]
     }
 ]
 
+const CardGraphic = ({ id }: { id: string }) => {
+    if (id === 'projects') return (
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
+            <div className="absolute right-[5%] top-[5%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(20%, -10%)' }} />
+            <div className="absolute right-[20%] top-[35%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(0%, 0%)' }} />
+            <div className="absolute right-[5%] top-[65%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(-20%, 10%)' }} />
+        </div>
+    );
+    if (id === 'papers') return (
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
+            <div className="absolute right-[15%] top-[15%] w-[45%] aspect-square bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] rounded-full shadow-sm" />
+            <div className="absolute right-[-15%] bottom-[5%] w-[55%] aspect-square bg-gradient-to-t from-[#e2e2e2] to-[#c8c8c8] rounded-tl-full shadow-sm" />
+            <div className="absolute right-[30%] bottom-[35%] w-[35%] aspect-[2/1] bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] rounded-t-full shadow-sm" />
+        </div>
+    );
+    if (id === 'theses') return (
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40 flex items-center justify-center">
+            <div className="relative w-full h-full">
+                <div className="absolute right-[-15%] top-1/2 -translate-y-1/2 w-[110%] aspect-square rounded-full bg-gradient-to-br from-[#dfd4f5] to-[#c8b5ed] blur-[1px] opacity-70" />
+                <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[45%] aspect-square rounded-full bg-[#b89ded] blur-[1px] opacity-90 shadow-sm" />
+                <div className="absolute right-[25%] top-1/2 -translate-y-1/2 w-[15%] aspect-square rounded-full bg-[#f0eaff] opacity-90 shadow-sm" />
+            </div>
+        </div>
+    );
+    if (id === 'models') return (
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
+            <div className="absolute right-[15%] top-[10%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+            <div className="absolute right-[45%] top-[40%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+            <div className="absolute right-[15%] top-[70%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+        </div>
+    );
+    return null;
+}
+
 export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
     const data = getCarouselData(stats)
 
-    const getColorTheme = (colorText: string) => {
-        if (colorText.includes('#f7ea92')) return {
-            shadow: 'shadow-[#f7ea92] hover:shadow-[#f7ea92]',
-            gradient: 'from-[#f7ea92]/10',
-            iconBg: 'bg-[#f7ea92]/10',
-            iconText: 'text-[#f7ea92]',
-            arrowHover: 'group-hover:bg-[#f7ea92] group-hover:border-[#f7ea92]',
-            titleText: 'text-[#f7ea92]/80',
-            headlineHover: 'group-hover:text-[#f7ea92]',
-            pillBg: 'bg-[#f7ea92]/5 dark:bg-[#f7ea92]/10',
-            pillText: 'text-[#f7ea92]',
-        }
-        if (colorText.includes('emerald')) return {
-            shadow: 'shadow-emerald-500 hover:shadow-emerald-500',
-            gradient: 'from-emerald-500/10',
-            iconBg: 'bg-emerald-500/10',
-            iconText: 'text-emerald-500',
-            arrowHover: 'group-hover:bg-emerald-500 group-hover:border-emerald-500',
-            titleText: 'text-emerald-500/80',
-            headlineHover: 'group-hover:text-emerald-500',
-            pillBg: 'bg-emerald-500/5 dark:bg-emerald-500/10',
-            pillText: 'text-emerald-500',
-        }
-        if (colorText.includes('#4fc5f7')) return {
-            shadow: 'shadow-[#4fc5f7] hover:shadow-[#4fc5f7]',
-            gradient: 'from-[#4fc5f7]/10',
-            iconBg: 'bg-[#4fc5f7]/10',
-            iconText: 'text-[#4fc5f7]',
-            arrowHover: 'group-hover:bg-[#4fc5f7] group-hover:border-[#4fc5f7]',
-            titleText: 'text-[#4fc5f7]/80',
-            headlineHover: 'group-hover:text-[#4fc5f7]',
-            pillBg: 'bg-[#4fc5f7]/5 dark:bg-[#4fc5f7]/10',
-            pillText: 'text-[#4fc5f7]',
-        }
-        if (colorText.includes('blue')) return {
-            shadow: 'shadow-blue-500 hover:shadow-blue-500',
-            gradient: 'from-blue-500/10',
-            iconBg: 'bg-blue-500/10',
-            iconText: 'text-blue-500',
-            arrowHover: 'group-hover:bg-blue-500 group-hover:border-blue-500',
-            titleText: 'text-blue-500/80',
-            headlineHover: 'group-hover:text-blue-500',
-            pillBg: 'bg-blue-500/5 dark:bg-blue-500/10',
-            pillText: 'text-blue-500',
-        }
-        if (colorText.includes('amber')) return {
-            shadow: 'shadow-amber-500 hover:shadow-amber-500',
-            gradient: 'from-amber-500/10',
-            iconBg: 'bg-amber-500/10',
-            iconText: 'text-amber-500',
-            arrowHover: 'group-hover:bg-amber-500 group-hover:border-amber-500',
-            titleText: 'text-amber-500/80',
-            headlineHover: 'group-hover:text-amber-500',
-            pillBg: 'bg-amber-500/5 dark:bg-amber-500/10',
-            pillText: 'text-amber-500',
-        }
-        // default primary
-        return {
-            shadow: 'shadow-primary hover:shadow-primary',
-            gradient: 'from-primary/10',
-            iconBg: 'bg-primary/10',
-            iconText: 'text-primary',
-            arrowHover: 'group-hover:bg-primary group-hover:border-primary',
-            titleText: 'text-primary/80',
-            headlineHover: 'group-hover:text-primary',
-            pillBg: 'bg-primary/5 dark:bg-primary/10',
-            pillText: 'text-primary',
-        }
-    }
-
     return (
-        <section className="relative py-16 md:py-24 bg-slate-50/50 dark:bg-background overflow-hidden border-t border-border/40">
+        <section className="relative py-16 md:py-24 bg-background overflow-hidden border-t border-border/40">
             <div className="container mx-auto px-4 relative z-10 max-w-7xl">
                 {/* Header Section */}
                 <div className="text-center mb-12 md:mb-20">
@@ -181,7 +125,7 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-muted/80 backdrop-blur-sm border border-white/50 dark:border-border text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/80 backdrop-blur-sm border border-border text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm"
                     >
                         <Globe className="w-3 h-3 text-primary" />
                         Research Impact
@@ -207,17 +151,9 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
                     </motion.p>
                 </div>
 
-                {/* Bento Grid Area */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {/* Grid Area - 4 Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {data.map((item, index) => {
-                        // Create spanning logic for Bento box: first item spans 2 columns on lg
-                        const isLarge = index === 0 
-                        const gridItemClass = isLarge 
-                            ? "md:col-span-2 lg:col-span-2" 
-                            : "col-span-1"
-                        
-                        const theme = getColorTheme(item.color)
-
                         return (
                             <motion.div
                                 key={item.id}
@@ -225,47 +161,45 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`group relative bg-white/60 dark:bg-card/40 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-lg/20 ${theme.shadow} hover:shadow-xl/30 hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 flex flex-col justify-between overflow-hidden ${gridItemClass}`}
+                                className={`group relative rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between overflow-hidden ${item.theme.bg} transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md border border-black/5 dark:border-white/5 min-h-[360px]`}
                             >
-                                {/* Permanent subtle background gradient glow */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} to-transparent pointer-events-none`} />
+                                <CardGraphic id={item.id} />
 
-                                <div className="relative z-10 mb-8">
-                                    <div className="flex justify-between items-start mb-8">
-                                        <div className={`w-12 h-12 rounded-2xl ${theme.iconBg} backdrop-blur-sm flex items-center justify-center`}>
-                                            <item.icon className={`w-6 h-6 ${theme.iconText}`} />
-                                        </div>
-                                        <Link href={item.href}>
-                                            <div className={`w-10 h-10 rounded-full bg-white/80 dark:bg-muted/50 backdrop-blur-sm border border-white/50 dark:border-border text-foreground flex items-center justify-center ${theme.arrowHover} group-hover:text-white transition-all duration-300 transform group-hover:scale-110 group-hover:-rotate-45 shrink-0 shadow-sm`}>
-                                                <ArrowRight className="w-4 h-4" />
-                                            </div>
-                                        </Link>
+                                <div className="relative z-10">
+                                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl ${item.theme.pillBg} text-xs font-medium text-foreground mb-6 md:mb-8 backdrop-blur-sm`}>
+                                        <div className={`w-2 h-2 rounded-full ${item.theme.pillDot}`} />
+                                        {item.title}
                                     </div>
                                     
-                                    <div className="flex flex-col gap-1.5 mb-3">
-                                        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${theme.titleText}`}>
-                                            {item.title}
-                                        </span>
-                                        <h3 className={`text-xl sm:text-2xl font-bold text-foreground ${theme.headlineHover} transition-colors`}>
-                                            {item.headline}
-                                        </h3>
-                                    </div>
-                                    <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mt-2">
+                                    <h3 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3 tracking-tight">
+                                        {item.headline}
+                                    </h3>
+                                    
+                                    <p className="text-foreground/70 text-sm md:text-base leading-relaxed max-w-[70%]">
                                         {item.description}
                                     </p>
                                 </div>
 
-                                {/* Stats as compact inline pills */}
-                                <div className="flex flex-wrap items-center gap-2 mt-auto pt-4 relative z-10">
-                                    {item.stats.map((stat, idx) => (
-                                        <span
-                                            key={idx}
-                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${theme.pillBg} text-xs font-semibold text-foreground/80 tracking-wide`}
-                                        >
-                                            <span className={`${theme.pillText} font-bold`}>{stat.value}</span>
-                                            <span className="text-muted-foreground font-medium">{stat.label}</span>
+                                {/* Stats and Link */}
+                                <div className="relative z-10 mt-10 md:mt-12 flex flex-col items-start gap-5">
+                                    <Link href={item.href} className="inline-flex items-center gap-2 text-sm font-semibold text-foreground group/link mt-auto">
+                                        <span className="border-b border-foreground/30 group-hover/link:border-foreground transition-colors pb-0.5">
+                                            Explore {item.headline.split(' ')[0]}
                                         </span>
-                                    ))}
+                                        <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
+                                    </Link>
+                                    
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {item.stats.map((stat, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/40 dark:bg-black/20 text-xs font-medium text-foreground/80 backdrop-blur-sm"
+                                            >
+                                                <span className="font-bold text-foreground">{stat.value}</span>
+                                                <span className="text-foreground/70">{stat.label}</span>
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         )
@@ -275,4 +209,3 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
         </section>
     )
 }
-
