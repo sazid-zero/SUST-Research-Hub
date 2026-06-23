@@ -15,7 +15,7 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         headline: "Projects",
         description: "Explore ongoing collaborative projects across multiple departments, featuring live updates and funding status.",
         theme: {
-            bg: "bg-[#fdf6ec] dark:bg-[#fdf6ec]/10",
+            bg: "bg-[#fdf6ec] dark:bg-[#d98b53]/15",
             pillBg: "bg-white/80 dark:bg-black/30",
             pillDot: "bg-[#d98b53]",
         },
@@ -32,9 +32,9 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         headline: "Papers & Articles",
         description: "Peer-reviewed journal articles and conference papers published by our faculty and students in top-tier venues.",
         theme: {
-            bg: "bg-[#f5f5f5] dark:bg-[#f5f5f5]/10",
+            bg: "bg-[#f5f5f5] dark:bg-white/5",
             pillBg: "bg-white/80 dark:bg-black/30",
-            pillDot: "bg-[#1a1a1a]",
+            pillDot: "bg-[#1a1a1a] dark:bg-white/80",
         },
         href: "/papers",
         stats: [
@@ -49,7 +49,7 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         headline: "Theses",
         description: "A comprehensive collection of undergraduate and postgraduate dissertations, representing years of academic excellence.",
         theme: {
-            bg: "bg-[#f0eaff] dark:bg-[#f0eaff]/10",
+            bg: "bg-[#f0eaff] dark:bg-[#8b5cf6]/15",
             pillBg: "bg-white/80 dark:bg-black/30",
             pillDot: "bg-[#8b5cf6]",
         },
@@ -66,7 +66,7 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         headline: "Datasets & Models",
         description: "Access simulation parameters, dataset pipelines, software packages, and machine learning models created during research.",
         theme: {
-            bg: "bg-[#eef5ed] dark:bg-[#eef5ed]/10",
+            bg: "bg-[#eef5ed] dark:bg-[#4ade80]/15",
             pillBg: "bg-white/80 dark:bg-black/30",
             pillDot: "bg-[#4ade80]",
         },
@@ -81,33 +81,33 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
 
 const CardGraphic = ({ id }: { id: string }) => {
     if (id === 'projects') return (
-        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
-            <div className="absolute right-[5%] top-[5%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(20%, -10%)' }} />
-            <div className="absolute right-[20%] top-[35%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(0%, 0%)' }} />
-            <div className="absolute right-[5%] top-[65%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(-20%, 10%)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-20">
+            <div className="absolute right-[5%] top-[5%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] dark:from-[#d98b53] dark:to-[#a35e22] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(20%, -10%)' }} />
+            <div className="absolute right-[20%] top-[35%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] dark:from-[#d98b53] dark:to-[#a35e22] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(0%, 0%)' }} />
+            <div className="absolute right-[5%] top-[65%] w-[55%] h-[35%] bg-gradient-to-r from-[#ebd2b0] to-[#e4bc93] dark:from-[#d98b53] dark:to-[#a35e22] rounded-[1.5rem] md:rounded-[2rem] shadow-sm rotate-45" style={{ transformOrigin: 'center', transform: 'rotate(45deg) translate(-20%, 10%)' }} />
         </div>
     );
     if (id === 'papers') return (
-        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
-            <div className="absolute right-[15%] top-[15%] w-[45%] aspect-square bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] rounded-full shadow-sm" />
-            <div className="absolute right-[-15%] bottom-[5%] w-[55%] aspect-square bg-gradient-to-t from-[#e2e2e2] to-[#c8c8c8] rounded-tl-full shadow-sm" />
-            <div className="absolute right-[30%] bottom-[35%] w-[35%] aspect-[2/1] bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] rounded-t-full shadow-sm" />
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-20">
+            <div className="absolute right-[15%] top-[15%] w-[45%] aspect-square bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] dark:from-[#ffffff] dark:to-[#888888] rounded-full shadow-sm" />
+            <div className="absolute right-[-15%] bottom-[5%] w-[55%] aspect-square bg-gradient-to-t from-[#e2e2e2] to-[#c8c8c8] dark:from-[#ffffff] dark:to-[#888888] rounded-tl-full shadow-sm" />
+            <div className="absolute right-[30%] bottom-[35%] w-[35%] aspect-[2/1] bg-gradient-to-b from-[#e2e2e2] to-[#c8c8c8] dark:from-[#ffffff] dark:to-[#888888] rounded-t-full shadow-sm" />
         </div>
     );
     if (id === 'theses') return (
-        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40 flex items-center justify-center">
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-30 flex items-center justify-center">
             <div className="relative w-full h-full">
-                <div className="absolute right-[-15%] top-1/2 -translate-y-1/2 w-[110%] aspect-square rounded-full bg-gradient-to-br from-[#dfd4f5] to-[#c8b5ed] blur-[1px] opacity-70" />
-                <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[45%] aspect-square rounded-full bg-[#b89ded] blur-[1px] opacity-90 shadow-sm" />
-                <div className="absolute right-[25%] top-1/2 -translate-y-1/2 w-[15%] aspect-square rounded-full bg-[#f0eaff] opacity-90 shadow-sm" />
+                <div className="absolute right-[-15%] top-1/2 -translate-y-1/2 w-[110%] aspect-square rounded-full bg-gradient-to-br from-[#dfd4f5] to-[#c8b5ed] dark:from-[#8b5cf6] dark:to-[#5b21b6] blur-[1px] opacity-70" />
+                <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[45%] aspect-square rounded-full bg-[#b89ded] dark:bg-[#7c3aed] blur-[1px] opacity-90 shadow-sm" />
+                <div className="absolute right-[25%] top-1/2 -translate-y-1/2 w-[15%] aspect-square rounded-full bg-[#f0eaff] dark:bg-[#ede9fe] opacity-90 shadow-sm" />
             </div>
         </div>
     );
     if (id === 'models') return (
-        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-40">
-            <div className="absolute right-[15%] top-[10%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
-            <div className="absolute right-[45%] top-[40%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
-            <div className="absolute right-[15%] top-[70%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+        <div className="absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none opacity-90 dark:opacity-20">
+            <div className="absolute right-[15%] top-[10%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] dark:from-[#4ade80] dark:to-[#166534] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+            <div className="absolute right-[45%] top-[40%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] dark:from-[#4ade80] dark:to-[#166534] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
+            <div className="absolute right-[15%] top-[70%] w-[40%] aspect-square bg-gradient-to-b from-[#c2dfc6] to-[#a2ccaa] dark:from-[#4ade80] dark:to-[#166534] rounded-[1rem] md:rounded-[1.5rem] shadow-sm" />
         </div>
     );
     return null;
