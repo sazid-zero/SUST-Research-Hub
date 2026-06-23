@@ -13,6 +13,7 @@ import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog"
 import { SupervisionRequestDialog } from "@/components/workspace/supervision-request-dialog"
 import { LinkRelatedWorkDialog } from "@/components/workspace/link-related-work-dialog"
 import { WorkspaceSettingsDialog } from "@/components/workspace/workspace-settings-dialog"
+import { CoauthorRequestsSection } from "@/components/workspace/coauthor-requests-section"
 import { User } from "@/lib/db/users"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -384,6 +385,14 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* Co-author Requests Section (Publications only) */}
+                        {workspace.type === 'publication' && (
+                            <CoauthorRequestsSection 
+                                publicationId={workspace.id} 
+                                canManage={true}
+                            />
+                        )}
 
                         {/* Metadata Card */}
                         <Card className="shadow-sm">
