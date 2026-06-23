@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {BookOpen, Menu, X, Search, Moon, Sun, FileText, Database, Folder, PanelLeft} from "lucide-react"
 import { IconCube } from "@tabler/icons-react"
@@ -152,8 +153,8 @@ export function GlobalNavbar({ user }: GlobalNavbarProps) {
                                 </button>
                             ) : null}
                             <Link href="/" className="flex items-center gap-2">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-accent">
-                                    <BookOpen className="h-5 w-5 text-primary-foreground" />
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-accent overflow-hidden">
+                                    <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
                                 </div>
                                 <span className="text-base font-bold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent hidden md:inline">
                                     Research Hub
