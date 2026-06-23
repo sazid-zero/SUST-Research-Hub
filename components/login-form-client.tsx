@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import { BookOpen, Eye, EyeOff } from "lucide-react"
+import Image from "next/image"
 
 export function LoginFormClient() {
   const router = useRouter()
@@ -63,11 +64,11 @@ export function LoginFormClient() {
       <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">
-              <BookOpen className="h-6 w-6" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">
+              <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              SUST Research Hub
+              Research Hub
             </span>
           </Link>
           <div className="flex items-center gap-4">

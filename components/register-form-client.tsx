@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { register } from "@/app/actions/auth"
 import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import Image from "next/image"
 
 export default function RegisterFormClient() {
   const router = useRouter()
@@ -163,18 +164,11 @@ export default function RegisterFormClient() {
       <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                          <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
+                        </div>
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              SUST Research Hub
+              Research Hub
             </span>
           </Link>
           <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
