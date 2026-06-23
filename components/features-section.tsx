@@ -210,7 +210,7 @@ export function FeaturesSection() {
 
     return (
         <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen bg-background transition-colors duration-500">
-            <ScatteredCubes isDark={isDark} />
+          {/*  <ScatteredCubes isDark={isDark} /> */}
 
             <div className="relative z-10 max-w-6xl mx-auto text-center">
                 <h2
