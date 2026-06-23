@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { scrollToExplore } from "@/components/scroll-to-section"
@@ -820,7 +821,7 @@ export function HomeContent({
                         <div className="lg:col-span-4 space-y-2 sm:space-y-3 md:space-y-4">
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <div className="flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
-                                    <BookOpen className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-white" />
+                                    <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-foreground text-sm sm:text-base">SUST Research Hub</h3>

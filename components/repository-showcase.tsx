@@ -8,6 +8,12 @@ import {
 
 import { ShowcaseStats } from "@/app/actions/stats"
 
+const formatNumber = (num: number): string => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`
+    return num.toString()
+}
+
 const getCarouselData = (stats: ShowcaseStats | null) => [
     {
         id: "projects",
@@ -21,9 +27,9 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         },
         href: "/projects",
         stats: [
-            { label: "Domains", value: "15+" },
-            { label: "Projects", value: stats?.projects.count?.toString() || "45" },
-            { label: "Partners", value: "18" },
+            { label: "Projects", value: stats?.projects.count?.toString() || "0" },
+            { label: "Researchers", value: stats?.researchersCount?.toString() || "0" },
+            { label: "Collaborators", value: stats?.projects.collaboratorCount?.toString() || "0" },
         ]
     },
     {
@@ -38,9 +44,9 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         },
         href: "/papers",
         stats: [
-            { label: "Papers", value: stats?.publications.count?.toString() || "850+" },
-            { label: "h-index", value: "42" },
-            { label: "Reads", value: stats ? (stats.publications.count * 180).toLocaleString() : "150k" },
+            { label: "Papers", value: stats?.publications.count?.toString() || "0" },
+            { label: "Citations", value: stats ? formatNumber(stats.publications.citations) : "0" },
+            { label: "Views", value: stats ? formatNumber(stats.publications.views) : "0" },
         ]
     },
     {
@@ -55,9 +61,9 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         },
         href: "/theses",
         stats: [
-            { label: "Theses", value: stats?.theses.count?.toString() || "300+" },
-            { label: "Depts.", value: "12" },
-            { label: "Citations", value: stats ? (stats.theses.count * 40).toLocaleString() : "12k" },
+            { label: "Theses", value: stats?.theses.count?.toString() || "0" },
+            { label: "Depts.", value: stats?.theses.deptCount?.toString() || "0" },
+            { label: "Views", value: stats ? formatNumber(stats.theses.views) : "0" },
         ]
     },
     {
@@ -72,9 +78,9 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         },
         href: "/models",
         stats: [
-            { label: "Scope", value: "Multi-Field" },
-            { label: "Models", value: stats?.models.count?.toString() || "12+" },
-            { label: "Downloads", value: stats ? (stats.models.count * 120).toLocaleString() : "8.5k" },
+            { label: "Scope", value: stats?.researchFieldsCount ? `${stats.researchFieldsCount} Fields` : "Multi-Field" },
+            { label: "Models", value: stats?.models.count?.toString() || "0" },
+            { label: "Views", value: stats ? formatNumber(stats.models.views) : "0" },
         ]
     }
 ]
