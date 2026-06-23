@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { FIELDS_OF_STUDY } from "@/lib/constants/academic-data"
 
 interface PapersContentProps {
     user: any
@@ -81,7 +82,7 @@ export function PapersContent({ user }: PapersContentProps) {
 
     const types = ["All Types", ...new Set(samplePapers.map((p) => p.type))]
     const years = ["All", ...new Set(samplePapers.map((p) => p.year).sort((a, b) => b - a))]
-    const fields = ["All Fields", ...new Set(samplePapers.flatMap((p) => p.keywords))]
+    const fields: string[] = ["All Fields", ...FIELDS_OF_STUDY]
 
     const filteredPapers = samplePapers.filter((paper) => {
         const matchesSearch =
@@ -93,6 +94,7 @@ export function PapersContent({ user }: PapersContentProps) {
         const matchesYear = selectedYear === "All" || paper.year === Number.parseInt(selectedYear)
         const matchesField =
             selectedField === "All Fields" ||
+            (paper as any).field?.toLowerCase() === selectedField.toLowerCase() ||
             paper.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
 
         return matchesSearch && matchesType && matchesYear && matchesField
@@ -156,7 +158,7 @@ export function PapersContent({ user }: PapersContentProps) {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            {fields.slice(0, 10).map((field) => (
+                                            {fields.map((field) => (
                                                 <SelectItem key={field} value={field}>
                                                     {field}
                                                 </SelectItem>

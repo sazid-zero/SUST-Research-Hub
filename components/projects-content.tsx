@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { FIELDS_OF_STUDY } from "@/lib/constants/academic-data"
 
 interface ProjectsContentProps {
     user: any
@@ -46,7 +47,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
 
     const departments = ["All Departments", ...new Set(projects.map((p) => p.department || "Other"))]
     const years = ["All", ...new Set(projects.map((p) => p.year).sort((a, b) => b - a))]
-    const fields = ["All Fields", ...new Set(projects.flatMap((p) => p.keywords))]
+    const fields: string[] = ["All Fields", ...FIELDS_OF_STUDY]
     const supervisors = ["All Supervisors", ...new Set(projects.map((p) => p.supervisor_name).filter(Boolean))]
 
     const filteredProjects = projects.filter((project) => {
@@ -59,6 +60,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
         const matchesYear = selectedYear === "All" || project.year === Number.parseInt(selectedYear)
         const matchesField =
             selectedField === "All Fields" ||
+            project.field?.toLowerCase() === selectedField.toLowerCase() ||
             project.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
         const matchesSupervisor = selectedSupervisor === "All Supervisors" || project.supervisor_name === selectedSupervisor
 
@@ -129,7 +131,7 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            {(fields as string[]).slice(0, 10).map((field: string) => (
+                                            {fields.map((field: string) => (
                                                 <SelectItem key={field} value={field}>
                                                     {field}
                                                 </SelectItem>

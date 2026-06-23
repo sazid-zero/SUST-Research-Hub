@@ -30,6 +30,9 @@ export const DEPARTMENTS = [
 
 export const FIELDS_OF_STUDY = [
   // Computer Science & Engineering
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Deep Learning",
   "Computer Vision",
   "Natural Language Processing",
   "Robotics",
@@ -43,6 +46,11 @@ export const FIELDS_OF_STUDY = [
   "Embedded Systems",
   "Digital Image Processing",
   "High Performance Computing",
+  "Cloud Computing",
+  "Cyber Security",
+  "Blockchain",
+  "Bioinformatics",
+  "Internet of Things",
 
   // EEE
   "Power Systems",

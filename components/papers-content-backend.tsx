@@ -11,6 +11,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import type { Publication } from "@/lib/db/publications"
 import { useState, useMemo } from "react"
+import { FIELDS_OF_STUDY } from "@/lib/constants/academic-data"
 
 interface PapersContentBackendProps {
   user: any
@@ -39,8 +40,7 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
         .sort((a, b) => b - a),
     ),
   ]
-  const allKeywords = [...new Set(safePapers.flatMap((p) => p.keywords || []))]
-  const fields = ["All Fields", ...allKeywords.slice(0, 20)]
+  const fields: string[] = ["All Fields", ...FIELDS_OF_STUDY]
   
   // Apply filters
   const filteredPapers = useMemo(() => {
@@ -64,7 +64,10 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
     
     // Field filter (by keywords)
     if (selectedField !== "All Fields") {
-      filtered = filtered.filter(paper => paper.keywords?.includes(selectedField))
+      filtered = filtered.filter(paper => 
+        (paper as any).field?.toLowerCase() === selectedField.toLowerCase() ||
+        paper.keywords?.some(k => k.toLowerCase().includes(selectedField.toLowerCase()))
+      )
     }
     
     // Year range filter

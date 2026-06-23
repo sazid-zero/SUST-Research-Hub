@@ -12,6 +12,7 @@ import {motion} from "framer-motion"
 import Link from "next/link"
 import {Button} from "@/components/ui/button"
 import {useRouter} from "next/navigation"
+import { FIELDS_OF_STUDY } from "@/lib/constants/academic-data"
 
 interface ThesisContentProps {
     user: any
@@ -36,7 +37,7 @@ export function ThesisContent({user, theses, pageTitle = "Research Theses"}: The
 
     const departments = ["All Departments", ...new Set(theses.map((t) => t.department))]
     const years = ["All", ...new Set(theses.map((t) => t.year).sort((a, b) => b - a))]
-    const fields = ["All Fields", ...new Set(theses.flatMap((t) => t.keywords))]
+    const fields: string[] = ["All Fields", ...FIELDS_OF_STUDY]
     const supervisors = ["All Supervisors", ...new Set(theses.map((t) => t.supervisor).filter(Boolean))]
 
     const filteredTheses = theses.filter((thesis) => {
@@ -51,6 +52,7 @@ export function ThesisContent({user, theses, pageTitle = "Research Theses"}: The
             (thesis.year >= Number.parseInt(selectedYearFrom) && thesis.year <= Number.parseInt(selectedYearTo))
         const matchesField =
             selectedField === "All Fields" ||
+            thesis.field?.toLowerCase() === selectedField.toLowerCase() ||
             thesis.keywords.some((k: string) => k.toLowerCase().includes(selectedField.toLowerCase()))
         const matchesSupervisor = selectedSupervisor === "All Supervisors" || thesis.supervisor === selectedSupervisor
 
@@ -123,7 +125,7 @@ export function ThesisContent({user, theses, pageTitle = "Research Theses"}: The
                                             <SelectValue/>
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border">
-                                            {fields.slice(0, 10).map((field) => (
+                                            {fields.map((field) => (
                                                 <SelectItem key={field} value={field}>
                                                     {field}
                                                 </SelectItem>
