@@ -135,10 +135,11 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4"
+                        className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4"
                     >
-                        Pioneering the future of <br className="hidden md:block" />
-                        Scientific Discovery
+                        <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Pioneering the future of</span>{" "}
+                        <br className="hidden md:block" />
+                        <span className="text-foreground">Scientific Discovery</span>
                     </motion.h2>
                     <motion.p
                          initial={{ opacity: 0, y: 20 }}
