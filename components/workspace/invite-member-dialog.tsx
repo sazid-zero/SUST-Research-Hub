@@ -20,18 +20,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { UserPlus, Loader2 } from "lucide-react"
-import { useState } from "react"
-import { useActionState } from "react" // Note: Check if React 19/Next 15 availability or use separate form handling
-import { inviteMember } from "@/app/actions/workspace"
-
-// Since useActionState might be experimental or unstable depending on Next.js version,
-// we can use a standard form submission for simpler dialog handling or useActionState if available.
-// Given the previous usage, assuming it's available.
+import { UserPlus, Loader2, User, Mail, Hash } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useActionState } from "react"
+import { inviteMember, searchUsersAction } from "@/app/actions/workspace"
 
 const initialState = {
   message: "",
   success: false,
+}
+
+interface User {
+  id: number
+  full_name: string
+  email: string
+  student_id?: string
 }
 
 interface InviteMemberDialogProps {
@@ -42,12 +45,55 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ workspaceId, type, children }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  
   // @ts-ignore
   const [state, formAction, pending] = useActionState(inviteMember, initialState)
 
-  // Close dialog on success
-  // Note: useActionState doesn't easily trigger a callback on success without useEffect.
-  // For simplicity, we just show the message.
+  // Search users as user types
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length > 0) {
+        setIsSearching(true)
+        try {
+          const result = await searchUsersAction(searchQuery)
+          if (result.success) {
+            setSearchResults(result.users as User[])
+            setShowDropdown(true)
+          }
+        } catch (error) {
+          console.error("Search error:", error)
+        } finally {
+          setIsSearching(false)
+        }
+      } else {
+        setSearchResults([])
+        setShowDropdown(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const handleSelectUser = (user: User) => {
+    setSelectedUser(user)
+    setSearchQuery(user.full_name)
+    setShowDropdown(false)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+    setSearchQuery("")
+    setSelectedUser(null)
+    setSearchResults([])
+  }
+
+  // Show role selector only for thesis and project
+  const showRoleSelector = type !== 'publication'
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -55,7 +101,7 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
         {children || (
           <Button size="sm">
               <UserPlus className="mr-2 h-4 w-4" />
-              Invite Member
+              Invite {type === 'publication' ? 'Co-Author' : 'Member'}
           </Button>
         )}
       </DialogTrigger>
@@ -63,11 +109,12 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
         <form action={formAction}>
             <input type="hidden" name="workspaceId" value={workspaceId} />
             <input type="hidden" name="type" value={type} />
+            {selectedUser && <input type="hidden" name="userId" value={selectedUser.id} />}
             
             <DialogHeader>
             <DialogTitle>Invite to Workspace</DialogTitle>
             <DialogDescription>
-                Add a collaborator to your research team.
+                Add a collaborator to your {type} team.
             </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -78,20 +125,78 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
                 </div>
             )}
 
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                Email
+            {/* User Search */}
+            <div className="grid grid-cols-4 items-center gap-4 relative">
+                <Label htmlFor="user-search" className="text-right">
+                Search User
                 </Label>
-                <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="student@example.com"
-                className="col-span-3"
-                required
-                />
+                <div className="col-span-3 relative">
+                  <Input
+                    id="user-search"
+                    placeholder="Type name, email, or ID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                    className="w-full"
+                  />
+                  
+                  {/* Dropdown Results */}
+                  {showDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+                      {isSearching ? (
+                        <div className="p-3 text-center text-gray-500">
+                          <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
+                          Searching...
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        searchResults.map((user) => (
+                          <button
+                            key={user.id}
+                            type="button"
+                            onClick={() => handleSelectUser(user)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition"
+                          >
+                            <div className="font-medium text-gray-900">{user.full_name}</div>
+                            <div className="flex gap-4 text-xs text-gray-500 mt-1">
+                              {user.email && (
+                                <span className="flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
+                                  {user.email}
+                                </span>
+                              )}
+                              {user.student_id && (
+                                <span className="flex items-center gap-1">
+                                  <Hash className="h-3 w-3" />
+                                  {user.student_id}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-3 text-center text-gray-500 text-sm">
+                          No users found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+
+            {/* Selected User Display */}
+            {selectedUser && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right text-xs text-gray-500">Selected</Label>
+                <div className="col-span-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                  <div className="font-medium text-sm">{selectedUser.full_name}</div>
+                  <div className="text-xs text-gray-600">{selectedUser.email}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Role Selector (for thesis and project only) */}
+            {showRoleSelector && (
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">
                 Role
                 </Label>
@@ -104,10 +209,14 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
                         <SelectItem value="leader">Co-Leader</SelectItem>
                     </SelectContent>
                 </Select>
-            </div>
+              </div>
+            )}
             </div>
             <DialogFooter>
-            <Button type="submit" disabled={pending}>
+            <Button type="button" variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending || !selectedUser}>
                 {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Send Invite
             </Button>

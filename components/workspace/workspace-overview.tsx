@@ -13,6 +13,7 @@ import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog"
 import { SupervisionRequestDialog } from "@/components/workspace/supervision-request-dialog"
 import { LinkRelatedWorkDialog } from "@/components/workspace/link-related-work-dialog"
 import { WorkspaceSettingsDialog } from "@/components/workspace/workspace-settings-dialog"
+import { CoauthorRequestsSection } from "@/components/workspace/coauthor-requests-section"
 import { User } from "@/lib/db/users"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -363,7 +364,18 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                             <CardContent>
                                 {teamMembers.length > 0 ? (
                                     <div className="space-y-3">
-                                        {teamMembers.map((member: any) => (
+                                        {teamMembers.map((member: any) => {
+                                            // Determine role display based on workspace type
+                                            let roleDisplay = ''
+                                            if (workspace.type === 'publication') {
+                                                roleDisplay = 'Co-author'
+                                            } else if (workspace.type === 'thesis') {
+                                                roleDisplay = member.role === 'supervisor' ? 'Supervisor' : 'Co-author'
+                                            } else {
+                                                roleDisplay = member.role ? (member.role.charAt(0).toUpperCase() + member.role.slice(1)) : 'Member'
+                                            }
+                                            
+                                            return (
                                             <div key={member.user_id || member.id} className="flex items-center justify-between group">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs">
@@ -372,18 +384,27 @@ export function WorkspaceOverview({ workspace, supervisors = [] }: WorkspaceOver
                                                     <div>
                                                         <p className="text-sm font-medium">{member.full_name || member.author_name}</p>
                                                         <p className="text-[10px] text-muted-foreground uppercase">
-                                                            {member.role || 'Co-author'} {member.status === 'invited' ? '(Pending)' : ''}
+                                                            {roleDisplay} {member.status === 'invited' ? '(Pending)' : ''}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 ) : (
                                     <p className="text-xs text-muted-foreground italic">No other members.</p>
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* Co-author Requests Section (Publications only) */}
+                        {workspace.type === 'publication' && (
+                            <CoauthorRequestsSection 
+                                publicationId={workspace.id} 
+                                canManage={true}
+                            />
+                        )}
 
                         {/* Metadata Card */}
                         <Card className="shadow-sm">

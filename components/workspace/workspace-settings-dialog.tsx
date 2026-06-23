@@ -13,8 +13,18 @@ import {
     Select, SelectContent, SelectItem, 
     SelectTrigger, SelectValue 
 } from "@/components/ui/select"
+import { 
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { updateWorkspaceSettings } from "@/app/actions/workspace"
+import { updateWorkspaceDetails, deleteWorkspace } from "@/app/actions/workspace"
 
 interface WorkspaceSettingsDialogProps {
     workspace: any
@@ -24,24 +34,38 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
 
-    const handleUpdate = async (formData: FormData) => {
+    const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
         setLoading(true)
-        const department = formData.get("department") as string
-        const visibility = formData.get("visibility") as string
+        
+        const formData = new FormData(e.currentTarget)
+        formData.append("id", workspace.id.toString())
+        formData.append("type", workspace.type)
 
-        const result = await updateWorkspaceSettings(workspace.id, workspace.type, {
-            department,
-            visibility
-        })
+        const result = await updateWorkspaceDetails({}, formData)
 
         if (result.success) {
             toast.success("Settings updated")
             setOpen(false)
         } else {
-            toast.error(result.message)
+            toast.error(result.message || "Failed to update settings")
         }
         setLoading(false)
+    }
+
+    const handleDelete = async () => {
+        setIsDeleting(true)
+        const result = await deleteWorkspace(workspace.id, workspace.type)
+        
+        if (result.success) {
+            toast.success("Workspace deleted")
+            window.location.href = "/student/dashboard"
+        } else {
+            toast.error(result.message || "Failed to delete workspace")
+        }
+        setIsDeleting(false)
     }
 
     return (
@@ -62,14 +86,14 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                     </DialogDescription>
                 </DialogHeader>
 
-                <form action={handleUpdate} className="space-y-6 py-4">
+                <form onSubmit={handleUpdate} className="space-y-6 py-4">
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Department</Label>
-                                <Select name="department" defaultValue={workspace.department}>
+                                <Select name="department" defaultValue={workspace.department || ""}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select Dept" />
+                                        <SelectValue placeholder="Select Department" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="CSE">Computer Science & Engineering</SelectItem>
@@ -81,6 +105,31 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                                 </Select>
                             </div>
                         </div>
+
+                        {(workspace.type === 'thesis' || workspace.type === 'project') && (
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Field of Study</Label>
+                                    <Select name="field" defaultValue={workspace.field || ""}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Field" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="AI">Artificial Intelligence</SelectItem>
+                                            <SelectItem value="ML">Machine Learning</SelectItem>
+                                            <SelectItem value="WEB">Web Development</SelectItem>
+                                            <SelectItem value="MOBILE">Mobile Development</SelectItem>
+                                            <SelectItem value="DATABASE">Database Systems</SelectItem>
+                                            <SelectItem value="NETWORK">Networking</SelectItem>
+                                            <SelectItem value="SECURITY">Cybersecurity</SelectItem>
+                                            <SelectItem value="POWER">Power Systems</SelectItem>
+                                            <SelectItem value="COMMUNICATION">Communications</SelectItem>
+                                            <SelectItem value="CONTROL">Control Systems</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
 
                         {workspace.type === 'thesis' && (
                             <div className="space-y-2">
@@ -131,6 +180,32 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                         </Button>
                     </DialogFooter>
                 </form>
+
+                {/* Delete Confirmation Dialog */}
+                <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                                <AlertTriangle className="w-5 h-5" />
+                                Delete Workspace?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete your {workspace.type} and all associated data including team members, files, and submissions.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="bg-destructive hover:bg-destructive/90 gap-2"
+                            >
+                                {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                Delete Permanently
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </DialogContent>
         </Dialog>
     )

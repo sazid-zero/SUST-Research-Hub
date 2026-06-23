@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
+import { searchUsers as dbSearchUsers } from "@/lib/db/users"
 import { z } from "zod"
 import fs from "fs"
 import path from "path"
@@ -134,22 +135,24 @@ export async function inviteMember(prevState: any, formData: FormData) {
     const user = await getCurrentUser()
     if (!user) return { message: "Unauthorized", success: false }
 
-    const email = formData.get("email") as string
+    const userId = formData.get("userId") as string
     const role = formData.get("role") as string
     const workspaceId = parseInt(formData.get("workspaceId") as string)
     const type = formData.get("type") as string
 
-    if (!email || !workspaceId || !type) {
+    if (!userId || !workspaceId || !type) {
         return { message: "Missing fields", success: false }
     }
 
     try {
-        // 1. Find User
-        const userResult = await sql`SELECT id, full_name FROM users WHERE email = ${email}`
+        const inviteeId = parseInt(userId)
+        
+        // 1. Find User to verify exists
+        const userResult = await sql`SELECT id, full_name, email FROM users WHERE id = ${inviteeId}`
         if (userResult.length === 0) {
-            return { message: "User not found with that email", success: false }
+            return { message: "User not found", success: false }
         }
-        const inviteeId = userResult[0].id
+        const email = userResult[0].email
 
         if (inviteeId === user.id) {
              return { message: "You cannot invite yourself", success: false }
@@ -169,30 +172,68 @@ export async function inviteMember(prevState: any, formData: FormData) {
                 ON CONFLICT (project_id, user_id) DO NOTHING
             `
         } else if (type === 'publication') {
+            // Check if already a co-author
+            const existingAuthor = await sql`
+                SELECT id FROM publication_authors WHERE publication_id = ${workspaceId} AND user_id = ${inviteeId}
+            `
+            if (existingAuthor.length > 0) {
+                return { message: "User is already a co-author", success: false }
+            }
+
+            // Check if already has a pending request
+            const existingRequest = await sql`
+                SELECT id FROM coauthor_requests WHERE publication_id = ${workspaceId} AND invited_user_id = ${inviteeId}
+            `
+            if (existingRequest.length > 0) {
+                return { message: "Invitation already sent to this user", success: false }
+            }
+
             // Get current max author order
             const orderResult = await sql`
                 SELECT MAX(author_order) as max_order FROM publication_authors WHERE publication_id = ${workspaceId}
             `
             const newOrder = (orderResult[0].max_order || 0) + 1
 
+            // Create pending co-author request instead of directly adding
             await sql`
-                INSERT INTO publication_authors (publication_id, user_id, author_name, author_order, corresponding_author)
-                VALUES (${workspaceId}, ${inviteeId}, ${userResult[0].full_name}, ${newOrder}, false)
+                INSERT INTO coauthor_requests (publication_id, invited_by, invited_user_id, author_order, status)
+                VALUES (${workspaceId}, ${user.id}, ${inviteeId}, ${newOrder}, 'pending')
             `
         }
         
         revalidatePath(`/student/workspace/${type}/${workspaceId}`)
 
+        // Get workspace title for notification
+        let workspaceTitle = 'Research Workspace'
+        try {
+            if (type === 'thesis') {
+                const [thesis] = await sql`SELECT title FROM theses WHERE id = ${workspaceId}`
+                workspaceTitle = thesis?.title || 'Thesis'
+            } else if (type === 'project') {
+                const [project] = await sql`SELECT title FROM projects WHERE id = ${workspaceId}`
+                workspaceTitle = project?.title || 'Project'
+            } else if (type === 'publication') {
+                const [pub] = await sql`SELECT title FROM publications WHERE id = ${workspaceId}`
+                workspaceTitle = pub?.title || 'Publication'
+            }
+        } catch (err) {
+            console.error("Error fetching workspace title:", err)
+        }
+
         // Send Notification
-        await createNotification({
-            userId: inviteeId,
-            type: 'invite',
-            title: 'Workspace Invitation',
-            message: `${user.full_name} invited you to join the ${type}: ${formData.get('workspaceTitle') || 'Research Workspace'}`,
-            link: `/student/workspace/${type}/${workspaceId}`,
-            sourceId: workspaceId,
-            sourceType: type
-        })
+        try {
+            await createNotification({
+                userId: inviteeId,
+                type: 'invite',
+                title: 'Workspace Invitation',
+                message: `${user.full_name} invited you to join the ${type}: ${workspaceTitle}`,
+                link: `/student/workspace/${type}/${workspaceId}`,
+                sourceId: workspaceId,
+                sourceType: type
+            })
+        } catch (notifyErr) {
+            console.error("Failed to create notification:", notifyErr)
+        }
 
         // Send Email
         await sendEmail({
@@ -203,9 +244,9 @@ export async function inviteMember(prevState: any, formData: FormData) {
 
         return { message: `Invited ${userResult[0].full_name} successfully`, success: true }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Invite error:", error)
-        return { message: "Failed to invite member", success: false }
+        return { message: error?.message || "Failed to invite member", success: false }
     }
 }
 
@@ -425,8 +466,10 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
     const keywordsStr = formData.get("keywords") as string
     const paperSubtype = formData.get("paper_subtype") as string
     const visibility = formData.get("visibility") as string
+    const department = formData.get("department") as string
+    const field = formData.get("field") as string
 
-    if (!id || !type || !title) return { message: "Missing required fields", success: false }
+    if (!id || !type) return { message: "Missing required fields", success: false }
 
     const keywords = keywordsStr ? keywordsStr.split(',').map(k => k.trim()).filter(k => k) : []
 
@@ -434,19 +477,38 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
         if (type === 'thesis') {
             await sql`
                 UPDATE theses 
-                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, visibility = COALESCE(${visibility}, visibility), updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    abstract = COALESCE(${description || null}, abstract),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    department = COALESCE(${department || null}, department),
+                    field = COALESCE(${field || null}, field),
+                    visibility = COALESCE(${visibility || null}, visibility),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'project') {
             await sql`
                 UPDATE projects 
-                SET title = ${title}, description = ${description}, keywords = ${keywords}, updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    description = COALESCE(${description || null}, description),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    department = COALESCE(${department || null}, department),
+                    field = COALESCE(${field || null}, field),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         } else if (type === 'publication') {
             await sql`
                 UPDATE publications 
-                SET title = ${title}, abstract = ${description}, keywords = ${keywords}, paper_subtype = ${paperSubtype}, updated_at = NOW()
+                SET 
+                    title = COALESCE(${title || null}, title),
+                    abstract = COALESCE(${description || null}, abstract),
+                    keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
+                    paper_subtype = COALESCE(${paperSubtype || null}, paper_subtype),
+                    department = COALESCE(${department || null}, department),
+                    updated_at = NOW()
                 WHERE id = ${id}
             `
         }
@@ -607,6 +669,71 @@ export async function supervisorReviewAction(
         return { success: false, message: "Failed to process review" }
     }
 }
+export async function publishWorkspace(workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        // Only supervisors or admins can publish
+        const userRole = user.role
+        if (userRole !== 'supervisor' && userRole !== 'admin') {
+            return { success: false, message: "Only supervisors and admins can publish work" }
+        }
+
+        // Verify user is supervisor of this workspace
+        if (userRole === 'supervisor') {
+            let isSupervisor = false
+            if (workspaceType === 'thesis') {
+                const [thesis] = await sql`SELECT supervisor_id FROM theses WHERE id = ${workspaceId}`
+                isSupervisor = thesis?.supervisor_id === user.id
+            } else if (workspaceType === 'project') {
+                const [member] = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId} AND user_id = ${user.id} AND role = 'supervisor'`
+                isSupervisor = !!member
+            }
+            if (!isSupervisor) {
+                return { success: false, message: "You are not the supervisor of this work" }
+            }
+        }
+
+        // Update status to published
+        if (workspaceType === 'thesis') {
+            await sql`UPDATE theses SET status = 'published', visibility = 'public', updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            await sql`UPDATE projects SET status = 'published', updated_at = NOW() WHERE id = ${workspaceId}`
+        }
+
+        // Get workspace title and team members
+        const title = await getWorkspaceTitle(workspaceId, workspaceType)
+        let members: any[] = []
+        if (workspaceType === 'thesis') {
+            members = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            members = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId}`
+        }
+
+        // Notify all team members
+        for (const member of members) {
+            await createNotification({
+                userId: member.user_id,
+                type: 'success',
+                title: 'Work Published',
+                message: `Your ${workspaceType} "${title || ''}" has been published to the public repository.`,
+                link: `/student/workspace/${workspaceType}/${workspaceId}`,
+                sourceId: workspaceId,
+                sourceType: workspaceType
+            })
+        }
+
+        revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+        revalidatePath(`/supervisor/review/${workspaceType}/${workspaceId}`)
+        revalidatePath(`/${workspaceType}/${workspaceId}`)
+        return { success: true, message: "Workspace published successfully to public repository" }
+    } catch (error) {
+        console.error("Publish workspace error:", error)
+        return { success: false, message: "Failed to publish workspace" }
+    }
+}
+
 export async function saveResourceMetadata(data: {
     workspaceId: number,
     workspaceType: string,
@@ -801,24 +928,24 @@ export async function uploadDocument(
         if (workspaceType === 'thesis') {
             await sql`
                 INSERT INTO thesis_files (thesis_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         } else if (workspaceType === 'project') {
             await sql`
                 INSERT INTO project_files (project_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         } else if (workspaceType === 'publication') {
             await sql`
                 INSERT INTO publication_files (publication_id, file_name, file_url, file_size, resource_type, uploaded_at)
-                VALUES (${workspaceId}, ${file.name}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
+                VALUES (${workspaceId}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${resourceType}, NOW())
             `
         }
 
         // Also keep documents table for global search/history if needed
         await sql`
             INSERT INTO documents (workspace_id, workspace_type, name, file_path, file_size, file_type, uploaded_by, created_at)
-            VALUES (${workspaceId}, ${workspaceType}, ${file.name}, ${fileUrl}, ${file.size}, ${file.type}, ${user.id}, NOW())
+            VALUES (${workspaceId}, ${workspaceType}, ${sanitizedFilename}, ${fileUrl}, ${file.size}, ${file.type}, ${user.id}, NOW())
         `
 
         revalidateWorkspace(workspaceId, workspaceType)
@@ -859,6 +986,26 @@ export async function addResourceLink(
     if (!user) return { message: "Unauthorized", success: false }
 
     try {
+        // Validate URL
+        if (!title || title.trim().length === 0) {
+            return { message: "Title is required", success: false }
+        }
+
+        if (!url || url.trim().length === 0) {
+            return { message: "URL is required", success: false }
+        }
+
+        // Basic URL validation
+        try {
+            new URL(url)
+        } catch {
+            return { message: "Invalid URL format", success: false }
+        }
+
+        if (title.length > 255) {
+            return { message: "Title must be less than 255 characters", success: false }
+        }
+
         await sql`
             INSERT INTO resource_links (workspace_id, workspace_type, title, url, category, updated_at)
             VALUES (${workspaceId}, ${workspaceType}, ${title}, ${url}, ${category}, NOW())
@@ -1079,6 +1226,17 @@ export async function uploadPublicationPDF(
     if (!file) return { success: false, message: "No file provided" }
 
     try {
+        // PDF validation
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB for PDFs
+        
+        if (file.type !== 'application/pdf') {
+            return { success: false, message: `Only PDF files are allowed. Received: ${file.type}` }
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            return { success: false, message: `PDF file size exceeds maximum limit of 100MB` }
+        }
+
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
@@ -1151,3 +1309,177 @@ export async function deleteWorkspaceModel(modelId: number, workspaceId: number,
     }
 }
 
+// Co-author Request Functions
+export async function acceptCoauthorRequest(requestId: number, publicationId: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        // Get the request details
+        const request = await sql`
+            SELECT cr.*, p.title, u.full_name as inviter_name
+            FROM coauthor_requests cr
+            JOIN publications p ON cr.publication_id = p.id
+            JOIN users u ON cr.invited_by = u.id
+            WHERE cr.id = ${requestId} AND cr.invited_user_id = ${user.id} AND cr.publication_id = ${publicationId}
+        `
+
+        if (request.length === 0) {
+            return { success: false, message: "Request not found" }
+        }
+
+        const req = request[0]
+
+        // Add user as co-author
+        await sql`
+            INSERT INTO publication_authors (publication_id, user_id, author_name, author_order, corresponding_author)
+            VALUES (${publicationId}, ${user.id}, ${user.full_name}, ${req.author_order}, false)
+        `
+
+        // Mark request as accepted
+        await sql`
+            UPDATE coauthor_requests 
+            SET status = 'accepted', responded_at = NOW()
+            WHERE id = ${requestId}
+        `
+
+        // Notify the inviter
+        await createNotification({
+            userId: req.invited_by,
+            type: 'success',
+            title: 'Co-author Request Accepted',
+            message: `${user.full_name} accepted your co-author invitation for "${req.title}".`,
+            link: `/student/workspace/publication/${publicationId}`,
+            sourceId: publicationId,
+            sourceType: 'publication'
+        })
+
+        revalidatePath(`/student/workspace/publication/${publicationId}`)
+        revalidatePath(`/student/notifications`)
+        return { success: true, message: "Co-author request accepted" }
+    } catch (error) {
+        console.error("Accept co-author request error:", error)
+        return { success: false, message: "Failed to accept request" }
+    }
+}
+
+export async function declineCoauthorRequest(requestId: number, publicationId: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        // Get the request details
+        const request = await sql`
+            SELECT cr.*, p.title, u.full_name as inviter_name
+            FROM coauthor_requests cr
+            JOIN publications p ON cr.publication_id = p.id
+            JOIN users u ON cr.invited_by = u.id
+            WHERE cr.id = ${requestId} AND cr.invited_user_id = ${user.id} AND cr.publication_id = ${publicationId}
+        `
+
+        if (request.length === 0) {
+            return { success: false, message: "Request not found" }
+        }
+
+        const req = request[0]
+
+        // Mark request as declined
+        await sql`
+            UPDATE coauthor_requests 
+            SET status = 'declined', responded_at = NOW()
+            WHERE id = ${requestId}
+        `
+
+        // Notify the inviter
+        await createNotification({
+            userId: req.invited_by,
+            type: 'warning',
+            title: 'Co-author Request Declined',
+            message: `${user.full_name} declined your co-author invitation for "${req.title}".`,
+            link: `/student/workspace/publication/${publicationId}`,
+            sourceId: publicationId,
+            sourceType: 'publication'
+        })
+
+        revalidatePath(`/student/workspace/publication/${publicationId}`)
+        revalidatePath(`/student/notifications`)
+        return { success: true, message: "Co-author request declined" }
+    } catch (error) {
+        console.error("Decline co-author request error:", error)
+        return { success: false, message: "Failed to decline request" }
+    }
+}
+
+export async function getPendingCoauthorRequests(publicationId: number) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, requests: [] }
+
+    try {
+        const requests = await sql`
+            SELECT cr.*, u.full_name, u.email
+            FROM coauthor_requests cr
+            JOIN users u ON cr.invited_user_id = u.id
+            WHERE cr.publication_id = ${publicationId} AND cr.status = 'pending'
+            ORDER BY cr.created_at DESC
+        `
+
+        return { success: true, requests }
+    } catch (error) {
+        console.error("Get pending coauthor requests error:", error)
+        return { success: false, requests: [] }
+    }
+}
+
+export async function searchUsersAction(query: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, users: [] }
+
+    try {
+        const users = await dbSearchUsers(query, 15)
+        // Exclude current user from results
+        const filtered = users.filter(u => u.id !== user.id)
+        return { success: true, users: filtered }
+    } catch (error) {
+        console.error("Search users error:", error)
+        return { success: false, users: [] }
+    }
+}
+
+export async function deleteWorkspace(workspaceId: number, workspaceType: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    try {
+        // Verify user is owner/leader of the workspace
+        let isOwner = false
+        if (workspaceType === 'thesis') {
+            const [thesis] = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId} AND user_id = ${user.id} AND role = 'leader'`
+            isOwner = !!thesis
+        } else if (workspaceType === 'project') {
+            const [project] = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId} AND user_id = ${user.id} AND role = 'leader'`
+            isOwner = !!project
+        } else if (workspaceType === 'publication') {
+            const [pub] = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${workspaceId} AND user_id = ${user.id} AND corresponding_author = true`
+            isOwner = !!pub
+        }
+
+        if (!isOwner) {
+            return { success: false, message: "You can only delete your own workspaces" }
+        }
+
+        // Delete the workspace
+        if (workspaceType === 'thesis') {
+            await sql`DELETE FROM theses WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'project') {
+            await sql`DELETE FROM projects WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            await sql`DELETE FROM publications WHERE id = ${workspaceId}`
+        }
+
+        revalidatePath('/student/dashboard')
+        return { success: true, message: "Workspace deleted successfully" }
+    } catch (error) {
+        console.error("Delete workspace error:", error)
+        return { success: false, message: "Failed to delete workspace" }
+    }
+}

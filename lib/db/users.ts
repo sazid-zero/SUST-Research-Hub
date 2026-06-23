@@ -62,3 +62,32 @@ export async function getAllUsers(): Promise<User[]> {
         return []
     }
 }
+
+export async function searchUsers(query: string, limit: number = 10): Promise<User[]> {
+    try {
+        if (!query || query.trim().length === 0) {
+            return []
+        }
+
+        const searchTerm = `%${query.toLowerCase()}%`
+        const result = await sql`
+            SELECT id, full_name, student_id, email, role, department, profile_pic
+            FROM users
+            WHERE LOWER(full_name) LIKE ${searchTerm}
+            OR LOWER(email) LIKE ${searchTerm}
+            OR LOWER(student_id) LIKE ${searchTerm}
+            ORDER BY 
+                CASE 
+                    WHEN LOWER(full_name) LIKE ${`${query.toLowerCase()}%`} THEN 1
+                    WHEN LOWER(student_id) LIKE ${`${query.toLowerCase()}%`} THEN 2
+                    ELSE 3
+                END,
+                full_name ASC
+            LIMIT ${limit}
+        `
+        return result as User[]
+    } catch (error) {
+        console.error("Error searching users:", error)
+        return []
+    }
+}
