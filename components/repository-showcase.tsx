@@ -26,7 +26,7 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         description: "Access simulation parameters, dataset pipelines, software packages, and machine learning models created during research.",
         image: "/model.png",
         icon: Brain,
-        color: "text-rose-500",
+        color: "text-[#f7ea92]",
         href: "/models",
         stats: [
             { label: "Scope", value: "Multi-Field" },
@@ -56,7 +56,7 @@ const getCarouselData = (stats: ShowcaseStats | null) => [
         description: "A comprehensive collection of undergraduate and postgraduate dissertations, representing years of academic excellence.",
         image: "/thesis.png",
         icon: GraduationCap,
-        color: "text-purple-500",
+        color: "text-[#4fc5f7]",
         href: "/theses",
         stats: [
             { label: "Theses", value: stats?.theses.count?.toString() || "300+" },
@@ -103,16 +103,16 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
     const data = getCarouselData(stats)
 
     const getColorTheme = (colorText: string) => {
-        if (colorText.includes('rose')) return {
-            shadow: 'shadow-rose-500 hover:shadow-rose-500',
-            gradient: 'from-rose-500/10',
-            iconBg: 'bg-rose-500/10',
-            iconText: 'text-rose-500',
-            arrowHover: 'group-hover:bg-rose-500 group-hover:border-rose-500',
-            titleText: 'text-rose-500/80',
-            headlineHover: 'group-hover:text-rose-500',
-            pillBg: 'bg-rose-500/5 dark:bg-rose-500/10',
-            pillText: 'text-rose-500',
+        if (colorText.includes('#f7ea92')) return {
+            shadow: 'shadow-[#f7ea92] hover:shadow-[#f7ea92]',
+            gradient: 'from-[#f7ea92]/10',
+            iconBg: 'bg-[#f7ea92]/10',
+            iconText: 'text-[#f7ea92]',
+            arrowHover: 'group-hover:bg-[#f7ea92] group-hover:border-[#f7ea92]',
+            titleText: 'text-[#f7ea92]/80',
+            headlineHover: 'group-hover:text-[#f7ea92]',
+            pillBg: 'bg-[#f7ea92]/5 dark:bg-[#f7ea92]/10',
+            pillText: 'text-[#f7ea92]',
         }
         if (colorText.includes('emerald')) return {
             shadow: 'shadow-emerald-500 hover:shadow-emerald-500',
@@ -125,16 +125,16 @@ export function RepositoryShowcase({ stats }: { stats: ShowcaseStats | null }) {
             pillBg: 'bg-emerald-500/5 dark:bg-emerald-500/10',
             pillText: 'text-emerald-500',
         }
-        if (colorText.includes('purple')) return {
-            shadow: 'shadow-purple-500 hover:shadow-purple-500',
-            gradient: 'from-purple-500/10',
-            iconBg: 'bg-purple-500/10',
-            iconText: 'text-purple-500',
-            arrowHover: 'group-hover:bg-purple-500 group-hover:border-purple-500',
-            titleText: 'text-purple-500/80',
-            headlineHover: 'group-hover:text-purple-500',
-            pillBg: 'bg-purple-500/5 dark:bg-purple-500/10',
-            pillText: 'text-purple-500',
+        if (colorText.includes('#4fc5f7')) return {
+            shadow: 'shadow-[#4fc5f7] hover:shadow-[#4fc5f7]',
+            gradient: 'from-[#4fc5f7]/10',
+            iconBg: 'bg-[#4fc5f7]/10',
+            iconText: 'text-[#4fc5f7]',
+            arrowHover: 'group-hover:bg-[#4fc5f7] group-hover:border-[#4fc5f7]',
+            titleText: 'text-[#4fc5f7]/80',
+            headlineHover: 'group-hover:text-[#4fc5f7]',
+            pillBg: 'bg-[#4fc5f7]/5 dark:bg-[#4fc5f7]/10',
+            pillText: 'text-[#4fc5f7]',
         }
         if (colorText.includes('blue')) return {
             shadow: 'shadow-blue-500 hover:shadow-blue-500',
