@@ -32,7 +32,9 @@ import {
     deletePublicationPDF,
     getWorkspaceDatasets,
     createDataset,
-    deleteWorkspaceDataset
+    deleteWorkspaceDataset,
+    saveResourceMetadata,
+    savePublicationPDFMetadata
 } from "@/app/actions/workspace"
 
 interface ResourcesTabProps {
@@ -85,38 +87,80 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
     setLoading(false)
   }
 
+  const uploadDirectToCloudinary = async (file: File) => {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+      if (!cloudName || !uploadPreset) throw new Error("Cloudinary environment variables missing")
+      
+      const uploadData = new FormData()
+      uploadData.append('file', file)
+      uploadData.append('upload_preset', uploadPreset)
+      uploadData.append('resource_type', 'auto')
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+          method: 'POST',
+          body: uploadData
+      })
+
+      if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Cloudinary upload failed: ${errorText}`)
+      }
+
+      const result = await res.json()
+      return result.secure_url
+  }
+
   const handleFileUpload = async () => {
       if (!uploadFile) return
 
-      const formData = new FormData()
-      formData.append("file", uploadFile)
+      try {
+          toast.loading("Uploading to Cloudinary...", { id: "upload-toast" })
+          const fileUrl = await uploadDirectToCloudinary(uploadFile)
+          
+          const result = await saveResourceMetadata({
+              workspaceId: workspace.id,
+              workspaceType: workspace.type,
+              fileName: uploadFile.name,
+              fileUrl: fileUrl,
+              fileSize: uploadFile.size,
+              resourceType: 'document',
+              publicId: '' // handled internally by url now
+          })
 
-      const result = await uploadDocument(workspace.id, workspace.type, formData, 'document')
-      if (result.success) {
-          toast.success(result.message)
-          setIsUploadDocOpen(false)
-          setUploadFile(null)
-          fetchResources()
-      } else {
-          toast.error(result.message)
+          if (result.success) {
+              toast.success(result.message, { id: "upload-toast" })
+              setIsUploadDocOpen(false)
+              setUploadFile(null)
+              fetchResources()
+          } else {
+              toast.error(result.message, { id: "upload-toast" })
+          }
+      } catch (error: any) {
+          toast.error(error.message || "Failed to upload document", { id: "upload-toast" })
       }
   }
 
   const handlePaperUpload = async () => {
       if (!paperFile) return
 
-      const formData = new FormData()
-      formData.append("file", paperFile)
+      try {
+          toast.loading("Uploading PDF to Cloudinary...", { id: "upload-toast" })
+          const fileUrl = await uploadDirectToCloudinary(paperFile)
 
-      const result = await uploadPublicationPDF(workspace.id, formData)
-      if (result.success) {
-          toast.success(result.message)
-          setIsUploadPaperOpen(false)
-          setPaperFile(null)
-          setPdfUrl(`/uploads/publication/${workspace.id}/${paperFile.name}`)
-          fetchResources()
-      } else {
-          toast.error(result.message)
+          const result = await savePublicationPDFMetadata(workspace.id, fileUrl)
+          
+          if (result.success) {
+              toast.success(result.message, { id: "upload-toast" })
+              setIsUploadPaperOpen(false)
+              setPaperFile(null)
+              setPdfUrl(fileUrl)
+              fetchResources()
+          } else {
+              toast.error(result.message, { id: "upload-toast" })
+          }
+      } catch (error: any) {
+          toast.error(error.message || "Failed to upload PDF", { id: "upload-toast" })
       }
   }
 

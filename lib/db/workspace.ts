@@ -164,9 +164,10 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
           }))
       }
       
-      // Add Supervisor
-      if (thesis.supervisor_name) {
-          if (thesis.supervisor_id) {
+      // Add Supervisor from theses table if not already in team_members
+      if (thesis.supervisor_name && thesis.supervisor_id) {
+          const alreadyInMembers = members.some(m => m.user_id === thesis.supervisor_id)
+          if (!alreadyInMembers) {
              members.push({
                  user_id: thesis.supervisor_id,
                  full_name: thesis.supervisor_name,

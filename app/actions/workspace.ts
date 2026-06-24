@@ -8,6 +8,7 @@ import { searchUsers as dbSearchUsers } from "@/lib/db/users"
 import { z } from "zod"
 import fs from "fs"
 import path from "path"
+import crypto from "crypto"
 import { createNotification } from "./notifications"
 import { sendEmail } from "@/lib/mail"
 
@@ -1215,13 +1216,17 @@ export async function deleteDocument(fileId: number, workspaceId: number, worksp
         if (fileUrl) {
             await sql`DELETE FROM documents WHERE workspace_id = ${workspaceId} AND workspace_type = ${workspaceType} AND file_path = ${fileUrl}`
             
-            try {
-                const diskPath = path.join(process.cwd(), "public", fileUrl)
-                if (fs.existsSync(diskPath)) {
-                    fs.unlinkSync(diskPath)
+            if (fileUrl.includes('cloudinary.com')) {
+                await deleteFromCloudinaryByUrl(fileUrl)
+            } else {
+                try {
+                    const diskPath = path.join(process.cwd(), "public", fileUrl)
+                    if (fs.existsSync(diskPath)) {
+                        fs.unlinkSync(diskPath)
+                    }
+                } catch (fsErr) {
+                    console.error("FS delete error:", fsErr)
                 }
-            } catch (fsErr) {
-                console.error("FS delete error:", fsErr)
             }
         }
 
@@ -1289,13 +1294,17 @@ export async function deletePublicationPDF(workspaceId: number) {
     try {
         const [pub] = await sql`SELECT pdf_url FROM publications WHERE id = ${workspaceId}`
         if (pub && pub.pdf_url) {
-            try {
-                const diskPath = path.join(process.cwd(), "public", pub.pdf_url)
-                if (fs.existsSync(diskPath)) {
-                    fs.unlinkSync(diskPath)
+            if (pub.pdf_url.includes('cloudinary.com')) {
+                await deleteFromCloudinaryByUrl(pub.pdf_url)
+            } else {
+                try {
+                    const diskPath = path.join(process.cwd(), "public", pub.pdf_url)
+                    if (fs.existsSync(diskPath)) {
+                        fs.unlinkSync(diskPath)
+                    }
+                } catch (fsErr) {
+                    console.error("FS delete publication PDF error:", fsErr)
                 }
-            } catch (fsErr) {
-                console.error("FS delete publication PDF error:", fsErr)
             }
         }
 
@@ -1601,8 +1610,8 @@ export async function deleteWorkspace(workspaceId: number, workspaceType: string
             isOwner = !!pub
         }
 
-        if (!isOwner) {
-            return { success: false, message: "You can only delete your own workspaces" }
+        if (!isOwner && user.role !== 'admin') {
+            return { success: false, message: "You don't have permission to delete this workspace" }
         }
 
         // Delete the workspace
@@ -1619,5 +1628,79 @@ export async function deleteWorkspace(workspaceId: number, workspaceType: string
     } catch (error) {
         console.error("Delete workspace error:", error)
         return { success: false, message: "Failed to delete workspace" }
+    }
+}
+
+export async function savePublicationPDFMetadata(workspaceId: number, fileUrl: string) {
+    const user = await getCurrentUser()
+    if (!user) return { message: "Unauthorized", success: false }
+
+    try {
+        await sql`
+            UPDATE publications
+            SET pdf_url = ${fileUrl}, updated_at = NOW()
+            WHERE id = ${workspaceId}
+        `
+        revalidateWorkspace(workspaceId, "publication")
+        return { message: "Main paper PDF metadata saved successfully", success: true }
+    } catch (error) {
+        console.error("Save publication PDF metadata error:", error)
+        return { message: "Failed to save PDF metadata", success: false }
+    }
+}
+
+async function deleteFromCloudinaryByUrl(fileUrl: string) {
+    try {
+        if (!fileUrl || !fileUrl.includes('res.cloudinary.com')) return true;
+
+        const urlObj = new URL(fileUrl);
+        const pathParts = urlObj.pathname.split('/');
+        
+        const resourceType = pathParts[1] === 'v1_1' ? pathParts[3] : pathParts[2] || 'image';
+        
+        const uploadIdx = pathParts.indexOf('upload');
+        if (uploadIdx === -1) return false;
+
+        let publicIdParts = pathParts.slice(uploadIdx + 2);
+        let publicIdWithExt = publicIdParts.join('/');
+        
+        let publicId = publicIdWithExt;
+        if (resourceType !== 'raw') {
+            publicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
+            if (!publicId) publicId = publicIdWithExt;
+        }
+
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+        const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET;
+
+        if (!cloudName || !apiKey || !apiSecret) {
+            console.error("Missing Cloudinary credentials for deletion");
+            return false;
+        }
+
+        const timestamp = Math.round((new Date()).getTime() / 1000).toString();
+        
+        const strToSign = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+        const signature = crypto.createHash('sha1').update(strToSign).digest('hex');
+
+        const formData = new FormData();
+        formData.append('public_id', publicId);
+        formData.append('api_key', apiKey);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+
+        const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/destroy`;
+        const res = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await res.json();
+        console.log(`Cloudinary delete result for ${publicId}:`, result);
+        return result.result === 'ok' || result.result === 'not found';
+    } catch (err) {
+        console.error("Error deleting from cloudinary:", err);
+        return false;
     }
 }

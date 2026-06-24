@@ -76,11 +76,22 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
             const [request] = await sql`SELECT thesis_id, project_id FROM supervision_requests WHERE id = ${requestId}`
             
             if (request?.thesis_id) {
+                // 1. Update theses table
                 await sql`
                     UPDATE theses 
-                    SET supervisor_id = ${user.id}, supervisor = ${user.full_name}
+                    SET supervisor_id = ${user.id}
                     WHERE id = ${request.thesis_id}
                 `
+                // 2. Add to team_members if not already there
+                const [existingMember] = await sql`SELECT id FROM team_members WHERE thesis_id = ${request.thesis_id} AND user_id = ${user.id}`
+                if (existingMember) {
+                    await sql`UPDATE team_members SET role = 'supervisor', status = 'active' WHERE id = ${existingMember.id}`
+                } else {
+                    await sql`
+                        INSERT INTO team_members (thesis_id, user_id, role, status, joined_at)
+                        VALUES (${request.thesis_id}, ${user.id}, 'supervisor', 'active', NOW())
+                    `
+                }
             } else if (request?.project_id) {
                 // 1. Update projects table
                 await sql`
@@ -89,11 +100,15 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
                     WHERE id = ${request.project_id}
                 `
                 // 2. Add to project_members if not already there
-                await sql`
-                    INSERT INTO project_members (project_id, user_id, role, joined_at)
-                    VALUES (${request.project_id}, ${user.id}, 'supervisor', NOW())
-                    ON CONFLICT (project_id, user_id) DO UPDATE SET role = 'supervisor'
-                `
+                const [existingProjectMember] = await sql`SELECT id FROM project_members WHERE project_id = ${request.project_id} AND user_id = ${user.id}`
+                if (existingProjectMember) {
+                    await sql`UPDATE project_members SET role = 'supervisor' WHERE id = ${existingProjectMember.id}`
+                } else {
+                    await sql`
+                        INSERT INTO project_members (project_id, user_id, role, joined_at)
+                        VALUES (${request.project_id}, ${user.id}, 'supervisor', NOW())
+                    `
+                }
             }
         }
 
