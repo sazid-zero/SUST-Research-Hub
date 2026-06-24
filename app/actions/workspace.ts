@@ -523,28 +523,44 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
 }
 
 export async function submitForReview(workspaceId: number, workspaceType: string) {
+    console.log(`[submitForReview] Called for ID: ${workspaceId}, Type: ${workspaceType}`)
     const user = await getCurrentUser()
     if (!user) return { success: false, message: "Unauthorized" }
 
     try {
         // For publications, route to admin review instead of supervisor
         if (workspaceType === 'publication') {
-            // Update publication status to pending_admin_review
-            await sql`UPDATE publications SET status = 'pending_admin_review', updated_at = NOW() WHERE id = ${workspaceId}`
+            console.log(`[submitForReview] Processing publication: ${workspaceId}`)
+            // Update publication status to pending_review
+            try {
+                await sql`UPDATE publications SET status = 'pending_review', updated_at = NOW() WHERE id = ${workspaceId}`
+                console.log(`[submitForReview] Publication status updated to pending_review`)
+            } catch (err) {
+                console.error(`[submitForReview] FAILED update publications status:`, err)
+                throw err
+            }
             
             // Create paper review request entry
             const publication = await sql`SELECT title FROM publications WHERE id = ${workspaceId}`
             if (publication.length === 0) {
+                console.error(`[submitForReview] Publication ${workspaceId} not found`)
                 return { success: false, message: "Publication not found" }
             }
             
-            await sql`
-                INSERT INTO paper_review_requests (publication_id, student_id, submitted_at, status)
-                VALUES (${workspaceId}, ${user.id}, NOW(), 'pending')
-            `
+            try {
+                await sql`
+                    INSERT INTO paper_review_requests (publication_id, student_id, submitted_at, status)
+                    VALUES (${workspaceId}, ${user.id}, NOW(), 'pending')
+                `
+                console.log(`[submitForReview] Paper review request created`)
+            } catch (err) {
+                console.error(`[submitForReview] FAILED insert paper_review_requests:`, err)
+                throw err
+            }
             
             // Notify all admins
             const admins = await sql`SELECT id FROM users WHERE role = 'admin'`
+            console.log(`[submitForReview] Found ${admins.length} admins to notify`)
             for (const admin of admins) {
                 await createNotification({
                     userId: admin.id,
@@ -558,6 +574,7 @@ export async function submitForReview(workspaceId: number, workspaceType: string
             }
             
             revalidatePath(`/student/workspace/${workspaceType}/${workspaceId}`)
+            console.log(`[submitForReview] Publication submission SUCCESSFUL`)
             return { success: true, message: "Paper submitted for admin review successfully" }
         }
         
