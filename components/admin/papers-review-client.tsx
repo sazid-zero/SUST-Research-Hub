@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { FileText, Search, Loader2, CheckCircle2, XCircle, LayoutDashboard, Filter, Calendar, User, Mail } from "lucide-react"
+import { FileText, Search, Loader2, CheckCircle2, XCircle, LayoutDashboard, Filter, Calendar, User, Mail, ExternalLink } from "lucide-react"
 import { approvePaperSubmission, rejectPaperSubmission } from "@/app/actions/admin"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 import {
   Dialog,
   DialogContent,
@@ -209,6 +210,16 @@ export default function PapersReviewClient({ initialSubmissions }: PapersReviewC
 
                       {/* Actions */}
                       <div className="flex gap-3 pt-2 border-t border-border/30">
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="flex-1 bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 border border-sky-500/20"
+                        >
+                          <Link href={`/student/workspace/publication/${submission.publication_id}`} target="_blank">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View Workspace
+                          </Link>
+                        </Button>
                         <Button
                           onClick={() => handleApprove(submission)}
                           disabled={isLoading === submission.review_id}

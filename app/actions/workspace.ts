@@ -369,21 +369,18 @@ export async function requestSupervision(prevState: any, formData: FormData) {
             return { message: "You already have a pending request to this supervisor for this workspace.", success: false }
         }
 
-        // 3. Create Request
+        // 3. Create Request — do NOT change workspace status here.
+        // Status only changes to 'pending_review' when student clicks "Submit for Review".
         if (type === 'thesis') {
              await sql`
                 INSERT INTO supervision_requests (student_id, supervisor_id, thesis_id, topic_proposal, status, created_at)
                 VALUES (${user.id}, ${supervisorId}, ${workspaceId}, ${topicProposal}, 'pending', NOW())
             `
-            // Update workspace status to pending
-            await sql`UPDATE theses SET status = 'pending' WHERE id = ${workspaceId}`
         } else if (type === 'project') {
             await sql`
                 INSERT INTO supervision_requests (student_id, supervisor_id, project_id, topic_proposal, status, created_at)
                 VALUES (${user.id}, ${supervisorId}, ${workspaceId}, ${topicProposal}, 'pending', NOW())
             `
-            // Update workspace status to pending
-            await sql`UPDATE projects SET status = 'pending' WHERE id = ${workspaceId}`
         }
         
         revalidatePath(`/student/workspace/${type}/${workspaceId}`)

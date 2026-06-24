@@ -595,10 +595,11 @@ export async function rejectPaperSubmission(publicationId: number, reviewRequest
 
     const request = reviewRequest[0]
 
-    // Update publication status to rejected
+    // 'rejected' is not a valid publications status per DB constraint.
+    // Use 'needs_revision' so the student can revise and resubmit.
     await sql`
       UPDATE publications 
-      SET status = 'rejected', updated_at = NOW() 
+      SET status = 'needs_revision', updated_at = NOW() 
       WHERE id = ${publicationId}
     `
 
@@ -609,12 +610,12 @@ export async function rejectPaperSubmission(publicationId: number, reviewRequest
       WHERE id = ${reviewRequestId}
     `
 
-    // Notify student of rejection with feedback
+    // Notify student — paper marked needs_revision so they can revise and resubmit
     await createNotification({
       userId: request.student_id,
       type: 'error',
-      title: 'Paper Rejected',
-      message: `Your paper "${request.title}" has been rejected. Feedback: ${feedback}`,
+      title: 'Paper Needs Revision',
+      message: `Your paper "${request.title}" requires revision before it can be published. Admin feedback: ${feedback}`,
       link: `/student/workspace/publication/${publicationId}`,
       sourceId: publicationId,
       sourceType: 'publication'
