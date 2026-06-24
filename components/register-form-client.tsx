@@ -13,6 +13,7 @@ import { register } from "@/app/actions/auth"
 import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Image from "next/image"
+import { DEPARTMENTS } from "@/lib/constants/academic-data"
 
 export default function RegisterFormClient() {
   const router = useRouter()
@@ -292,16 +293,11 @@ export default function RegisterFormClient() {
                     <SelectValue placeholder="Select your department" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    <SelectItem value="cse">Computer Science & Engineering</SelectItem>
-                    <SelectItem value="eee">Electrical & Electronic Engineering</SelectItem>
-                    <SelectItem value="ce">Civil Engineering</SelectItem>
-                    <SelectItem value="me">Mechanical Engineering</SelectItem>
-                    <SelectItem value="che">Chemical Engineering</SelectItem>
-                    <SelectItem value="arch">Architecture</SelectItem>
-                    <SelectItem value="math">Mathematics</SelectItem>
-                    <SelectItem value="physics">Physics</SelectItem>
-                    <SelectItem value="chemistry">Chemistry</SelectItem>
-                    <SelectItem value="biology">Biology</SelectItem>
+                    {DEPARTMENTS.map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
