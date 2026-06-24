@@ -20,18 +20,14 @@ export async function getSupervisors(department?: string): Promise<User[]> {
         let query = sql`
             SELECT id, full_name, email, role, department, profile_pic, specialization, is_department_head
             FROM users
-            WHERE role IN ('supervisor', 'faculty', 'professor')
+            WHERE role IN ('supervisor', 'faculty', 'professor', 'admin')
         `
         
         if (department) {
-            // query = sql`${query} AND department = ${department}` 
-            // Neon/One-shot sql tagging might not support appending like this easily without helper.
-            // Rewriting for simple logic:
              return await sql`
                 SELECT id, full_name, email, role, department, profile_pic, specialization
                 FROM users
-                WHERE role IN ('supervisor', 'faculty', 'professor')
-                AND department = ${department}
+                WHERE role IN ('supervisor', 'faculty', 'professor', 'admin')
                 ORDER BY full_name ASC
             ` as User[]
         }
@@ -39,7 +35,7 @@ export async function getSupervisors(department?: string): Promise<User[]> {
         const result = await sql`
             SELECT id, full_name, email, role, department, profile_pic, specialization, is_department_head
             FROM users
-            WHERE role IN ('supervisor', 'faculty', 'professor')
+            WHERE role IN ('supervisor', 'faculty', 'professor', 'admin')
             ORDER BY full_name ASC
         `
         

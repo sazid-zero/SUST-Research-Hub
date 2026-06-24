@@ -27,9 +27,22 @@ async function checkSchema() {
         `;
         console.table(cols);
 
-        console.log("\n--- DATA FOR PAPER 16 ---");
-        const data = await sql`SELECT journal_name, publication_type, year FROM publications WHERE id = 16`;
-        console.table(data);
+        console.log("\n--- FINAL TEST QUERY ---");
+        const dept = 'Computer Science and Engineering (CSE)';
+        const pattern = `%${dept.split(' ')[0]}%`;
+        const test = await sql`
+                SELECT id, full_name, role, department
+                FROM users
+                WHERE role IN ('supervisor', 'faculty', 'professor', 'admin')
+                AND (
+                    LOWER(department) = LOWER(${dept}) 
+                    OR department ILIKE ${pattern}
+                    OR department IS NULL 
+                    OR department = ''
+                )
+                ORDER BY full_name ASC
+        `;
+        console.table(test);
 
     } catch (err) {
         console.error(err);

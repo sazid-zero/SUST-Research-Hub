@@ -92,8 +92,8 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
     setSearchResults([])
   }
 
-  // Show role selector only for thesis and project
-  const showRoleSelector = type !== 'publication'
+  // Show role selector only for project
+  const showRoleSelector = type === 'project'
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,7 +101,7 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
         {children || (
           <Button size="sm">
               <UserPlus className="mr-2 h-4 w-4" />
-              Invite {type === 'publication' ? 'Co-Author' : 'Member'}
+              Invite {type === 'project' ? 'Member' : 'Co-Author'}
           </Button>
         )}
       </DialogTrigger>
@@ -112,9 +112,11 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
             {selectedUser && <input type="hidden" name="userId" value={selectedUser.id} />}
             
             <DialogHeader>
-            <DialogTitle>Invite to Workspace</DialogTitle>
+            <DialogTitle>Invite {type === 'project' ? 'Member' : 'Co-Author'}</DialogTitle>
             <DialogDescription>
-                Add a collaborator to your {type} team.
+                {type === 'project' 
+                  ? `Add a collaborator to your project team.`
+                  : `Invite a co-author to collaborate on your ${type}.`}
             </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

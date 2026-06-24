@@ -46,9 +46,7 @@ export function SupervisionRequestDialog({ workspaceId, type, supervisors }: Sup
     const query = searchQuery.toLowerCase()
     return supervisors.filter(s => 
       s.full_name?.toLowerCase().includes(query) || 
-      s.email?.toLowerCase().includes(query) ||
-      s.department?.toLowerCase().includes(query) ||
-      s.specialization?.toLowerCase().includes(query)
+      s.email?.toLowerCase().includes(query)
     )
   }, [searchQuery, supervisors])
 
@@ -145,30 +143,20 @@ export function SupervisionRequestDialog({ workspaceId, type, supervisors }: Sup
 
                   {/* Search Results Dropdown */}
                   {showDropdown && filteredSupervisors.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-border rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto overflow-x-hidden">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
                       {filteredSupervisors.map((supervisor) => (
                         <button
                           key={supervisor.id}
                           type="button"
                           onClick={() => handleSelect(supervisor)}
-                          className="w-full text-left px-4 py-3 hover:bg-muted/50 border-b border-border last:border-b-0 transition-colors flex flex-col gap-0.5"
+                          className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition"
                         >
-                          <div className="font-semibold text-sm flex items-center justify-between">
-                            {supervisor.full_name}
-                            <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded whitespace-nowrap">
-                              {supervisor.department}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="font-medium text-gray-900">{supervisor.full_name}</div>
+                          <div className="flex gap-4 text-xs text-gray-500 mt-1">
                             <span className="flex items-center gap-1">
                               <Mail className="h-3 w-3" />
                               {supervisor.email}
                             </span>
-                            {supervisor.specialization && (
-                              <span className="truncate flex-1">
-                                • {supervisor.specialization}
-                              </span>
-                            )}
                           </div>
                         </button>
                       ))}
@@ -184,25 +172,9 @@ export function SupervisionRequestDialog({ workspaceId, type, supervisors }: Sup
                 
                 {/* Selected Display */}
                 {selectedSupervisor && (
-                  <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/20 flex items-center justify-between animate-in fade-in slide-in-from-top-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
-                        {selectedSupervisor.full_name?.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold">{selectedSupervisor.full_name}</p>
-                        <p className="text-[10px] text-muted-foreground">{selectedSupervisor.email}</p>
-                      </div>
-                    </div>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7" 
-                      onClick={() => setSelectedSupervisor(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                    <div className="font-medium text-sm">{selectedSupervisor.full_name}</div>
+                    <div className="text-xs text-gray-600">{selectedSupervisor.email}</div>
                   </div>
                 )}
             </div>
