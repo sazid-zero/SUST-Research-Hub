@@ -229,7 +229,7 @@ export default function ThesesManagementClient({ initialTheses }: ThesesManageme
 
                             <div className="mt-8 pt-6 border-t border-border/30 flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-2">
-                                    <Link href={`/theses/${thesis.id}`}>
+                                    <Link href={`/thesis/${thesis.id}`}>
                                         <Button className="rounded-2xl h-11 px-6 bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold transition-all border-none">
                                             <Eye className="h-4 w-4 mr-2" />
                                             Inspect Work

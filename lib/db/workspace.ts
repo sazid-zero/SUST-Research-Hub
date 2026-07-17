@@ -111,7 +111,7 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
             title: pub.title,
             description: pub.abstract || null,
             status: pub.status,
-            department: null, 
+            department: (pub as any).department || pub.thesis_department || null,
             field: null,
             created_at: pub.created_at,
             updated_at: pub.updated_at,

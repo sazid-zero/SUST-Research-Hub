@@ -331,55 +331,6 @@ export async function getSystemAnalytics() {
   }
 }
 
-export async function getSystemSettings() {
-  try {
-    const admin = await getCurrentUser()
-    if (!admin || admin.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    // Try to fetch from a system_settings table if it exists
-    const [row]: any = await sql`SELECT settings FROM system_settings WHERE id = 1`
-    
-    const settings = row?.settings || {
-        systemName: "SUST Thesis Repository",
-        systemEmail: "admin@sust-thesis.edu.bd",
-        maxFileSize: "50",
-        maintenanceMode: false,
-        allowNewRegistrations: true,
-        requireEmailVerification: true,
-        autoApproveThesis: false,
-    }
-
-    return { success: true, settings }
-  } catch (error: any) {
-    console.error('Get system settings error:', error)
-    return { success: false, error: error.message }
-  }
-}
-
-export async function updateSystemSettings(settings: any) {
-  try {
-    const admin = await getCurrentUser()
-    if (!admin || admin.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
-    // Update settings in DB
-    await sql`
-      INSERT INTO system_settings (id, settings, updated_at)
-      VALUES (1, ${JSON.stringify(settings)}, NOW())
-      ON CONFLICT (id) DO UPDATE SET 
-        settings = EXCLUDED.settings,
-        updated_at = NOW()
-    `
-    
-    return { success: true, message: 'Settings updated successfully' }
-  } catch (error: any) {
-    console.error('Update system settings error:', error)
-    return { success: false, error: error.message }
-  }
-}
 
 export async function deleteThesis(thesisId: number) {
   try {

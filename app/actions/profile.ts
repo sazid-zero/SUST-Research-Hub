@@ -80,7 +80,8 @@ export async function getSupervisorProfileWithAuth(supervisorId: number) {
     const [supervisor] = await sql`
       SELECT 
         id, full_name, email, department,
-        created_at, role, is_approved
+        created_at, role, is_approved,
+        bio, phone, designation, degree, profile_pic
       FROM users
       WHERE id = ${supervisorId} AND role = 'supervisor'
       LIMIT 1
@@ -198,5 +199,25 @@ export async function updateSupervisorProfile(data: any) {
   } catch (error: any) {
     console.error('[Profile] Update supervisor error:', error)
     return { success: false, error: 'Failed to update profile' }
+  }
+}
+
+export async function updateProfilePic(profilePicUrl: string) {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    await sql`
+      UPDATE users
+      SET profile_pic = ${profilePicUrl}
+      WHERE id = ${currentUser.id}
+    `
+
+    return { success: true }
+  } catch (error: any) {
+    console.error('[Profile] Update profile pic error:', error)
+    return { success: false, error: 'Failed to update profile picture' }
   }
 }

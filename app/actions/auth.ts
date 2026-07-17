@@ -33,13 +33,6 @@ export interface LoginFormData {
 
 export async function register(formData: RegisterFormData) {
   try {
-    // Check if registration is allowed
-    const { getSystemSettings } = await import("./admin")
-    const settingsRes = await getSystemSettings()
-    if (settingsRes.success && settingsRes.settings && !settingsRes.settings.allowNewRegistrations) {
-      return { success: false, error: "New registrations are currently disabled by the administrator." }
-    }
-
     // Validate input
     if (!formData.email || !formData.password || !formData.fullName) {
       return { success: false, error: "Missing required fields" }

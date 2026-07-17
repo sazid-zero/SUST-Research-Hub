@@ -22,20 +22,12 @@ export const viewport = {
 }
 
 import { SidebarProvider } from "@/components/sidebar-context"
-import { getSystemSettings } from "@/app/actions/admin"
-import { getCurrentUser } from "@/lib/auth"
-import { MaintenanceGuard } from "@/components/maintenance-guard"
 
 export default async function RootLayout({
                                        children,
                                    }: {
     children: React.ReactNode
 }) {
-    const settingsRes = await getSystemSettings()
-    const user = await getCurrentUser()
-    
-    const isMaintenanceMode = settingsRes.success && settingsRes.settings?.maintenanceMode === true
-    const isAdmin = user?.role === "admin"
 
     return (
         <html lang="en" suppressHydrationWarning>
@@ -43,9 +35,7 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             <SidebarProvider>
                 <GlobalSmoothScroll>
-                    <MaintenanceGuard isMaintenanceMode={isMaintenanceMode} isAdmin={isAdmin}>
-                        {children}
-                    </MaintenanceGuard>
+                    {children}
                     <Toaster position="top-center" richColors />
                 </GlobalSmoothScroll>
             </SidebarProvider>

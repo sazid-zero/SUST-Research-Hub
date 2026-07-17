@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,10 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Mail, Phone, MapPin, Calendar, Award, GraduationCap, School, Edit2, Shield, BellRing, UserCircle, Briefcase, BookOpen } from "lucide-react"
+import { Mail, Phone, MapPin, Calendar, Award, GraduationCap, School, Edit2, Shield, BellRing, UserCircle, Briefcase, BookOpen, Loader2, Camera } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { updateSupervisorProfile } from "@/app/actions/profile"
+import { updateSupervisorProfile, updateProfilePic } from "@/app/actions/profile"
 import { toast } from "sonner"
 
 interface SupervisorProfileClientProps {
@@ -24,6 +24,9 @@ interface SupervisorProfileClientProps {
 
 export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserRole }: SupervisorProfileClientProps) {
   const [isEditing, setIsEditing] = useState(false)
+  const [profilePic, setProfilePic] = useState(supervisor.profile_pic || "")
+  const [isUploadingPic, setIsUploadingPic] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     fullName: supervisor.full_name || "",
     email: supervisor.email || "",
@@ -50,6 +53,41 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
     }
   }
 
+  const handlePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB")
+      return
+    }
+    setIsUploadingPic(true)
+    try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+      const fd = new FormData()
+      fd.append("file", file)
+      fd.append("upload_preset", uploadPreset!)
+      fd.append("folder", "profile_pics")
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok || !data.secure_url) throw new Error(data.error?.message || "Upload failed")
+      const result = await updateProfilePic(data.secure_url)
+      if (result.success) {
+        setProfilePic(data.secure_url)
+        toast.success("Profile picture updated!")
+      } else {
+        toast.error(result.error || "Failed to save picture")
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed")
+    } finally {
+      setIsUploadingPic(false)
+    }
+  }
+
   return (
     <main className="flex-1 bg-[#f8fafc] dark:bg-[#0b1120] min-h-screen">
       {/* Hero Section */}
@@ -59,14 +97,28 @@ export function SupervisorProfileClient({ supervisor, isOwnProfile, currentUserR
           <div className="flex flex-col md:flex-row gap-8 items-end">
             <div className="relative group">
               <Avatar className="h-40 w-40 border-4 border-background shadow-2xl rounded-3xl overflow-hidden ring-4 ring-primary/5">
+                <AvatarImage src={profilePic} alt={supervisor.full_name} />
                 <AvatarFallback className="bg-linear-to-br from-primary to-accent text-primary-foreground text-4xl font-black uppercase">
                   {supervisor.full_name?.split(" ").map((n: string) => n[0]).join("") || "S"}
                 </AvatarFallback>
               </Avatar>
               {isOwnProfile && (
-                <button className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Edit2 className="h-4 w-4" />
-                </button>
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePicUpload}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingPic}
+                    className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                  >
+                    {isUploadingPic ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                  </button>
+                </>
               )}
             </div>
             

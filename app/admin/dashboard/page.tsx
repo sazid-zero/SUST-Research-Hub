@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { 
   FileText, Users, CheckCircle, Clock, AlertCircle, TrendingUp, 
   Sparkles, LayoutDashboard, ArrowRight, Shield, Activity, 
-  Settings as SettingsIcon, MessageSquare
+  MessageSquare
 } from "lucide-react"
 import Link from "next/link"
 import { Suspense } from "react"
@@ -58,7 +58,6 @@ async function DashboardContent() {
     { label: "User Directory", href: "/admin/users", icon: Users },
     { label: "Research Vault", href: "/admin/theses", icon: FileText },
     { label: "Platform Metrics", href: "/admin/analytics", icon: TrendingUp },
-    { label: "Access Controls", href: "/admin/settings", icon: SettingsIcon },
   ]
 
   return (
@@ -81,12 +80,6 @@ async function DashboardContent() {
                       </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Link href="/admin/settings">
-                        <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none">
-                            <SettingsIcon className="h-4 w-4 mr-2" />
-                            Security Protocol
-                        </Button>
-                    </Link>
                   </div>
               </div>
           </div>

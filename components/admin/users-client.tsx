@@ -237,7 +237,7 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
                                     {isLoading === user.id ? (
                                         <Loader2 className="h-3 w-3 animate-spin" />
                                     ) : (
-                                        user.is_approved ? "Authorized" : "Deactivated"
+                                        user.is_approved ? "Active" : "Inactive"
                                     )}
                                 </Badge>
                             </td>

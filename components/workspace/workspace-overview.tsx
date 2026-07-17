@@ -420,10 +420,12 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                                     <span className="text-muted-foreground">Department</span>
                                     <span className="font-medium">{workspace.department || 'N/A'}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-1 border-b">
-                                    <span className="text-muted-foreground">Field</span>
-                                    <span className="font-medium">{workspace.field || 'N/A'}</span>
-                                </div>
+                                {workspace.type !== 'publication' && (
+                                    <div className="flex justify-between items-center py-1 border-b">
+                                        <span className="text-muted-foreground">Field</span>
+                                        <span className="font-medium">{workspace.field || 'N/A'}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center py-1 border-b">
                                     <span className="text-muted-foreground">Created</span>
                                     <span className="font-medium">{new Date(workspace.created_at).toLocaleDateString()}</span>

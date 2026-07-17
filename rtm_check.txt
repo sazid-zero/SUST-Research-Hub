@@ -1,0 +1,11 @@
+﻿=== Table 4 (likely RTM) ===
+Requirement ID(s) | Verification Method / Status
+FR-01ûFR-16 | User registration, auth, approval, profile ù verified via form/DB and session-token tests
+FR-17ûFR-20 | Public browse/search ù verified via query/UI response tests
+FR-21ûFR-23 | Team collaboration ù verified via invitation flow test
+FR-24ûFR-27 | Thesis submission & review ù verified via end-to-end workflow test
+FR-32ûFR-35 | Publications ù verified via creation/linking/browse test
+FR-36ûFR-38 | Projects ù Passed (UAT, Unit Test)
+FR-39ûFR-41 | Datasets ù Passed (UAT, Unit Test)
+FR-42ûFR-44 | Models ù Passed (UAT, Unit Test)
+

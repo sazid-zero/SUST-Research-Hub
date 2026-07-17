@@ -215,10 +215,10 @@ export default function PapersReviewClient({ initialSubmissions }: PapersReviewC
                           variant="outline"
                           className="flex-1 bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 border border-sky-500/20"
                         >
-                          <Link href={`/student/workspace/publication/${submission.publication_id}`} target="_blank">
+                          <a href={`/student/workspace/publication/${submission.publication_id}`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4 mr-2" />
                             View Workspace
-                          </Link>
+                          </a>
                         </Button>
                         <Button
                           onClick={() => handleApprove(submission)}

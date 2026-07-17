@@ -35,7 +35,6 @@ function SidebarContent({ setIsOpen }: SidebarContentProps) {
         { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
         { href: "/admin/claims", label: "Authorship Claims", icon: UserCheck },
         { href: "/admin/upload", label: "Legacy Upload", icon: UploadCloud },
-        { href: "/admin/settings", label: "Settings", icon: Settings },
     ]
 
     return (
