@@ -23,7 +23,7 @@ import {
 import { UserPlus, Loader2, User, Mail, Hash } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useActionState } from "react"
-import { inviteMember, searchUsersAction } from "@/app/actions/workspace"
+import { inviteMember, searchUsersAction, addGhostAuthor } from "@/app/actions/workspace"
 
 const initialState = {
   message: "",
@@ -50,9 +50,30 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [isAddingGhost, setIsAddingGhost] = useState(false)
+  const [ghostError, setGhostError] = useState("")
+  const [ghostSuccess, setGhostSuccess] = useState("")
   
   // @ts-ignore
   const [state, formAction, pending] = useActionState(inviteMember, initialState)
+
+  const handleAddGhost = async () => {
+    if (!searchQuery || searchQuery.trim() === '') return
+    setIsAddingGhost(true)
+    setGhostError("")
+    setGhostSuccess("")
+    
+    const result = await addGhostAuthor(workspaceId, searchQuery.trim())
+    if (result.success) {
+      setGhostSuccess(result.message || "Ghost author added")
+      setTimeout(() => {
+        handleClose()
+      }, 1500)
+    } else {
+      setGhostError(result.message || "Failed to add ghost author")
+    }
+    setIsAddingGhost(false)
+  }
 
   // Search users as user types
   useEffect(() => {
@@ -90,6 +111,8 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
     setSearchQuery("")
     setSelectedUser(null)
     setSearchResults([])
+    setGhostError("")
+    setGhostSuccess("")
   }
 
   // Show role selector only for project
@@ -121,9 +144,19 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
             </DialogHeader>
             <div className="grid gap-4 py-4">
             
-            {state?.message && (
+            {state?.message && !ghostError && !ghostSuccess && (
                 <div className={`p-2 text-sm rounded ${state.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {state.message}
+                </div>
+            )}
+            {ghostError && (
+                <div className="p-2 text-sm rounded bg-red-100 text-red-800">
+                    {ghostError}
+                </div>
+            )}
+            {ghostSuccess && (
+                <div className="p-2 text-sm rounded bg-green-100 text-green-800">
+                    {ghostSuccess}
                 </div>
             )}
 
@@ -177,7 +210,20 @@ export function InviteMemberDialog({ workspaceId, type, children }: InviteMember
                         ))
                       ) : (
                         <div className="p-3 text-center text-gray-500 text-sm">
-                          No users found
+                          <p className="mb-2">No users found</p>
+                          {type === 'publication' && (
+                              <Button 
+                                type="button" 
+                                variant="secondary" 
+                                size="sm" 
+                                className="w-full mt-2 text-xs"
+                                onClick={handleAddGhost}
+                                disabled={isAddingGhost}
+                              >
+                                {isAddingGhost ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <UserPlus className="w-3 h-3 mr-2" />}
+                                Add &quot;{searchQuery}&quot; as Ghost Author
+                              </Button>
+                          )}
                         </div>
                       )}
                     </div>

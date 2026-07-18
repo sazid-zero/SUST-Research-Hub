@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { updateWorkspaceDetails, getRelatedWork, submitForReview } from "@/app/actions/workspace"
+import { updateWorkspaceDetails, getRelatedWork, submitForReview, publishWorkspace } from "@/app/actions/workspace"
 import { syncPublicationCitations } from "@/app/actions/citations"
 import { getPendingRequests, updateRequestStatus } from "@/app/actions/requests"
 import { Button } from "@/components/ui/button"
@@ -113,6 +113,17 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
     setIsSubmitting(false)
   }
 
+  const handlePublishWorkspace = async () => {
+    setIsSubmitting(true)
+    const result = await publishWorkspace(workspace.id, workspace.type)
+    if (result.success) {
+        toast.success(result.message)
+    } else {
+        toast.error(result.message)
+    }
+    setIsSubmitting(false)
+  }
+
   const handleSyncCitations = async () => {
       if (workspace.type !== 'publication') return;
       setIsSyncingCitations(true);
@@ -180,8 +191,8 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                                 rows={2}
                             />
                             <div className="flex flex-wrap gap-2 items-center">
-                                {keywords.map((k) => (
-                                    <Badge key={k} variant="secondary" className="bg-muted text-muted-foreground font-medium px-2 py-1 rounded-md text-xs group">
+                                {keywords.map((k, i) => (
+                                    <Badge key={`${k}-${i}`} variant="secondary" className="bg-muted text-muted-foreground font-medium px-2 py-1 rounded-md text-xs group">
                                         #{k}
                                         <button onClick={() => handleRemoveKeyword(k)} className="ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <X className="h-3 w-3 hover:text-destructive" />
@@ -289,14 +300,25 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
 
                                 <div className="space-y-3 pt-4 border-t">
                                     {workspace.status === 'draft' || workspace.status === 'needs_revision' ? (
-                                        <Button 
-                                            className="w-full h-11"
-                                            onClick={handleSubmitForReview}
-                                            disabled={isSubmitting || (supervisorsList.length === 0 && workspace.type !== 'publication')}
-                                        >
-                                            <Send className="w-4 h-4 mr-2" /> 
-                                            {workspace.status === 'needs_revision' ? "Resubmit for Review" : "Submit for Review"}
-                                        </Button>
+                                        (currentUser?.role === 'supervisor' || currentUser?.role === 'admin') && workspace.type === 'publication' ? (
+                                            <Button 
+                                                className="w-full h-11"
+                                                onClick={handlePublishWorkspace}
+                                                disabled={isSubmitting}
+                                            >
+                                                <CheckCircle2 className="w-4 h-4 mr-2" /> 
+                                                Publish Workspace
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                className="w-full h-11"
+                                                onClick={handleSubmitForReview}
+                                                disabled={isSubmitting || (supervisorsList.length === 0 && workspace.type !== 'publication')}
+                                            >
+                                                <Send className="w-4 h-4 mr-2" /> 
+                                                {workspace.status === 'needs_revision' ? "Resubmit for Review" : "Submit for Review"}
+                                            </Button>
+                                        )
                                     ) : null}
 
                                     {workspace.status === 'approved' && (
@@ -334,8 +356,8 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                                 <CardContent>
                                     {supervisorsList.length > 0 ? (
                                         <div className="space-y-3">
-                                            {supervisorsList.map((sup: any) => (
-                                                <div key={sup.user_id} className="flex items-center gap-3">
+                                            {supervisorsList.map((sup: any, index: number) => (
+                                                <div key={sup.user_id || `sup-${index}`} className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
                                                         {sup.full_name?.charAt(0) || 'S'}
                                                     </div>
@@ -372,7 +394,7 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                             <CardContent>
                                 {teamMembers.length > 0 ? (
                                     <div className="space-y-3">
-                                        {teamMembers.map((member: any) => {
+                                        {teamMembers.map((member: any, index: number) => {
                                             // Determine role display based on workspace type
                                             let roleDisplay = ''
                                             if (workspace.type === 'publication') {
@@ -384,7 +406,7 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                                             }
                                             
                                             return (
-                                            <div key={member.user_id || member.id} className="flex items-center justify-between group">
+                                            <div key={member.user_id || member.id || `member-${index}`} className="flex items-center justify-between group">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs">
                                                         {member.full_name?.charAt(0) || member.author_name?.charAt(0) || 'M'}
@@ -425,6 +447,28 @@ export function WorkspaceOverview({ workspace, supervisors = [], currentUser }: 
                                         <span className="text-muted-foreground">Field</span>
                                         <span className="font-medium">{workspace.field || 'N/A'}</span>
                                     </div>
+                                )}
+                                {workspace.type === 'publication' && (
+                                    <>
+                                        <div className="flex justify-between items-center py-1 border-b">
+                                            <span className="text-muted-foreground">Journal/Conf.</span>
+                                            <span className="font-medium text-right max-w-[180px] truncate">{workspace.journal_name && workspace.journal_name !== 'TBD' ? workspace.journal_name : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center py-1 border-b">
+                                            <span className="text-muted-foreground">DOI</span>
+                                            {workspace.doi ? (
+                                                <a href={`https://doi.org/${workspace.doi}`} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline text-xs text-right max-w-[180px] truncate">
+                                                    {workspace.doi}
+                                                </a>
+                                            ) : (
+                                                <span className="font-medium text-muted-foreground">N/A</span>
+                                            )}
+                                        </div>
+                                        <div className="flex justify-between items-center py-1 border-b">
+                                            <span className="text-muted-foreground">Year</span>
+                                            <span className="font-medium">{workspace.year || 'N/A'}</span>
+                                        </div>
+                                    </>
                                 )}
                                 <div className="flex justify-between items-center py-1 border-b">
                                     <span className="text-muted-foreground">Created</span>

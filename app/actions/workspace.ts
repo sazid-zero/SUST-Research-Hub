@@ -101,13 +101,14 @@ export async function createWorkspace(prevState: any, formData: FormData) {
       `
     } else if (type === "publication") {
         const paperSubtype = formData.get("paper_subtype") as string
+        const initialStatus = 'draft';
         // Create Publication
         const result = await sql`
             INSERT INTO publications (
                 title, abstract, journal_name, publication_type, paper_subtype, year, status, created_at, updated_at
             )
             VALUES (
-                ${title}, ${description}, 'TBD', 'journal', ${paperSubtype || 'journal'}, EXTRACT(YEAR FROM NOW()), 'draft', NOW(), NOW()
+                ${title}, ${description}, 'TBD', 'journal', ${paperSubtype || 'journal'}, EXTRACT(YEAR FROM NOW()), ${initialStatus}, NOW(), NOW()
             )
             RETURNING id
         `
@@ -125,8 +126,13 @@ export async function createWorkspace(prevState: any, formData: FormData) {
   }
 
   if (workspaceId) {
-    revalidatePath("/student/dashboard")
-    redirect(`/student/workspace/${type}/${workspaceId}`)
+    if (user.role === 'supervisor') {
+        revalidatePath("/supervisor/dashboard")
+        redirect(`/supervisor/workspace/${type}/${workspaceId}`)
+    } else {
+        revalidatePath("/student/dashboard")
+        redirect(`/student/workspace/${type}/${workspaceId}`)
+    }
   }
 
   return { message: "Unknown error", success: false }
@@ -249,6 +255,43 @@ export async function inviteMember(prevState: any, formData: FormData) {
     } catch (error: any) {
         console.error("Invite error:", error)
         return { message: error?.message || "Failed to invite member", success: false }
+    }
+}
+
+export async function addGhostAuthor(workspaceId: number, authorName: string) {
+    const user = await getCurrentUser()
+    if (!user) return { success: false, message: "Unauthorized" }
+
+    if (!authorName || authorName.trim() === '') {
+        return { success: false, message: "Author name cannot be empty" }
+    }
+
+    try {
+        // Verify user has permission (is supervisor or leader)
+        const isSupervisorOrAdmin = user.role === 'supervisor' || user.role === 'admin';
+        if (!isSupervisorOrAdmin) {
+            return { success: false, message: "Only supervisors can add ghost authors directly." }
+        }
+
+        // Get max order
+        const orderResult = await sql`
+            SELECT MAX(author_order) as max_order FROM publication_authors WHERE publication_id = ${workspaceId}
+        `
+        const newOrder = (orderResult[0].max_order || 0) + 1
+
+        // Insert directly as ghost author (no user_id)
+        await sql`
+            INSERT INTO publication_authors (publication_id, author_name, author_order, corresponding_author)
+            VALUES (${workspaceId}, ${authorName.trim()}, ${newOrder}, false)
+        `
+
+        revalidatePath(`/student/workspace/publication/${workspaceId}`)
+        revalidatePath(`/supervisor/workspace/publication/${workspaceId}`)
+
+        return { success: true, message: `Added ${authorName} as a ghost author` }
+    } catch (error: any) {
+        console.error("Ghost author error:", error)
+        return { success: false, message: error?.message || "Failed to add ghost author" }
     }
 }
 
@@ -467,6 +510,10 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
     const visibility = formData.get("visibility") as string
     const department = formData.get("department") as string
     const field = formData.get("field") as string
+    const journalName = formData.get("journal_name") as string
+    const doi = formData.get("doi") as string
+    const yearStr = formData.get("year") as string
+    const year = yearStr ? parseInt(yearStr) : null
 
     if (!id || !type) return { message: "Missing required fields", success: false }
 
@@ -507,6 +554,9 @@ export async function updateWorkspaceDetails(prevState: any, formData: FormData)
                     keywords = COALESCE(${keywords && keywords.length > 0 ? keywords : null}, keywords),
                     paper_subtype = COALESCE(${paperSubtype || null}, paper_subtype),
                     department = COALESCE(${department || null}, department),
+                    journal_name = COALESCE(${journalName || null}, journal_name),
+                    doi = COALESCE(${doi || null}, doi),
+                    year = COALESCE(${year || null}, year),
                     updated_at = NOW()
                 WHERE id = ${id}
             `
@@ -705,6 +755,9 @@ export async function publishWorkspace(workspaceId: number, workspaceType: strin
             } else if (workspaceType === 'project') {
                 const [member] = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId} AND user_id = ${user.id} AND role = 'supervisor'`
                 isSupervisor = !!member
+            } else if (workspaceType === 'publication') {
+                const [author] = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${workspaceId} AND user_id = ${user.id}`
+                isSupervisor = !!author
             }
             if (!isSupervisor) {
                 return { success: false, message: "You are not the supervisor of this work" }
@@ -716,6 +769,8 @@ export async function publishWorkspace(workspaceId: number, workspaceType: strin
             await sql`UPDATE theses SET status = 'published', visibility = 'public', updated_at = NOW() WHERE id = ${workspaceId}`
         } else if (workspaceType === 'project') {
             await sql`UPDATE projects SET status = 'published', updated_at = NOW() WHERE id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            await sql`UPDATE publications SET status = 'published', updated_at = NOW() WHERE id = ${workspaceId}`
         }
 
         // Get workspace title and team members
@@ -725,6 +780,8 @@ export async function publishWorkspace(workspaceId: number, workspaceType: strin
             members = await sql`SELECT user_id FROM team_members WHERE thesis_id = ${workspaceId}`
         } else if (workspaceType === 'project') {
             members = await sql`SELECT user_id FROM project_members WHERE project_id = ${workspaceId}`
+        } else if (workspaceType === 'publication') {
+            members = await sql`SELECT user_id FROM publication_authors WHERE publication_id = ${workspaceId} AND user_id IS NOT NULL`
         }
 
         // Notify all team members

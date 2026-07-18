@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { 
     Select, SelectContent, SelectItem, 
     SelectTrigger, SelectValue 
@@ -127,6 +128,39 @@ export function WorkspaceSettingsDialog({ workspace }: WorkspaceSettingsDialogPr
                                             <SelectItem value="CONTROL">Control Systems</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                            </div>
+                        )}
+
+                        {workspace.type === 'publication' && (
+                            <div className="space-y-4 pt-2">
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Journal / Conference Name</Label>
+                                        <Input 
+                                            name="journal_name" 
+                                            defaultValue={workspace.journal_name || ""} 
+                                            placeholder="e.g. IEEE Access or ICML 2024" 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">DOI (Optional)</Label>
+                                        <Input 
+                                            name="doi" 
+                                            defaultValue={workspace.doi || ""} 
+                                            placeholder="e.g. 10.1109/ACCESS.2024.12345" 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Publication Year</Label>
+                                        <Input 
+                                            name="year" 
+                                            type="number" 
+                                            defaultValue={workspace.year || new Date().getFullYear()} 
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

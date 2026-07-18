@@ -33,6 +33,49 @@ export async function POST(request: NextRequest) {
 
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
 
+    // Rate limiting: Check if user/IP has viewed this content >= 5 times in the last hour
+    try {
+      const recentViews = await sql`
+        SELECT COUNT(*) as count 
+        FROM view_counts 
+        WHERE content_type = ${contentType} 
+          AND content_id = ${contentId} 
+          AND (
+            (user_id IS NOT NULL AND user_id = ${userId}) 
+            OR 
+            (user_id IS NULL AND ip_address = ${ipAddress})
+          )
+          AND created_at >= NOW() - INTERVAL '1 hour'
+      `
+      
+      if (recentViews[0] && parseInt(recentViews[0].count) >= 5) {
+        // Limit reached: do not log or increment
+        return NextResponse.json({ success: true, limited: true })
+      }
+    } catch (checkError: any) {
+      // Fallback if created_at doesn't exist (e.g. it's named viewed_at)
+      try {
+        const recentViewsFallback = await sql`
+          SELECT COUNT(*) as count 
+          FROM view_counts 
+          WHERE content_type = ${contentType} 
+            AND content_id = ${contentId} 
+            AND (
+              (user_id IS NOT NULL AND user_id = ${userId}) 
+              OR 
+              (user_id IS NULL AND ip_address = ${ipAddress})
+            )
+            AND viewed_at >= NOW() - INTERVAL '1 hour'
+        `
+        if (recentViewsFallback[0] && parseInt(recentViewsFallback[0].count) >= 5) {
+          return NextResponse.json({ success: true, limited: true })
+        }
+      } catch (fallbackError) {
+        console.error("Error checking view limit (fallback):", fallbackError)
+        // Continue and log the view if we can't determine the limit
+      }
+    }
+
     // Log view count
     await sql`
       INSERT INTO view_counts (content_type, content_id, user_id, ip_address)

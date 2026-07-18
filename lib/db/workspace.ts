@@ -44,6 +44,11 @@ export interface WorkspaceData {
   
   keywords: string[]
   paper_subtype?: string // journal, conference
+  doi?: string
+  journal_name?: string
+  year?: number
+  visibility?: string
+  citations?: number
 }
 
 export async function getWorkspace(type: WorkspaceType, id: number): Promise<WorkspaceData | null> {
@@ -130,7 +135,11 @@ export async function getWorkspace(type: WorkspaceType, id: number): Promise<Wor
             })), 
             publication: pub,
             keywords: pub.keywords || [],
-            paper_subtype: pub.paper_subtype
+            paper_subtype: pub.paper_subtype,
+            doi: pub.doi || undefined,
+            journal_name: pub.journal_name || undefined,
+            year: pub.year || undefined,
+            citations: pub.citations || 0,
         }
 
     } else {

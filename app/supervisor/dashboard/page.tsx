@@ -88,7 +88,13 @@ async function DashboardContent() {
                         Welcome back, Professor {user?.full_name?.split(' ').pop()}. Monitor your supervision pipeline and student excellence.
                       </p>
                   </div>
-                  <div>
+                  <div className="flex gap-3">
+                    <Link href="/supervisor/workspace/create">
+                        <Button variant="outline" className="hover:scale-105 transition-all font-bold h-10 px-6 rounded-xl shadow-sm text-sm border-primary/20 hover:bg-primary/5 hover:text-primary">
+                            <Plus className="h-4 w-4 mr-2" />
+                            New Publication
+                        </Button>
+                    </Link>
                     <Link href="/supervisor/requests">
                         <Button className="bg-linear-to-r from-primary to-accent hover:scale-105 transition-all text-white font-bold h-10 px-6 rounded-xl shadow-md border-none text-sm">
                             Triage Requests
