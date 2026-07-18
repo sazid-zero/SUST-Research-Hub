@@ -464,13 +464,17 @@ export function ThesisDetailEnhanced({
                                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-4 w-4" />
-                      {thesis.submitted_date
-                          ? new Date(thesis.submitted_date).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                          })
-                          : year}
+                    {year}
                   </span>
+                                    {thesis.submitted_date && (
+                                        <span className="flex items-center gap-1.5">
+                                            <Clock className="h-4 w-4" />
+                                            Uploaded {new Date(thesis.submitted_date).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                            })}
+                                        </span>
+                                    )}
                                     <span className="flex items-center gap-1.5">
                     <Building2 className="h-4 w-4" />
                                         {thesis.department}
@@ -776,13 +780,17 @@ export function ThesisDetailEnhanced({
                             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
-                  {thesis.submitted_date
-                      ? new Date(thesis.submitted_date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                      })
-                      : year}
+                {year}
               </span>
+                                {thesis.submitted_date && (
+                                    <span className="flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4" />
+                                        Uploaded {new Date(thesis.submitted_date).toLocaleDateString("en-US", {
+                                            year: "numeric",
+                                            month: "long",
+                                        })}
+                                    </span>
+                                )}
                                 <span className="flex items-center gap-1.5">
                 <Building2 className="h-4 w-4" />
                                     {thesis.department}

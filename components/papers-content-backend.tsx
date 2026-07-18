@@ -3,7 +3,7 @@
 import { GlobalNavbar } from "@/components/global-navbar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Quote, Search, X, ArrowUpDown } from "lucide-react"
+import { Eye, Quote, Search, X, ArrowUpDown, GraduationCap } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -16,15 +16,17 @@ import { FIELDS_OF_STUDY } from "@/lib/constants/academic-data"
 interface PapersContentBackendProps {
   user: any
   papers: Publication[]
+  supervisorNames?: string[]
 }
 
-export function PapersContentBackend({ user, papers }: PapersContentBackendProps) {
+export function PapersContentBackend({ user, papers, supervisorNames = [] }: PapersContentBackendProps) {
   const safePapers = papers || []
   
   // Filter state
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedType, setSelectedType] = useState("All Types")
   const [selectedField, setSelectedField] = useState("All Fields")
+  const [selectedSupervisor, setSelectedSupervisor] = useState("All Supervisors")
   const [yearFrom, setYearFrom] = useState("All")
   const [yearTo, setYearTo] = useState("All")
   const [sortBy, setSortBy] = useState("recent")
@@ -41,6 +43,9 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
     ),
   ]
   const fields: string[] = ["All Fields", ...FIELDS_OF_STUDY]
+
+  // Use server-provided supervisor list (same pattern as thesis page)
+  const supervisors = ["All Supervisors", ...supervisorNames]
   
   // Apply filters
   const filteredPapers = useMemo(() => {
@@ -70,6 +75,13 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
       )
     }
     
+    // Supervisor filter
+    if (selectedSupervisor !== "All Supervisors") {
+      filtered = filtered.filter(paper =>
+        paper.authors?.some(a => a.author_name === selectedSupervisor)
+      )
+    }
+    
     // Year range filter
     if (yearFrom !== "All") {
       filtered = filtered.filter(paper => paper.year && paper.year >= Number(yearFrom))
@@ -88,12 +100,13 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
     }
     
     return filtered
-  }, [safePapers, searchQuery, selectedType, selectedField, yearFrom, yearTo, sortBy])
+  }, [safePapers, searchQuery, selectedType, selectedField, selectedSupervisor, yearFrom, yearTo, sortBy])
   
   const handleClearFilters = () => {
     setSearchQuery("")
     setSelectedType("All Types")
     setSelectedField("All Fields")
+    setSelectedSupervisor("All Supervisors")
     setYearFrom("All")
     setYearTo("All")
     setSortBy("recent")
@@ -147,6 +160,22 @@ export function PapersContentBackend({ user, papers }: PapersContentBackendProps
                       {fields.map((field) => (
                         <SelectItem key={field} value={field}>
                           {field}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-foreground font-medium mb-2 block">Supervisor</Label>
+                  <Select value={selectedSupervisor} onValueChange={setSelectedSupervisor}>
+                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border">
+                      {supervisors.map((sup) => (
+                        <SelectItem key={sup} value={sup}>
+                          {sup}
                         </SelectItem>
                       ))}
                     </SelectContent>
