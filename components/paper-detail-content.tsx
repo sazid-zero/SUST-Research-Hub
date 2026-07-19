@@ -46,10 +46,22 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
     const [copied, setCopied] = useState(false)
     const [bookmarked, setBookmarked] = useState(false)
     const [viewCount, setViewCount] = useState(publication.views || 0)
+    const [downloadCount, setDownloadCount] = useState(publication.downloads || 0)
 
     const { trackDownload } = useContentTracking("publication", publication.id, {
         onView: () => setViewCount(prev => prev + 1)
     })
+
+    const handleDownload = async () => {
+        const fileUrl = publication.pdf_url || publication.url
+        if (!fileUrl) return
+        const success = await trackDownload()
+        if (success) {
+            setDownloadCount(prev => prev + 1)
+        }
+        // Open the file for download
+        window.open(fileUrl, '_blank')
+    }
 
     const [secureViewerOpen, setSecureViewerOpen] = useState(false)
     const [currentDocUrl, setCurrentDocUrl] = useState("")
@@ -213,6 +225,10 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                         <Eye className="h-4 w-4" />
                                         {viewCount} Views
                                     </span>
+                                    <span className="flex items-center gap-1.5 text-emerald-500">
+                                        <Download className="h-4 w-4" />
+                                        {downloadCount} Downloads
+                                    </span>
                                 </div>
 
                                 {/* Citations */}
@@ -249,6 +265,12 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                         </a>
                                     </Button>
 
+                                    {(publication.pdf_url || publication.url) && (
+                                        <Button variant="outline" className="gap-2 bg-transparent border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-500" onClick={handleDownload}>
+                                            <Download className="h-4 w-4" />
+                                            Download Paper
+                                        </Button>
+                                    )}
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}
@@ -773,6 +795,14 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                     </span>
                                     )}
                                     {publication.pages && <span>Pages {publication.pages}</span>}
+                                    <span className="flex items-center gap-1.5 text-primary">
+                                        <Eye className="h-4 w-4" />
+                                        {viewCount} Views
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-emerald-500">
+                                        <Download className="h-4 w-4" />
+                                        {downloadCount} Downloads
+                                    </span>
                                 </div>
 
                                 {/* Citations */}
@@ -809,6 +839,12 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
                                         </a>
                                     </Button>
 
+                                    {(publication.pdf_url || publication.url) && (
+                                        <Button variant="outline" className="gap-2 bg-transparent border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-500" onClick={handleDownload}>
+                                            <Download className="h-4 w-4" />
+                                            Download Paper
+                                        </Button>
+                                    )}
                                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setBookmarked(!bookmarked)}>
                                         <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
                                         {bookmarked ? "Saved" : "Save"}

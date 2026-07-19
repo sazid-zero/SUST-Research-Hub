@@ -254,17 +254,26 @@ export default function ProjectsContent({ user, initialProjects }: ProjectsConte
                                                     </Link>
                                                     <p className="text-xs text-muted-foreground mt-1">
                                                         By{" "}
-                                                        {project.authors?.map((author: any, idx: number) => (
-                                                            <span key={author.id || idx}>
-                                <Link
-                                    href={`/project/member/${author.student_id}`}
-                                    className="font-medium hover:text-primary transition-colors"
-                                >
-                                  {author.full_name}
-                                </Link>
-                                                                {idx < project.authors.length - 1 && ", "}
-                              </span>
-                                                        ))}
+                                                        {project.authors?.map((author: any, idx: number) => {
+                                                            const isGhost = !author.student_id && !author.email
+                                                            return (
+                                                                <span key={author.id || `ghost-${idx}`}>
+                                                                    {isGhost ? (
+                                                                        <span className="font-medium text-foreground">
+                                                                            {author.full_name}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <Link
+                                                                            href={author.role === 'supervisor' ? `/supervisor/profile/${author.id}` : `/student/profile/${author.student_id || author.id}`}
+                                                                            className="font-medium hover:text-primary transition-colors"
+                                                                        >
+                                                                          {author.full_name}
+                                                                        </Link>
+                                                                    )}
+                                                                    {idx < project.authors.length - 1 && ", "}
+                                                                </span>
+                                                            )
+                                                        })}
                                                         {" • "}
                                                         {project.department} • {project.year}
                                                     </p>

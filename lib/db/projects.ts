@@ -149,30 +149,45 @@ export async function getAllProjects(): Promise<Project[]> {
             WHERE p.status = 'approved' 
             ORDER BY p.created_at DESC
         `;
-        return result.map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            supervisor_name: p.supervisor_name,
-            status: p.status,
-            department: p.department,
-            field: p.field,
-            start_date: p.start_date,
-            end_date: p.end_date,
-            funding_amount: p.funding_amount,
-            funding_source: p.funding_source,
-            objectives: p.objectives || [],
-            keywords: p.keywords || [],
-            views: p.views || 0,
-            created_at: p.created_at,
-            updated_at: p.updated_at,
-            team: [], // TODO: Fetch team
-            theses: [], // TODO: Fetch linked theses
-            publications: [], // TODO: Fetch linked publications
-            datasets: [], // TODO: Fetch linked datasets
-            models: [], // TODO: Fetch linked models
-            files: [], // TODO: Fetch files
-        })) as Project[]
+        const projectsWithTeam = await Promise.all(
+            result.map(async (p: any) => {
+                const teamResult = await sql`
+                  SELECT pm.*, 
+                    COALESCE(u.full_name, pm.member_name, 'Unknown Member') as full_name, 
+                    u.profile_pic, u.student_id, u.email
+                  FROM project_members pm
+                  LEFT JOIN users u ON pm.user_id = u.id
+                  WHERE pm.project_id = ${p.id}
+                  ORDER BY pm.joined_at ASC
+                `
+                
+                return {
+                    id: p.id,
+                    title: p.title,
+                    description: p.description,
+                    supervisor_name: p.supervisor_name,
+                    status: p.status,
+                    department: p.department,
+                    field: p.field,
+                    start_date: p.start_date,
+                    end_date: p.end_date,
+                    funding_amount: p.funding_amount,
+                    funding_source: p.funding_source,
+                    objectives: p.objectives || [],
+                    keywords: p.keywords || [],
+                    views: p.views || 0,
+                    created_at: p.created_at,
+                    updated_at: p.updated_at,
+                    team: teamResult as ProjectMember[],
+                    theses: [], // TODO: Fetch linked theses
+                    publications: [], // TODO: Fetch linked publications
+                    datasets: [], // TODO: Fetch linked datasets
+                    models: [], // TODO: Fetch linked models
+                    files: [], // TODO: Fetch files
+                }
+            })
+        )
+        return projectsWithTeam as Project[]
 
     } catch (error) {
         console.error("Error fetching all projects:", error)
@@ -189,27 +204,41 @@ export async function getUserProjects(userId: number): Promise<Project[]> {
             WHERE pm.user_id = ${userId}
             ORDER BY p.created_at DESC
         `
-        return result.map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            status: p.status,
-            department: p.department,
-            field: p.field,
-            start_date: p.start_date,
-            end_date: p.end_date,
-            funding_amount: p.funding_amount,
-            funding_source: p.funding_source,
-            objectives: p.objectives || [],
-            created_at: p.created_at,
-            updated_at: p.updated_at,
-            team: [], 
-            theses: [],
-            publications: [], 
-            datasets: [],
-            models: [],
-            files: [],
-        })) as Project[]
+        const projectsWithTeam = await Promise.all(
+            result.map(async (p: any) => {
+                const teamResult = await sql`
+                  SELECT pm.*, 
+                    COALESCE(u.full_name, pm.member_name, 'Unknown Member') as full_name, 
+                    u.profile_pic, u.student_id, u.email
+                  FROM project_members pm
+                  LEFT JOIN users u ON pm.user_id = u.id
+                  WHERE pm.project_id = ${p.id}
+                  ORDER BY pm.joined_at ASC
+                `
+                return {
+                    id: p.id,
+                    title: p.title,
+                    description: p.description,
+                    status: p.status,
+                    department: p.department,
+                    field: p.field,
+                    start_date: p.start_date,
+                    end_date: p.end_date,
+                    funding_amount: p.funding_amount,
+                    funding_source: p.funding_source,
+                    objectives: p.objectives || [],
+                    created_at: p.created_at,
+                    updated_at: p.updated_at,
+                    team: teamResult as ProjectMember[], 
+                    theses: [],
+                    publications: [], 
+                    datasets: [],
+                    models: [],
+                    files: [],
+                }
+            })
+        )
+        return projectsWithTeam as Project[]
     } catch (error) {
         console.error("Error fetching user projects:", error)
         return []
