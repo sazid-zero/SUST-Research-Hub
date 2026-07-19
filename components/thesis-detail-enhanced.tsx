@@ -723,30 +723,7 @@ export function ThesisDetailEnhanced({
                             </Card>
                         </motion.div>
 
-                        {/* Citations */}
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                            <Card className="p-6 border-border bg-card">
-                                <h2 className="text-xl font-bold text-foreground mb-5">How to Cite</h2>
-                                <div className="space-y-5">
-                                    {["bibtex", "apa", "ieee"].map((format) => (
-                                        <div key={format}>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-semibold text-foreground capitalize">{format}</h3>
-                                                <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5">
-                                                    <Copy className="h-3.5 w-3.5" />
-                                                    Copy
-                                                </Button>
-                                            </div>
-                                            <pre className="text-xs p-3 rounded-lg border bg-muted overflow-x-auto whitespace-pre-wrap font-mono">
-                        <code className="text-foreground/80">
-                          {format === "bibtex" ? citations.bibtex : format === "apa" ? citations.apa : citations.ieee}
-                        </code>
-                      </pre>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </motion.div>
+
                     </div>
 
                     <div className="hidden lg:block space-y-6 overflow-y-auto pl-2 no-scrollbar">
@@ -1011,30 +988,7 @@ export function ThesisDetailEnhanced({
                         </Card>
                     </motion.div>
 
-                    {/* Citations */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                        <Card className="p-6 border-border bg-card">
-                            <h2 className="text-xl font-bold text-foreground mb-5">How to Cite</h2>
-                            <div className="space-y-5">
-                                {["bibtex", "apa", "ieee"].map((format) => (
-                                    <div key={format}>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h3 className="font-semibold text-foreground capitalize">{format}</h3>
-                                            <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5">
-                                                <Copy className="h-3.5 w-3.5" />
-                                                Copy
-                                            </Button>
-                                        </div>
-                                        <pre className="text-xs p-3 rounded-lg border bg-muted overflow-x-auto whitespace-pre-wrap font-mono">
-                    <code className="text-foreground/80">
-                      {format === "bibtex" ? citations.bibtex : format === "apa" ? citations.apa : citations.ieee}
-                    </code>
-                  </pre>
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-                    </motion.div>
+
 
                     {/* Resources on Mobile */}
                     <div className="space-y-6">
