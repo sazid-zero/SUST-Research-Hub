@@ -227,9 +227,16 @@ export async function uploadLegacyWorkspace(formData: FormData) {
                     const role = userCheck[0]?.role === 'supervisor' ? 'supervisor' : (memberOrder === 1 ? 'leader' : 'member')
                     
                     await sql`
-                        INSERT INTO project_members (project_id, user_id, role, joined_at)
-                        VALUES (${workspaceId}, ${author.userId}, ${role}, NOW())
+                        INSERT INTO project_members (project_id, user_id, role, member_name, joined_at)
+                        VALUES (${workspaceId}, ${author.userId}, ${role}, ${author.name}, NOW())
                         ON CONFLICT (project_id, user_id) DO NOTHING
+                    `
+                } else {
+                    // Ghost member — store with user_id = NULL and member_name
+                    const finalName = author.regNo ? `${author.name} (Reg: ${author.regNo})` : author.name
+                    await sql`
+                        INSERT INTO project_members (project_id, user_id, role, member_name, joined_at)
+                        VALUES (${workspaceId}, NULL, ${memberOrder === 1 ? 'leader' : 'member'}, ${finalName}, NOW())
                     `
                 }
                 memberOrder++

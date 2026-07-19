@@ -61,11 +61,14 @@ export async function getProjectById(id: number): Promise<Project | null> {
     if (projectResult.length === 0) return null
     const project = projectResult[0] as any
 
-    // 2. Fetch Team Members
+    // 2. Fetch Team Members (including ghost members with no user_id)
+    await sql`ALTER TABLE project_members ADD COLUMN IF NOT EXISTS member_name TEXT`
     const teamResult = await sql`
-      SELECT pm.*, u.full_name, u.profile_pic, u.student_id, u.email
+      SELECT pm.*, 
+        COALESCE(u.full_name, pm.member_name, 'Unknown Member') as full_name, 
+        u.profile_pic, u.student_id, u.email
       FROM project_members pm
-      JOIN users u ON pm.user_id = u.id
+      LEFT JOIN users u ON pm.user_id = u.id
       WHERE pm.project_id = ${id}
       ORDER BY pm.joined_at ASC
     `
@@ -160,6 +163,7 @@ export async function getAllProjects(): Promise<Project[]> {
             funding_source: p.funding_source,
             objectives: p.objectives || [],
             keywords: p.keywords || [],
+            views: p.views || 0,
             created_at: p.created_at,
             updated_at: p.updated_at,
             team: [], // TODO: Fetch team

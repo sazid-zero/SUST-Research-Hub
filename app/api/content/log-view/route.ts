@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
           await sql`UPDATE models SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
           break
         case "project":
+          await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS views integer DEFAULT 0`
           await sql`UPDATE projects SET views = COALESCE(views, 0) + 1 WHERE id = ${contentId}`
           break
       }

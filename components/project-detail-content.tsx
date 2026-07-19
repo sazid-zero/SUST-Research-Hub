@@ -32,6 +32,7 @@ import { getFileIcon } from "@/components/file-icon-helper"
 import { Lock } from "lucide-react"
 import { ClaimAuthorshipButton } from "@/components/claim-authorship-button"
 import { SecureDocumentViewer } from "@/components/secure-document-viewer"
+import { useContentTracking } from "@/hooks/use-content-tracking"
 
 interface ProjectMember {
     id: number
@@ -87,6 +88,12 @@ interface ProjectDetailContentProps {
 }
 
 export default function ProjectDetailContent({ project, user }: ProjectDetailContentProps) {
+    const [viewCount, setViewCount] = useState(project.views || 0)
+
+    const { trackDownload } = useContentTracking("project", project.id, {
+        onView: () => setViewCount(prev => prev + 1)
+    })
+
     const [activeTab, setActiveTab] = useState("overview")
     const [secureViewerOpen, setSecureViewerOpen] = useState(false)
     const [currentDocUrl, setCurrentDocUrl] = useState("")
@@ -261,7 +268,7 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
                                 const config = getFileIcon(file.file_type || file.file_name, isExternal)
                                 const IconComponent = config.icon
 
-                                const linkHref = file.external_url || file.url || "#"
+                                const linkHref = file.external_url || file.file_url || file.url || ""
                                 const isDocument = type === "documents"
 
                                 return (
@@ -383,7 +390,7 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
                   </span>
                                     <span className="flex items-center gap-1.5">
                     <Eye className="h-4 w-4" />
-                    <span className="font-medium text-foreground">{project.views || 0}</span> views
+                    <span className="font-medium text-foreground">{viewCount}</span> views
                   </span>
                                 </div>
 
@@ -402,10 +409,28 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
 
                                 {/* Action Buttons */}
                                 <div className="flex flex-wrap gap-2">
-                                    <Button className="gap-2 bg-primary hover:bg-primary/90">
-                                        <ExternalLink className="h-4 w-4" />
-                                        View Project Details
-                                    </Button>
+                                    {(() => {
+                                        const primaryDoc = categorizedFiles.documents?.[0]
+                                        return (
+                                            <Button 
+                                                className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" 
+                                                onClick={(e) => {
+                                                    if (primaryDoc) {
+                                                        const href = primaryDoc.external_url || primaryDoc.file_url || primaryDoc.url || ""
+                                                        if (!primaryDoc.external_url) {
+                                                            openSecureViewer(href, primaryDoc.file_name || primaryDoc.title, e)
+                                                        } else {
+                                                            window.open(href, "_blank")
+                                                        }
+                                                    }
+                                                }}
+                                                disabled={!primaryDoc}
+                                            >
+                                                <FileText className="h-4 w-4" />
+                                                View Document
+                                            </Button>
+                                        )
+                                    })()}
                                     <Button
                                         variant="outline"
                                         className="gap-2 bg-muted/20 backdrop-blur-sm border-border/50 hover:bg-muted/40 transition-all"
@@ -434,46 +459,66 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
                                     Project Team
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {project.team.map((member) => (
-                                        <Link
-                                            key={member.id}
-                                            href={member.role === 'supervisor' ? `/supervisor/profile/${member.id}` : `/student/profile/${member.student_id || member.id}`}
-                                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors group border border-transparent hover:border-border"
-                                        >
-                                            <Avatar className="h-10 w-10 shrink-0">
-                                                {member.profile_pic ? (
-                                                    <AvatarImage
-                                                        src={svgTextToDataUri(member.profile_pic) || "/placeholder.svg"}
-                                                        alt={member.full_name}
-                                                        onError={(e) => {
-                                                            e.currentTarget.style.display = "none"
-                                                        }}
-                                                    />
-                                                ) : null}
-                                                <AvatarFallback className="bg-primary/10">
-                                                    <Users className="h-5 w-5 text-primary" />
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
-                                                        {member.full_name}
-                                                    </p>
-                                                    {!member.student_id && !!user && (
-                                                        <div onClick={(e) => e.preventDefault()}>
-                                                            <ClaimAuthorshipButton
-                                                                workspaceType="project"
-                                                                workspaceId={project.id}
-                                                                authorName={member.full_name}
-                                                                isLoggedIn={!!user}
-                                                            />
-                                                        </div>
-                                                    )}
+                                    {project.team.map((member, idx) => {
+                                        const isGhost = !member.student_id && !member.email
+                                        const content = (
+                                            <>
+                                                <Avatar className="h-10 w-10 shrink-0">
+                                                    {member.profile_pic ? (
+                                                        <AvatarImage
+                                                            src={svgTextToDataUri(member.profile_pic) || "/placeholder.svg"}
+                                                            alt={member.full_name}
+                                                            onError={(e) => {
+                                                                e.currentTarget.style.display = "none"
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <AvatarFallback className="bg-primary/10">
+                                                        <Users className="h-5 w-5 text-primary" />
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium text-foreground group-hover:text-primary transition-colors text-sm">
+                                                            {member.full_name}
+                                                        </p>
+                                                        {isGhost && !!user && (
+                                                            <div onClick={(e) => e.preventDefault()}>
+                                                                <ClaimAuthorshipButton
+                                                                    workspaceType="project"
+                                                                    workspaceId={project.id}
+                                                                    authorName={member.full_name}
+                                                                    isLoggedIn={!!user}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground">{member.role}</p>
-                                            </div>
-                                        </Link>
-                                    ))}
+                                            </>
+                                        )
+
+                                        if (isGhost) {
+                                            return (
+                                                <div
+                                                    key={member.id || `ghost-${idx}`}
+                                                    className="flex items-center gap-3 p-3 rounded-lg border border-transparent"
+                                                >
+                                                    {content}
+                                                </div>
+                                            )
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={member.id}
+                                                href={member.role === 'supervisor' ? `/supervisor/profile/${member.id}` : `/student/profile/${member.student_id || member.id}`}
+                                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors group border border-transparent hover:border-border"
+                                            >
+                                                {content}
+                                            </Link>
+                                        )
+                                    })}
                                 </div>
                             </Card>
                         </motion.div>
@@ -647,7 +692,7 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
               </span>
                                 <span className="flex items-center gap-1.5">
                 <Eye className="h-4 w-4" />
-                <span className="font-medium text-foreground">{project.views || 0}</span> views
+                <span className="font-medium text-foreground">{viewCount}</span> views
               </span>
 
                             </div>
@@ -667,10 +712,28 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-2">
-                                <Button className="gap-2 bg-primary hover:bg-primary/90">
-                                    <ExternalLink className="h-4 w-4" />
-                                    View Project Details
-                                </Button>
+                                {(() => {
+                                    const primaryDoc = categorizedFiles.documents?.[0]
+                                    return (
+                                        <Button 
+                                            className="gap-2 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" 
+                                            onClick={(e) => {
+                                                if (primaryDoc) {
+                                                    const href = primaryDoc.external_url || primaryDoc.file_url || primaryDoc.url || ""
+                                                    if (!primaryDoc.external_url) {
+                                                        openSecureViewer(href, primaryDoc.file_name || primaryDoc.title, e)
+                                                    } else {
+                                                        window.open(href, "_blank")
+                                                    }
+                                                }
+                                            }}
+                                            disabled={!primaryDoc}
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            View Document
+                                        </Button>
+                                    )
+                                })()}
 
                                 <Button
                                     variant="outline"
@@ -715,37 +778,40 @@ export default function ProjectDetailContent({ project, user }: ProjectDetailCon
                         <Card className="p-6 border-border bg-card">
                             <h2 className="text-xl font-bold text-foreground mb-4">Project Team</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {project.team.map((member) => (
-                                    <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors">
-                                        <Avatar className="h-10 w-10">
-                                            {member.profile_pic ? (
-                                                <AvatarImage
-                                                    src={svgTextToDataUri(member.profile_pic) || "/placeholder.svg"}
-                                                    alt={member.full_name}
-                                                />
-                                            ) : null}
-                                            <AvatarFallback className="bg-primary/10">
-                                                <User className="h-5 w-5 text-primary" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-medium text-foreground text-sm">{member.full_name}</p>
-                                                {!member.student_id && !!user && (
-                                                    <div onClick={(e) => e.preventDefault()}>
-                                                        <ClaimAuthorshipButton
-                                                            workspaceType="project"
-                                                            workspaceId={project.id}
-                                                            authorName={member.full_name}
-                                                            isLoggedIn={!!user}
-                                                        />
-                                                    </div>
-                                                )}
+                                {project.team.map((member, idx) => {
+                                    const isGhost = !member.student_id && !member.email
+                                    return (
+                                        <div key={member.id || `ghost-m-${idx}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors">
+                                            <Avatar className="h-10 w-10">
+                                                {member.profile_pic ? (
+                                                    <AvatarImage
+                                                        src={svgTextToDataUri(member.profile_pic) || "/placeholder.svg"}
+                                                        alt={member.full_name}
+                                                    />
+                                                ) : null}
+                                                <AvatarFallback className="bg-primary/10">
+                                                    <User className="h-5 w-5 text-primary" />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium text-foreground text-sm">{member.full_name}</p>
+                                                    {isGhost && !!user && (
+                                                        <div onClick={(e) => e.preventDefault()}>
+                                                            <ClaimAuthorshipButton
+                                                                workspaceType="project"
+                                                                workspaceId={project.id}
+                                                                authorName={member.full_name}
+                                                                isLoggedIn={!!user}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">{member.role}</p>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </Card>
                     </motion.div>
