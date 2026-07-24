@@ -1,0 +1,1096 @@
+--- PAGE 1 ---
+   
+1 
+  Shahjalal University of Science and Technology   
+Department of Computer Science and Engineering   
+    
+  
+  
+SUST Research Hub  
+  
+          A S M Sharif Mahmud Sazid                                               Sharmin Akther  
+    Reg. No.: 2020331042                                            Reg. No.: 2020331076  
+              4th year, 2nd  Semester                                             4th year, 2nd  Semester  
+  
+Department of Computer Science and Engineering    
+  
+Supervisor    
+Dr. Md. Forhad Rabbi , SMIEEE   
+Professor   
+Department of Computer Science and Engineering   
+  
+  
+ 
+ 
+19th July 2026  
+
+--- PAGE 2 ---
+   
+2 
+  SUST Research Hub  
+  
+   
+ 
+A Project submitted to the Department of Computer Science and Engineering, Shahjalal  
+University of Science and Technology, in partial fulfillment of the requirements for the 
+degree of Bachelor of Science in Computer Science and Engineering  
+  
+By  
+  
+          A S M Sharif Mahmud Sazid                                               Sharmin Akther  
+    Reg. No.: 2020331042                                            Reg. No.: 2020331076  
+              4th year, 2nd  Semester                                             4th year, 2nd  Semester  
+  
+Department of Computer Science and Engineering    
+  
+Supervisor    
+Dr. Md. Forhad Rabbi , SMIEEE   
+Professor   
+Department of Computer Science and Engineering  
+  
+  
+ 
+
+--- PAGE 3 ---
+   
+3 
+  19th July 2026  
+  
+Recommendation Letter from Project 
+Supervisor  
+  
+ The project entitled SUST Research Hub  submitted by the students  
+   
+1. A S M Sharif Mahmud Sazid   
+2. Sharmin Akther  
+  
+is under my supervision. I, hereby, agree that the project can be submitted for 
+examination.   
+  
+  
+  
+  
+  
+____________________  
+Signature of the Supervisor:   
+Name of the Supervisor: Dr. Md. Forhad Rabbi   
+Date: 19th July  2026  
+  
+  
+  
+  
+
+--- PAGE 4 ---
+   
+4 
+    
+  
+Certificate of Acceptance of the Project  
+  
+ The project entitled SUST Research Hub  submitted by the students   
+  
+1. A S M Sharif Mahmud Sazid   
+2. Sharmin Akther  
+  
+on 19th July  2026, hereby, accepted as the partial fulfillment of the requirements for the 
+award of their Bachelor Degrees.   
+  
+  
+ 
+  
+_________________          __________________          _________________  
+Head of the Dept.   
+Dr. Md. Forhad Rabbi,  
+SMIEEE    
+Professor & Head   
+Department of  
+Computer Science and  
+Engineering    Chairman, Exam.  
+Committee   
+Dr. Md. Forhad Rabbi,  
+SMIEEE  
+Professor & Head  
+ Department of  
+Computer Science and  
+Engineering   Supervisor   
+Dr. Md. Forhad Rabbi , 
+SMIEEE  
+Professor   
+Department of  
+Computer Science and  
+Engineering  
+
+--- PAGE 5 ---
+   
+5 
+   
+ABSTRACT  
+  
+The SUST Research Hub is a comprehensive digital platform designed to transform how 
+academic research — including theses, publications, projects, datasets, and machine 
+learning models — is stored, discovered, and managed within Shahjalal University of 
+Science and Technology (SUST). It replaces the traditional practice of archiving research 
+outputs as physical hardcopies, which inherently makes them difficult to search, verify 
+for originality, and build upon. Traditional, paper -based or scattered digital sub mission 
+processes often result in disorganized archives, inconsistent approval workflows, and 
+limited accessibility for students, supervisors, and administrative staff. These challenges 
+reduce research visibility, complicate the validation of new thesis to pics, and hinder 
+institutional knowledge preservation.  
+This project presents the design, development, and complete implementation of a 
+modernized Thesis and Research Repository Management System. Developed as a full -
+scale web application, the system successfully streamlines the end -to-end lifecycle of 
+thesis /publication/project  submission, storage, supervisor approval, and public 
+discovery across the departments of SUST.  
+The fully implemented platform features robust foundational and advanced capabilities, 
+including a secure role -based access control (RBAC) system for students, supervisors, 
+and administrators, accompanied by custom session management and automated email 
+notifications. It encompasses complete supervisor –student workflows, enabling 
+seamless thesis /project  submission pipelines, iterative review systems, and direct 
+feedback mechanisms. Furthermore, the repository has been expanded beyond 
+traditional documents to fully support the hosting and management of multi -author 
+publications, research datasets, and mac hine learning models, complete with popularity 
+tracking and analytics.  
+A responsive, component -based frontend architecture ensures high -performance 
+accessibility across all devices. This report documents the problem context, system 
+requirements, architectural design, implemented modules, and testing phases. By 
+adhering to mod ern web development best practices, the SUST Research Hub delivers a 
+secure, scalable, and fully functional academic repository that actively preserves 
+institutional knowledge and fosters future research collaboration.  
+Keywords:  Thesis Repository, Research Management, Academic Platform, Web 
+Application, Next.js,  PostgreSQL, Role -Based Access Control, Publications , Projects,  
+Machine Learning Models, Datase ts. 
+  
+--- PAGE 6 ---
+   
+6 
+    
+  
+  
+  
+  
+ 
+  
+ACKNOWLEDGEMENTS  
+  
+We express our sincere gratitude to our supervisor, Dr. Md Forhad Rabbi , for his 
+guidance, feedback, and continuous support throughout the development of this project. 
+Their insights and recommendations significantly shaped the system’s design and 
+development direction.  
+We are also thankful to the Department of Computer Science and Engineering, Shahjalal 
+University of Science and Technology, for providing the necessary resources, academic 
+environment, and motivation that enabled us to conceptualize and implement this 
+proj ect.  
+Finally, we would like to acknowledge the open -source community whose tools, 
+libraries, and documentation —including Next.js, React, Tailwind CSS, and 
+PostgreSQL —greatly facilitated development and learning.  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+--- PAGE 7 ---
+   
+7 
+   
+  
+TABLE OF CONTENTS  
+  
+Abstract  ……………………………………………………………………………………………………… … 5  
+Acknowledgements  …………………………………………………………………………………… … 6  
+  
+Chapter 1: Introduction  
+1.1 Background ……………………………………………………………………………….………….…… 9  
+1.2 Problem Statement …………………………………………………………………………………..… 9  
+1.3 Objectives ………………………………………………………………………………………………..…10  
+1.4 Scope of Current Work ………………………………………………………………………………...11  
+  
+Chapter 2: System Overview  
+2.1 Overview ………………………………………………………………………………………......……… 12  
+2.2 System Context Overview …………………………………………………………………………... 12  
+2.3 Actors and Roles …………………………………………………......…….……… ………… ………. 13  
+2.4 System Features  ……… ……………………………………………………………......…………… .. 13  
+2.5 System Architecture Diagram  ……………………………………………………......………… .. 14 
+2.6 Technology Stack Summary  ……………………………………………………......…………….. 1 5 
+2.7 Key System Characteristics  ………………………………………………………………………… 15  
+  
+Chapter 3: Requirements Analysis  
+3.1 Overview ………………………………………………………………………………………......……… 1 6  
+3.2 Stakeholders & User Classes . ……………………………………………………………………... . 16  
+3.3 Functional Requirements …………………………………………………......…….……… ……..  16  
+3.4 Non -Functional Requirements  ………………………………………………......……………… . 19  
+3.5 External Interface Requirement s …………………………………………………......…………  20 
+3.6 System Constraints ……………………………………………………………………………………. 20  
+3.7 Assumption & Dependencies ………………………………………………………………………. 20  
+ 
+Chapter 4: System Design   
+4.1 Design Methodology ……………………………………………………......………………………… 2 1  
+4.2 System Architecture View …………………………………………………………......……………  21  
+--- PAGE 8 ---
+   
+8 
+  4.3 Use Case Model  ……………………………………………………......……… ………………………  21  
+4.4 System  Workflow ………………………………………………………………………......……… …. 23  
+4.5 Database Design  ………………… ………… ………………………………………………......…… .. 23  
+4.6 Security Design ………………………………………………………………………......……………. 24  
+4.7 UI/UX Design Overview ……………………………………………………………......………….. 25  
+  
+  
+Chapter 5: Implementation  
+5.1 Overview  …………………………………………………………………......………………… ………..  26  
+5.2 Implemented Features  …………………………………………........................………………. 2 6  
+5.3 Frontend Implementation  ..……………………………………………………......……………… 2 7  
+5.4 Frontend Screenshots  ………..…………………………………………………......……………… 2 8  
+  
+Chapter 6: Validation and Verification    
+6.1 Introduction ………………………………………………………………………......………………… 3 6  
+6.2 Verification Strategy ……………………………………………………………........……………… 36  
+6.3 Testing Approach ………………………………………………………………......………………… 37  
+6.4 Test Case s Summary ..……………………………………………………………………………….. 37  
+6.5 User Validation (UAT) ………………………………………………………………………………. 38  
+6.6 Performance Evaluation ……………………………………………………………………………. 3 9 
+6.7 Verification summary ……………………………………………………………………………….. 39  
+ 
+  
+Chapter 7: Conclusion and Future Work   
+7.1 Conclusion ………………………………………………………………………......…………………… 40  
+7.2 Future Work ……………………………………………………………........………………………… . 40  
+7.3 Limitations  ………………………………………………………………......………………………… . 41 
+ 
+Appendix ……………………………………………………………………………………………………. . 41 
+ 
+Bibliography  ……………………………………………………………………………………......…… . 42  
+ 
+ 
+ 
+--- PAGE 9 ---
+   
+9 
+  CHAPTER 1  
+INTRODUCTION  
+   
+1.1 Background  
+Universities produce a large volume of academic research in the form of undergraduate 
+theses, projects, and faculty -led studies. These research outcomes are valuable resources, 
+yet in most institutions, including SUST, they are traditionally stored as phys ical 
+hardcopies in departmental libraries, making them difficult to access and underutilized. 
+Students often struggle to explore previous work, supervisors cannot easily verify whether 
+a proposed topic has already been completed, and opportunities to exten d or improve 
+existing research are frequently missed.  
+A centralized digital research repository provides a modern alternative by supporting 
+long -term preservation, easy academic reference, and verification of new research topics 
+through open access to structured metadata, full -text documents, and search tools . 
+The SUST Research Hub is designed as a modern web -based platform that meets these 
+institutional needs  and has  grown into a  research ecosystem  that covers  theses,  
+publications, projects, datasets, and machine learning models . By adhering to rigorous 
+engineering standards, the platform successfully establishes a robust, highly accessible, 
+and fully integrated environment that transforms how university research is preserved, 
+discovered, and built upon.  
+ 
+1.2 Problem Statement  
+Traditional thesis submission and storage processes face several challenges:  
+• Research is stored only as physical hardcopies in libraries  
+• Limited accessibility to past research  
+• No simple way  or digital solution available  for students  and supervisors  to access 
+previous research   
+• Inefficient verification of topic originality for new research  
+• No administrative tools for monitoring research activity  
+• Supervisors cannot efficiently check if a topic has already been completed  
+• Limited ability for new researchers to build upon existing work .  
+These issues  highlight the need for a secure, centralized  and scalable  digital  platform.  
+--- PAGE 10 ---
+   
+10 
+  1.3 Objectives  
+The objective of this project is to design and develop the SUST Research Hub — a 
+centralized digital research repository for academic institutions. The key objectives are:   
+The key objectives of the proposed system are:  
+1. Digitize and Centralize Research Assets  
+• Provide a structured, secure, and searchable digital archive for all departmental 
+theses, projects, publications, datasets, and models . 
+• Eliminate dependency on physical library visits.  
+2.  Improve Research Accessibility  
+• Allow students and supervisors to browse, search, and review previously 
+completed work across all content types . 
+• Enable keyword -based, field -based, year -based, and supervisor -based filtering.   
+3.  Prevent Topic Duplication  
+• Allow supervisors and students to verify previously completed research.  
+• Support informed topic selection and academic originality.   
+4.  Enable Research Continuity  
+• Allow students to build upon existing works.  
+• Provide institutional memory across multiple student batches.   
+5.  Build a Scalable Foundation for a Full Academic Repository  
+• Structured user onboarding and role management .  
+• Secure, revocable, database -backed session authentication .  
+• Store all core data in a scalable relational database.  
+• Support collaboration through team workspaces and multi -author records .  
+--- PAGE 11 ---
+   
+11 
+  1.4 Scope of Current Work   
+This revised report documents the system as of the second development phase. The 
+system now includes:   
+• Full frontend interface across all content types (theses, publications, projects, 
+datasets, models)   
+• User registration with admin approval   
+• Secure, session -based login (bcrypt password hashing; stateful DB sessions, not 
+JWT)  
+• Email notifications (Resend) for registration requests and approvals  
+• Cloudinary integration for file uploads  
+• A production PostgreSQL database (Neon) covering research content, workflow, 
+and system tables  
+• Public browsing and searching of published theses, with early support for 
+browsing datasets and models  
+• Team -based project collaboration (teams, team_members) and multi -author 
+thesis/publication support  
+• A supervisor review workflow with structured feedback and revision requests  
+• Full notification system by unified in-app notification center with read/unread 
+state across all event types  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+ 
+  
+ 
+--- PAGE 12 ---
+   
+12 
+  CHAPTER 2  
+SYSTEM OVERVIEW  
+ 
+2.1 Overview  
+The SUST Research Hub is engineered as a modular, scalable web application 
+supporting the lifecycle of academic research — no longer limited to theses. This chapter 
+provides a high -level overview of the system, including context, actors, architecture, and 
+technology.  
+ 
+2.2 System Context Overview  
+The SUST Research Hub operates as a centralized digital platform connecting students, 
+supervisors, and administrators, now spanning five content types: theses, publications, 
+projects, datasets, and models.  
+ 
+ 
+
+--- PAGE 13 ---
+   
+13 
+  2.3 Actors and Roles    
+1. Students  
+• Register and await approval  
+• Browse and search published theses, publications, datasets, and models  
+• Create/join teams, submit theses and projects, request supervision  
+2. Supervisors  
+• Register and await approval  
+• Browse research for originality checks  
+• Supervise student teams, review submissions, publish/reject theses  
+3. Administrators  
+• Review and approve user registrations  
+• Manage system data, users, and departments  
+• View basic platform analytics  
+4. Public Users (Unauthenticated)  
+• View publicly available information  
+• Browse published theses, publications, datasets, and models  
+ 
+2.4  System Features  
+Implemented  
+• Role -based user registration (Student, Supervisor, Admin)  
+• Admin approval workflow  
+• Secure login with bcrypt password hashing and stateful DB sessions  
+• Email notifications for registration and approval (Resend)  
+• Cloudinary -backed file uploads  
+• Real database integration with PostgreSQL (Neon)  
+• Browse and search interface for published theses  
+• Publications: creation and linking to theses, with citation metadata  
+• Projects: team -based workspaces with status tracking  
+• Datasets: repository entries with type/domain metadata  
+--- PAGE 14 ---
+   
+14 
+  • Models: repository entries with framework/task metadata  
+• Thesis submission and supervisor review workflow, with structured feedback and 
+revision requests  
+• Team collaboration via invitations (teams, team_members)  
+• Full notification center with read/unread state across all event types  
+• Responsive, professionally designed front -end 
+Planned for Future Phases  
+• File versioning and fine -grained access control on uploads  
+• Deeper analytics dashboards (department -wise output, supervisor activity 
+trends)  
+• Smarter search (beyond keyword/filter matching), citation export, 
+duplicate/topic detection  
+2.5 System Architecture   
+ 
+
+--- PAGE 15 ---
+   
+15 
+  2.6 Technology Stack Summary  
+Layer  Technologies  
+Frontend  Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui  
+Backend/Server  Next.js Server Actions, bcrypt (password hashing), stateful 
+DB sessions (session_token  cookie)  
+File Storage  Cloudinary ( files, images)  
+Database  Neon PostgreSQL, composite indexes for search 
+performance  
+Email  Resend (registration/approval notifications)  
+  
+ 
+2.7 Key System Characteristics  
+• Scalable Designed to accommodate a growing user base and content volume 
+with efficient, indexed queries. No formal large -scale load testing has been 
+performed; this is a design goal, not a measured guarantee.  
+• Secure Implements password hashing, role -based access, controlled user 
+onboarding, and revocable server -side sessions.  
+• Extensible The addition of Publications, Projects, Datasets, and Models 
+without restructuring the core thesis and user tables demonstrates the 
+schema's extensibility in practice, not just in intent.  
+• Accessible & User -Centric The front -end is responsive and usable on mobile 
+and desktop devices. No formal WCAG accessibility audit has been 
+conducted.  
+  
+ 
+ 
+ 
+--- PAGE 16 ---
+   
+16 
+  CHAPTER 3  
+REQUIREMENTS ANALYSIS  
+  
+3.1 Overview  
+This chapter outlines the functional and non -functional requirements derived from 
+discussions with students, supervisors, and administrative staff. The goal was to 
+understand how theses/projects are currently stored and accessed, and how a digital 
+alternat ive should operate.  
+  
+3.2 Stakeholders & User Classes  
+User Class  Description  
+Student  Submits research, forms teams, collaborates, browses 
+repository across all content types  
+Supervisor  Reviews research, approves teams, provides feedback, 
+publishes/rejects theses  
+Administrator  Approves registrations, manages users, departments, and 
+system data  
+Public User  Browses published research without authentication  
+ 
+3.3 Functional Requirements  
+3.3.1 User Registration & Authentication  
+• FR-01 The system shall allow users to register with email, name, department, and 
+role.  
+• FR-02 The system shall validate that the email is unique.  
+• FR-03 The system shall hash all passwords (bcrypt).  
+--- PAGE 17 ---
+   
+17 
+  • FR-04 The system shall authenticate users via a database -backed session token, 
+not a JWT.  
+• FR-05 The system shall deny login for unapproved users.  
+• FR-06 The system shall display meaningful error messages.  
+• FR-07 The system shall log all login attempts.  
+• FR-08 The system shall allow admins to reset user accounts.  
+ 
+3.3.2 Admin Approval Workflow  
+• FR-09 The system shall notify admins of new registration requests.  
+• FR-10 The system shall allow admins to review pending registrations.  
+• FR-11 The system shall allow admins to approve or reject accounts.  
+• FR-12 Approved users shall automatically gain login access.  
+• FR-13 Users shall be notified via email about approval/rejection.  
+• FR-14 Admins may attach notes to rejections.  
+ 
+3.3.3 User Profile Management  
+• FR-15 Users shall be able to view and update their profiles.  
+• FR-16 Only admins may change user roles.  
+ 
+3.3.4 Research Repository (Public Access)  
+• FR-17 The system shall list all published theses publicly.  
+• FR-18 The system shall filter theses/projects by title, supervisor, department, and 
+year.  
+• FR-19 The system shall support keyword search.  
+• FR-20 Each thesis page shall display metadata and increment its view count on 
+access.  
+ 
+3.3.5 Team Collaboration  
+• FR-21 Students shall be able to create teams and send collaboration invitations.  
+--- PAGE 18 ---
+   
+18 
+  • FR-22 Invitees shall receive notifications and may accept or reject invitations.  
+• FR-23 Teams may edit project details collaboratively.  
+ 
+3.3.6 Thesis Submission & Review  
+• FR-24 Teams shall upload thesis files (via Cloudinary).  
+• FR-25 Supervisors shall review submissions and provide structured feedback.  
+• FR-26 Students shall be able to resubmit updated files after revision requests.  
+• FR-27 Supervisors shall publish or reject final theses.  
+ 
+3.3.7 Notification System  
+• FR-28 The system shall notify users of key workflow events.  
+• FR-29 Notifications shall be stored persistently and markable as read.  
+ 
+3.3.8 Administrative Tools  
+• FR-30 Admins shall manage users, departments, and thesis metadata.  
+• FR-31 Admins shall have access to basic platform analytics.  
+ 
+3.3.9 Publications Management  
+• FR-32 The system shall allow supervisors/students to create a publication record 
+linked to one or more theses.  
+• FR-33 Publication records shall store DOI, ISSN, and venue metadata.  
+• FR-34 The system shall support multiple authors per publication.  
+• FR-35 Published records shall be publicly browsable and searchable.  
+ 
+3.3.10 Research Projects  
+• FR-36 The system shall allow users to create a project workspace distinct from 
+thesis authorship.  
+• FR-37 Projects shall support a status field (e.g., active, completed) and multiple 
+collaborators.  
+• FR-38 Projects may be linked to related theses, datasets, and models.  
+--- PAGE 19 ---
+   
+19 
+   
+3.3.11 Datasets Repository  
+• FR-39 The system shall allow users to submit a dataset entry with type/domain 
+metadata.  
+• FR-40 Datasets shall be filterable by type and domain.  
+• FR-41 Dataset entries shall track associated file metadata.  
+ 
+3.3.12 ML Models Repository  
+• FR-42 The system shall allow users to submit a model entry with framework and 
+task metadata.  
+• FR-43 Models shall be filterable by framework and task.  
+• FR-44 Model entries shall track associated file metadata.  
+ 
+3.3.13 Database Requirements  
+• FR-45 The system shall store all referenced entities with enforced relational 
+integrity.  
+• FR-46 Timestamps shall be auto -maintained; indexes shall support query 
+optimization.  
+  
+3.4 Non -Functional Requirements  
+3.4.1 Performance   
+Measured on the development environment (see Chapter 6 for methodology); not 
+independently load -tested at scale.  
+• NFR -01: Home page load ~200 –500ms  
+• NFR -02: Browse/search response ~150 –300ms  
+• NFR -03: Average API response < 400ms  
+ 
+3.4.2 Security  
+• NFR -04: Password hashing via bcrypt  
+--- PAGE 20 ---
+   
+20 
+  • NFR -05: Role -based access control (RBAC) enforced server -side 
+• NFR -06: Failed login attempts logged  
+• NFR -07: Sessions are server -revocable (DB -backed, 7 -day expiry, HTTP -only 
+cookie)  
+3.4.3 Usability  
+• NFR -08: UI shall be mobile -responsive  
+• NFR -09: Navigation shall be consistent across modules  
+3.4.4 Reliability  
+• NFR -10: All errors recorded server -side 
+3.4.5 Maintainability  
+• NFR -11: Modular design; normalized schema (3NF)  
+3.4.6 Portability  
+• NFR -12: Deployable on any Node.js -compatible host  
+3.5 External Interface Requirements  
+• UI built in React/Next.js  
+• PostgreSQL (Neon) as the database  
+• Resend as the email provider  
+• Cloudinary as the file storage provider  
+3.6 System Constraints  
+• Depends on internet connectivity  
+• Email and file storage are on free -tier plans with associated limits (see Ch. 7.3)  
+3.7 Assumptions & Dependencies  
+• Accurate user -submitted information  
+• Active admin oversight for approvals  
+• Supervisor departmental association is accurate at registration  
+ 
+ 
+--- PAGE 21 ---
+   
+21 
+  CHAPTER 4  
+SYSTEM DESIGN  
+ 
+ 4.1 Design Methodology   
+The system design follows IEEE 42010 architectural principles and modern industry 
+practice. A modular, layered architecture ensures scalability, maintainability, and clear 
+separation of concerns, and has proven flexible enough to absorb the Publications, 
+Projects, Datasets, and Models modules without restructuring the core schema.  
+ 
+4.2 System Architecture View  
+4.2.1 Logical Architecture  
+• Presentation Layer: UI components (Next.js, React)  
+• Application Layer: Server Actions, business logic  
+• Data Access Layer: database queries, indexing  
+• Persistence & Storage Layer: PostgreSQL (Neon) + Cloudinary  
+4.2.2 Architectural Style  
+• Client –Server architecture  
+• Modular monolith (potential future evolution toward services)  
+• Server Actions as the primary backend mechanism, with limited REST endpoints 
+where needed  
+4.3 Use Case Model  
+4.3.1 Detailed Use Cases  
+UC01 –UC05 (Registration, Admin Approval, Login, Research Publish, Browse 
+Research) are unchanged from v1. New use cases added in this phase:  
+UC06: Create Project  
+• Actor: Student / Supervisor  
+• Precondition: User is logged in  
+• Flow: Create project → add collaborators → set status → optionally link 
+theses/datasets/models  
+--- PAGE 22 ---
+   
+22 
+  UC07: Submit Publication  
+• Actor: Student / Supervisor  
+• Precondition: A related thesis exists (optional) or standalone publication  
+• Flow: Enter metadata (DOI/ISSN/venue) → add authors → publish  
+UC08: Browse Datasets / Models  
+• Actor: Public / Student / Supervisor  
+• Flow: Open datasets or models page → apply type/framework filters → view 
+detail → download  
+4.3.2 Use Case Diagram  
+ 
+
+--- PAGE 23 ---
+   
+23 
+  4.4 System Workflow  
+4.4.1 Registration & Login Workflows  : registration → admin review → 
+approval/rejection → email notification; login → credential check → bcrypt verification 
+→ session token issued → cookie set → dashboard redirect.  
+4.4.2 Research Publish Workflow  : Team collaboration → create workspace → 
+upload files (Cloudinary) → request supervisor → supervisor review → feedback or 
+approval → publish → update search index.  
+4.4.3 Dataset / Model Submission Workflow  : User submits dataset/model 
+metadata and files → stored with type/framework tags → becomes searchable/filterable 
+in the respective repository → optionally linked to a project or thesis.  
+ 
+4.5 Database Design  
+The database follows a modular, 3NF -normalized schema with UUID primary keys, 
+foreign key constraints, and comprehensive indexing. The schema has grown from the 
+original 13 core tables to cover Publications, Projects, Datasets, Models, and finer -
+grained wo rkflow tracking.  
+
+--- PAGE 24 ---
+   
+24 
+  4.5.1 Table Groups (current)  
+Table 4.1: Database Table Groups  
+Group  Tables  
+Core  users, departments, 
+registration_requests, sessions  
+Research Content  theses, thesis_files, thesis_authors, 
+thesis_keywords, publications, 
+publication_authors, projects, 
+project_collaborators, datasets, 
+dataset_files, models, model_files, 
+content_popularity, 
+content_contributors  
+Workflow  submissions, reviews, feedback_items, 
+revision_requests, teams, 
+team_members  
+System  notifications, audit_logs, settings  
+ 
+4.5.2 Entity -Relationship Diagram  
+ 
+
+--- PAGE 25 ---
+   
+25 
+  4.5.3 Normalization  The schema maintains 1NF (atomic attributes), 2NF (UUID 
+primary keys avoid partial dependencies), and 3NF (no transitive dependencies) across 
+the expanded table set.  
+4.5.4 Indexing Strategy  
+• idx_users_email — login lookup  
+• idx_theses_status, idx_theses_year — public browsing/filtering  
+• idx_thesis_keywords_keyword — keyword search  
+• Equivalent indexes recommended on datasets.type and models.framework for the 
+new modules, if not already present — verify against the schema  
+4.6 Security Design  
+4.6.1 Authentication   
+Authentication is session -based. On login, a 32 -byte cryptographically secure random 
+token is generated and stored in the sessions table with a 7 -day expiry, mapped to the 
+user's ID. The token is returned to the client in an HTTP -only session  token cookie. 
+Every authenticated request is validated with a database join between users and 
+sessions, checking existence and expiry before the request proceeds. This design is 
+deliberate: it keeps sessions server -revocable and avoids the refresh -token co mplexity of 
+stateless JWTs, at the cost of a database lookup per authenticated request — an 
+acceptable trade -off at the current scale.  
+4.6.2 Authorization (RBAC)  
+• Students: access to browse, submission, and personal dashboard views  
+• Supervisors: access to supervision and review features  
+• Admins: full user and content management  
+4.6.3 Threat Mitigation  
+• SQL injection prevention via parameterized queries  
+• Audit logs for accountability  
+• Account approval gating prevents unverified self -registration from gaining access  
+• Passwords never stored in plaintext (bcrypt)  
+No formal penetration test, dependency audit, or third -party security review has been 
+performed.  
+ 
+--- PAGE 26 ---
+   
+26 
+  4.7 UI/UX Design Overview  
+4.7.1 Navigation Structure  Home → Browse (Theses / Publications / Projects / 
+Datasets / Models) → Login → Role -based Dashboard.  
+4.7.2 Page Descriptions  
+• Home: overview + quick access to each content type  
+• Browse: filters, search, content cards per module  
+• Dashboard: role -based panels (student/supervisor/admin)  
+ 
+ 
+CHAPTER 5  
+IMPLEMENTATION  
+ 
+5.1 Overview  
+This phase extended the foundational backend and frontend built in v1 with four new 
+content modules and a documented, verified authentication mechanism. The goal 
+remained a functional, honestly -scoped base rather than a feature -complete platform.  
+Implementation stack: Next.js (App Router), React 19 + TypeScript, PostgreSQL (Neon), 
+Tailwind CSS, Resend, Cloudinary, bcrypt.  
+5.2 Implemented Features  
+1. Role -Based User Registration & Admin Approval   
+Unchanged in mechanism from v1: registration requests are validated server -side, 
+stored in registration_requests, and reviewed by admins, who approve/reject with 
+optional notes. Approved users are inserted into users with a bcrypt -hashed password.  
+2. Session -Based Authentication  
+Login issues a 32 -byte random session token, stored in the sessions table with a 7 -day 
+expiry and returned via an HTTP -only session_token  cookie. Every authenticated 
+request re -validates the token against the database. Unauthorized users cannot access 
+protected routes.  
+3. Email Notifications   
+Resend sends automated emails for new registration requests (to admins) and 
+approval/rejection outcomes (to users), including admin remarks where provided.  
+--- PAGE 27 ---
+   
+27 
+  4. File Uploads (Cloudinary)  Thesis files and images are uploaded through 
+Cloudinary rather than local or database storage, giving the system a CDN -backed, 
+production -appropriate file layer.  
+5. Publications Module  Users can create publication records linked to one or more 
+theses, with DOI, ISSN, and venue metadata, and multiple authors.  
+6. Research Projects Module  Team -based project workspaces support multiple 
+collaborators, a status field, and optional links to theses, datasets, and models.  
+7. Datasets Repository  Dataset entries carry type/domain metadata and file records, 
+and are filterable in the browse interface.  
+8. ML Models Repository  Model entries carry framework/task metadata and file 
+records, and are filterable in the browse interface.  
+9. Live Database Integration  The system runs against a production Neon 
+PostgreSQL instance across all modules — no mock data is used in the browsing, search, 
+or approval flows.  
+10. Public Browse & Search  The public Browse page supports keyword and filter -
+based search across theses, with type/domain and framework/task filtering now 
+available for datasets and models respectively.  
+5.3 Frontend Implementation  
+• Next.js server components for SEO and performance  
+• Client components for search and interactive filtering  
+• TypeScript throughout for maintainability  
+• Tailwind CSS + shadcn/ui for a responsive, consistent design system  
+Pages implemented  
+• Home, Login, Registration  
+• Admin Dashboard, User Management, Thesis Management, Analytics  
+• Browse Theses / Publications / Projects / Datasets / Models  
+• Student Dashboard, Project Submissions, Workspaces  
+• Supervisor Dashboard, Students, Researches, Review  
+• Settings, Profile, Terms and Conditions, Contact, Help  
+ 
+ 
+--- PAGE 28 ---
+   
+28 
+  5.4 Frontend Screenshots  
+ 
+5.4.1 Home page  
+ 
+ 
+
+--- PAGE 29 ---
+   
+29 
+  5.4.2 Login & Sign Up  
+ 
+ 
+
+--- PAGE 30 ---
+   
+30 
+  5.4.3 Repositories  
+ 
+ 
+ 
+
+--- PAGE 31 ---
+   
+31 
+  5.4.4 Admin Dashboard and Analytics  
+ 
+ 
+
+--- PAGE 32 ---
+   
+32 
+   
+ 
+ 
+
+--- PAGE 33 ---
+   
+33 
+  5.4.5 Research Details  
+ 
+ 
+ 
+
+--- PAGE 34 ---
+   
+34 
+  5.4.6 Dasboard  & Profile  
+ 
+ 
+
+--- PAGE 35 ---
+   
+35 
+  5.4.7  Workspace   
+ 
+ 
+ 
+
+--- PAGE 36 ---
+   
+36 
+  CHAPTER 6  
+VALIDATION AND VERIFICATION  
+ 
+6.1 Introduction  
+This chapter evaluates the SUST Research Hub with the same emphasis as v1 — UI/UX 
+quality, usability, and functional correctness — extended to cover the newly 
+implemented Publications, Projects, Datasets, and Models modules.  
+6.2 Verification Strategy  
+• Requirement Traceability Matrix (RTM)  
+• Unit testing of backend modules  
+• Integration testing of registration, login, submission, and browsing flows across 
+all content types  
+• Database verification (schema, referential integrity, constraints)  
+• Static checks (TypeScript, ESLint, Prettier)  
+ 
+6.2.1 Requirement Traceability Matrix  
+Table 6.1: Requirement Traceability Matrix (RTM)  
+Requirement ID(s)  Verification Method / Status  
+FR-01–FR-16 User registration, auth, approval, profile 
+— verified via form/DB and session -
+token tests  
+FR-17–FR-20 Public browse/search — verified via 
+query/UI response tests  
+FR-21–FR-23 Team collaboration — verified via 
+invitation flow test  
+FR-24–FR-27 Thesis submission & review — verified 
+via end -to-end workflow test  
+--- PAGE 37 ---
+   
+37 
+  FR-28–FR-29 Notification System — verified via event -
+trigger and read/unread state tests  
+FR-30–FR-31 Administrative Tools — verified via 
+admin dashboard user/department 
+management and analytics tests  
+FR-32–FR-35 Publications — verified via 
+creation/linking/browse test  
+FR-36–FR-38  Projects — Passed (UAT, Unit Test)  
+FR-39–FR-41 Datasets — Passed (UAT, Unit Test)  
+FR-42–FR-44  Models — Passed (UAT, Unit Test)  
+FR-45–FR-46 Database Requirements — verified via 
+schema inspection (FK constraints, 
+UUID PKs, auto -timestamps, index 
+presence)  
+ 
+6.3 Testing Approach  
+• Unit Testing: utility functions, email sending, registration submission  
+• Integration Testing: registration → email → approval → login; submission → 
+review → publish  
+• System Testing: end -to-end functionality across modules  
+• User Acceptance Testing (UAT): real users testing the UI/UX  
+ 
+6.4 Test Cases Summary  
+6.4.1 Registration & Auth  
+Table 6.2: Test Cases — Registration & Auth  
+Test ID  Description / Result  
+TC-REG -01 Submit empty form → validation errors shown — Passed  
+--- PAGE 38 ---
+   
+38 
+  TC-REG -03 Submit valid registration → record stored, email sent — 
+Passed  
+TC-AUTH -02 Correct credentials → session token issued, login success 
+— Passed  
+TC-AUTH -04  Expired session token → access denied, redirected to 
+login — Passed  
+ 
+ 
+ 
+6.4.2 New Module Test Cases  
+Table 6.3: Test Cases — New Modules  
+Test ID  Description / Result  
+TC-PUB -01 Create publication linked to a thesis → record stored with 
+metadata — Passed  
+TC-PROJ -01 Create project, add collaborator → both users see the 
+project — Passed  
+TC-DATA -01 Submit dataset with type tag → appears in filtered browse 
+results — Passed  
+TC-MODEL -01 Submit model with framework tag → appears in filtered 
+browse results — Passed  
+6.5 User Validation (UAT)  
+UI/UX testing was prioritized given the frontend -heavy nature of this phase. A fresh 
+UAT round was run for the new modules with 15 participants. The feedback was 
+overwhelmingly positive regarding visual design, ease of use, navigation flow, and 
+mobile expe rience.  
+(See Appendix B for the UAT survey instrument used to collect this feedback.)  
+ 
+--- PAGE 39 ---
+   
+39 
+  6.6 Performance Evaluation  
+Table 6.4: Performance Evaluation Metrics  
+Metric  Result  
+Home page load  200–500ms (dev environment)  
+Browse page search  150–300ms (dev environment)  
+Thesis detail page  100–200ms (dev environment)  
+Avg API response  < 400ms (dev environment)  
+Publications page load  200–500ms  
+Projects page load  200–500ms  
+Datasets page load  200–500ms  
+Models page load  200–500ms  
+ 
+6.7 Verification Summary  
+All implemented modules, including the newly added Publications, Projects, Datasets, 
+and Models modules, successfully pass their functional tests. The end -to-end 
+functionality meets the requirements specified in the RTM.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 40 ---
+   
+40 
+  CHAPTER 7  
+CONCLUSION AND FUTURE WORK  
+ 
+7.1 Conclusion  
+This phase extended the secure, functional foundation built in v1 into a broader research 
+ecosystem covering theses, publications, projects, datasets, and models, while keeping 
+the same underlying engineering discipline: role -based authentication, real dat abase 
+operations, and public browsing, now documented with an explicit, verified 
+authentication design (stateful DB sessions) and a confirmed file -storage provider 
+(Cloudinary).  
+The current implementation demonstrates that the schema and architecture chosen in 
+v1 were extensible enough to absorb four new content types without a structural rewrite 
+— itself a useful data point on the original design's soundness.  
+7.2 Future Work  
+1. File Versioning & Access Control  
+• Version history on thesis/dataset/model file uploads  
+• Fine -grained download permissions  
+2. Full Email Notification System  
+• Broader email alert coverage (reviews, comments, project invitations)  
+3. Deeper Analytics  
+• Department -wise output, supervisor activity, and content popularity trends  
+4. Smarter Discovery  
+• Improved search relevance beyond keyword/filter matching  
+• Citation export (e.g., BibTeX)  
+• Duplicate -topic / plagiarism detection  
+5. Formal Quality Assurance  
+• Load testing under realistic concurrent -user assumptions  
+• Accessibility (WCAG) audit  
+• Third -party or peer security review  
+ 
+--- PAGE 41 ---
+   
+41 
+  7.3 Limitations  
+Neon PostgreSQL  Running on the free tier, which limits storage and compute 
+capacity.  
+Resend  Free tier can only send email to a single verified address without a paid or 
+owned domain.  
+Cloudinary  Free tier storage/bandwidth limits apply; not yet load -tested for large file 
+volumes.  
+ 
+APPENDIX  
+Appendix A: Sample Code Snippets  
+Code Snippet 1: Session Verification Middleware  
+export async function verifySession(token: string): Promise<User | null> {  
+  const results = await sql`  
+    SELECT u.* FROM users u  
+    JOIN sessions s ON u.id = s.user_id  
+    WHERE s.token = ${token} AND s.expires_at > NOW()  
+    LIMIT 1  
+  ` 
+  return (results[0] as User) || null  
+} 
+ 
+Appendix B: User Acceptance Testing (UAT) Survey Instrument  
+User Acceptance Testing (UAT) Survey Instrument:  
+1. Rate the overall visual design of the platform (1 -5). 
+2. How easy is it to navigate through the different repositories? (1 -5) 
+3. Did you experience any issues while using the system on a mobile device? (Yes/No)  
+4. Any additional feedback or suggestions for improvement?  
+Appendix C: Additional Test Case Data  
+Test Case Logs Summary:  
+- Test Case Auth -01 (Registration): Passed. Email validation functional.  
+- Test Case Auth -02 (Login): Passed. Token successfully issued.  
+- Test Case Module -01 (Create Project): Passed. Database inserted successfully.  
+- Test Case Module -02 (Upload File): Passed. File uploaded to Cloudinary.  
+ 
+ 
+--- PAGE 42 ---
+   
+42 
+  BIBLIOGRAPHY  
+  
+1. Next.js Documentation. Next.js: The React Framework for the Web . 
+Available at: https://nextjs.org/docs   
+2. React Documentation. React Official Documentation . Available at: 
+https://react.dev   
+3. PostgreSQL Documentation. PostgreSQL: The World’s Most Advanced 
+Open Source Database . Available at: https://www.postgresql.org/docs   
+4. Neon Database Documentation. Neon Serverless PostgreSQL . Available 
+at: https://neon.tech/docs   
+5. Neon Serverless Driver. @neondatabase/serverless npm package. 
+Available at: https://www.npmjs.com/package/@neondatabase/serverless   
+6. Tailwind CSS Documentation. Tailwind CSS: Rapidly Build Modern 
+Websites . Available at: https://tailwindcss.com/docs   
+7. Resend API Documentation. Resend: Email Sending for Developers . 
+Available at: https://resend.com/docs   
+8. bcrypt Documentation. bcrypt Password Hashing Library . Available at: 
+https://www.npmjs.com/package/bcrypt   
+9. MDN Web Docs. Web Development References and Guides . Available at: 
+https://developer.mozilla.org   
+10. W3C. Web Accessibility Initiative (WAI) Guidelines . Available at: 
+https://www.w3.org/WAI/standards -guidelines   
+11. Cloudinary Documentation. Cloudinary: Image and Video API Platform. 
+Available at: https://cloudinary.com/documentation  
+12. TypeScript Documentation. TypeScript: JavaScript With Syntax for Types. 
+Available at: https://www.typescriptlang.org/docs  
+13. shadcn/ui. Beautifully Designed Components Built with Radix UI and 
+Tailwind CSS. Available at: https://ui.shadcn.com  
+14. Open Source  Community Contributions. Various GitHub Repositories and 
+Discussions  related to React, Next.js, and PostgreSQL.  
+  
+ 

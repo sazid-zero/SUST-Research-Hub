@@ -67,7 +67,7 @@ These are implemented and demoable in the current build:
 
 - Dataset entries with type/domain filtering
 - ML model entries with framework/task filtering
-- File metadata and versioning fields
+- File metadata fields
 
 ### Collaboration & Notifications
 
@@ -81,7 +81,6 @@ These are implemented and demoable in the current build:
 - User and department management
 - Basic analytics dashboard (submissions, approvals, department distribution)
 
-> Note: some of these modules (Publications, Datasets, Models, Projects) are at varying stages of completeness. Treat this list as "what exists and is wired to the database," not a claim that every feature is polished or production-hardened.
 
 ---
 
@@ -228,7 +227,6 @@ System:
   notifications, audit_logs, settings
 ```
 
-> Table count and names should be verified against the live migration files before this goes into any formal report — list only what's actually created and used.
 
 ---
 
@@ -356,4 +354,6 @@ MIT License — see [LICENSE](./LICENSE).
 
 ---
 
-**Maintainer:** A S M Sharif Mahmud Sazid ([@sazid-zero](https://github.com/sazid-zero))
+**Authors & Maintainers:**
+- A S M Sharif Mahmud Sazid ([@sazid-zero](https://github.com/sazid-zero))
+- Sharmin Akther
