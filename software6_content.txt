@@ -1,0 +1,56 @@
+--- PAGE 1 ---
+A S M Sharif Mahmud Sazid
+Software Engineer•AWS Certified Solutions Architect – Associate
+♂¶ap-¶arker-altSylhet, Bangladesh| /envel⌢pesharif.sazid.3@gmail.com| ♂phone+880 1872 283211
+/linkedinsharif-mahmud-sazid| /githubGitHub| /gl⌢bePortfolio
+Professional Summary
+Software Engineer and AWS Certified Solutions Architect – Associate with hands-on experience building full-stack applications, design-
+ing REST APIs, implementing CI/CD pipelines, and deploying scalable systems using React, Next.js, Node.js, PostgreSQL, Docker,
+Linux, and AWS. Comfortable rapidly learning new technologies and using AI-assisted development tools while rigorously validating
+correctness, security, and code quality.
+Education
+BSc in Computer Science and Engineering 2022–2026
+Shahjalal University of Science and Technology (SUST), Sylhet
+•Relevant coursework: Data Structures & Algorithms, Software Engineering, DBMS, Operating Systems, Networking & Security,
+Cloud Computing, Machine Learning
+Technical Skills
+Languages & Frameworks:TypeScript, JavaScript, Python, Java, C++, OOP, SOLID, React, Next.js, Node.js, Express.js
+Cloud&AWS:EC2, S3, Lambda, IAM,VPC,RDS,ALB,ECS,ECR,Route53, CloudWatch, CloudTrail, APIGateway, DynamoDB
+DevOps & Infrastructure:Git, Docker, Docker Compose, GitHub Actions, CI/CD, Linux, Bash, Nginx
+AI Development:GitHub Copilot, Cursor, Claude, Antigravity, AI-assisted development, prompt engineering
+Databases & ORMs:PostgreSQL, MySQL, MongoDB, Firebase, Prisma ORM, Drizzle ORM, pgvector
+AI/ML Research:TensorFlow, Deep Learning, CNNs, GNNs, RAG, Embeddings, Vector Search, LLM Applications
+Selected Projects
+ResearchRAG — AI Research Paper Assistant /external-link-alt 2026
+Next.js 16, TypeScript, Python, PostgreSQL, pgvector, Cohere, Supabase, Docker
+•Designed and implemented a Retrieval-Augmented Generation (RAG) system for querying academic PDFs with cited answers using
+HyDE retrieval, Cohere embeddings, pgvector search, and Cohere Rerank v3
+•Fault-tolerant four-tier LLM waterfall (Cohere→Gemini→DeepSeek/Llama→GPT-4o Mini) with automatic failover
+SUST Research Hub — Academic Research Platform /external-link-alt 2025
+Next.js 16, TypeScript, PostgreSQL, Prisma ORM, Cloudinary CDN, Docker
+•Full-stack academic platform for managing theses, datasets, and publications, with 40+ relational tables and automated workflow
+notifications
+•Multi-role authentication for students, supervisors, and admins; Dockerized with Cloudinary CDN for file storage at scale
+HomeSync — Smart Home IoT Dashboard /external-link-alt 2025
+React 19, TypeScript, Node.js, Express, PostgreSQL, Socket.io, Docker, Nginx, AWS EC2
+•Designed RESTful APIs and a full-stack “Digital Twin” IoT dashboard with real-time Socket.io updates and a simulation engine for
+live sensor data
+•Deployed to AWS EC2 (ap-south-1) with Docker Compose, Nginx, and a GitHub Actions CI/CD pipeline for auto-deploy on push
+ConsultBook — Expert Consultation SaaS Platform /external-link-alt 2024
+Next.js 15, TypeScript, PostgreSQL, Drizzle ORM, Stripe, Server-Sent Events, Docker
+•Full-stack SaaS marketplace for 1:1 expert consultations with smart scheduling, timezone support, and Stripe payments/payouts
+•Real-time messaging with SSE notifications and dual-role dashboards with earnings analytics; Dockerized for deployment
+Research: Hierarchical Deep Learning for Microorganism Classification /github 2026
+TensorFlow, ResNet50, ResNet152V2, Transfer Learning
+•Designed a two-stage hierarchical CNN (ResNet50→ResNet152V2 via confidence-based routing) for 38-class microorganism classi-
+fication, reaching 98.40% accuracy and 100% F1 on bacterial detection
+•Curated and cleaned a 7,000+ image dataset from three public sources; validated the approach against single-stage baselines with
+McNemar’s significance testing and ablation studies
+Technical Achievements
+•Competitive Programmer— CodeforcesSpecialist(Max Rating: 1567)
+•LeetCode—Knight(Contest Rating: 1864)
+•OpenSource—ActiveGitHubcontributor,25+publicrepositoriesdemonstratingself-directedlearningacrossmultipletechnologies
+Certifications
+•AWS Certified Solutions Architect – Associate (June 2026) [/external-link-alt]
+•AWS Academy — Cloud Developing [/external-link-alt]
+•AWS Academy — Cloud Foundations [/external-link-alt]

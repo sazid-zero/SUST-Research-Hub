@@ -354,6 +354,5 @@ MIT License — see [LICENSE](./LICENSE).
 
 ---
 
-**Authors & Maintainers:**
+**Maintainer:**
 - A S M Sharif Mahmud Sazid ([@sazid-zero](https://github.com/sazid-zero))
-- Sharmin Akther
