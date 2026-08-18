@@ -111,7 +111,10 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
                     `
                 }
             }
+        } // end if (action === 'accept')
+
         // --- Notification Logic ---
+
 
         const [requestData] = await sql`
             SELECT sr.student_id, sr.thesis_id, sr.project_id, u.email as student_email, u.full_name as student_name 
