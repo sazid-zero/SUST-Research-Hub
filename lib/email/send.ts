@@ -1,8 +1,12 @@
+import nodemailer from 'nodemailer'
+
 const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'console'
 
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    if (EMAIL_PROVIDER === 'resend') {
+    if (EMAIL_PROVIDER === 'gmail' || EMAIL_PROVIDER === 'smtp') {
+      return await sendWithGmailSmtp(to, subject, html)
+    } else if (EMAIL_PROVIDER === 'resend') {
       return await sendWithResend(to, subject, html)
     } else if (EMAIL_PROVIDER === 'sendgrid') {
       return await sendWithSendGrid(to, subject, html)
@@ -16,22 +20,59 @@ export async function sendEmail(to: string, subject: string, html: string) {
   }
 }
 
+async function sendWithGmailSmtp(to: string, subject: string, html: string) {
+  console.log(`\n=================== [EMAIL SENT VIA GMAIL SMTP] ===================`)
+  console.log(`TO: ${to}`)
+  console.log(`SUBJECT: ${subject}`)
+  const linkMatch = html.match(/href="([^"]+)"/)
+  if (linkMatch && linkMatch[1]) {
+    console.log(`VERIFICATION LINK: ${linkMatch[1]}`)
+  }
+  console.log(`==================================================================\n`)
+
+  const user = process.env.GMAIL_USER
+  const pass = process.env.GMAIL_APP_PASSWORD
+
+  if (!user || !pass) {
+    console.log('[EMAIL] Gmail SMTP credentials (GMAIL_USER & GMAIL_APP_PASSWORD) not configured.')
+    return { success: false, warning: 'Gmail credentials missing' }
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass }
+  })
+
+  const info = await transporter.sendMail({
+    from: `SUST Research Hub <${user}>`,
+    to,
+    subject,
+    html
+  })
+
+  console.log('[EMAIL] Successfully sent via Gmail SMTP to:', to, 'MessageId:', info.messageId)
+  return { success: true, messageId: info.messageId }
+}
+
+
 async function sendWithResend(to: string, subject: string, html: string) {
+  // Always log outgoing email details to server console for dev visibility
+  console.log(`\n=================== [EMAIL SENT] ===================`)
+  console.log(`TO: ${to}`)
+  console.log(`SUBJECT: ${subject}`)
+  const linkMatch = html.match(/href="([^"]+)"/)
+  if (linkMatch && linkMatch[1]) {
+    console.log(`VERIFICATION LINK: ${linkMatch[1]}`)
+  }
+  console.log(`====================================================\n`)
+
   if (!process.env.RESEND_API_KEY) {
-    console.log('[EMAIL] Resend API key not configured - emails will be logged only')
-    console.log(`[EMAIL] Would send to: ${to} | Subject: ${subject}`)
+    console.log('[EMAIL] Resend API key not configured - logged above')
     return { success: true, messageId: 'resend-mock' }
   }
 
   try {
     const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev'
-    
-    const testModeEmail = 'sharif.sazid.3@gmail.com'
-    const actualTo = process.env.NODE_ENV === 'production' ? to : testModeEmail
-    
-    if (actualTo !== to) {
-      console.log(`[EMAIL] Test mode: Redirecting email from ${to} to ${testModeEmail}`)
-    }
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -41,16 +82,17 @@ async function sendWithResend(to: string, subject: string, html: string) {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: actualTo,
-        subject: `[${actualTo !== to ? `FOR: ${to}` : ''}] ${subject}`,
+        to: to,
+        subject: subject,
         html,
       }),
     })
 
     if (!response.ok) {
       const error = await response.text()
+      console.log(`[EMAIL WARNING] Resend API response: ${error}`)
       if (error.includes('verify a domain') || error.includes('testing emails')) {
-        console.log('[EMAIL] Resend requires domain verification - email skipped (registration continues)')
+        console.log('[EMAIL NOTE] Resend free account restricts email delivery to verified domains or account owner. Use the link logged above in terminal for testing!')
         return { success: true, messageId: 'resend-domain-not-verified', warning: 'Domain verification required' }
       }
       throw new Error(`Resend API error: ${error}`)
@@ -64,6 +106,7 @@ async function sendWithResend(to: string, subject: string, html: string) {
     return { success: true, messageId: 'resend-failed', warning: error.message }
   }
 }
+
 
 async function sendWithSendGrid(to: string, subject: string, html: string) {
   if (!process.env.SENDGRID_API_KEY) {

@@ -28,7 +28,6 @@ function SidebarContent({ setIsOpen }: SidebarContentProps) {
 
     const navItems = [
         { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/admin/registrations", label: "Registrations", icon: ClipboardList },
         { href: "/admin/users", label: "User Management", icon: Users },
         { href: "/admin/theses", label: "Research Management", icon: FileText },
         { href: "/admin/papers", label: "Paper Review", icon: ScrollText },
@@ -36,6 +35,7 @@ function SidebarContent({ setIsOpen }: SidebarContentProps) {
         { href: "/admin/claims", label: "Authorship Claims", icon: UserCheck },
         { href: "/admin/upload", label: "Legacy Upload", icon: UploadCloud },
     ]
+
 
     return (
         <div className="flex flex-col h-full">

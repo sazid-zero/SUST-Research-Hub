@@ -193,4 +193,52 @@ export const emailTemplates = {
       </html>
     `,
   }),
+
+  verificationEmail: (fullName: string, verifyUrl: string) => ({
+    subject: 'Verify Your SUST Email Address - Research Hub',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 14px 32px; background: #2563eb; color: white; text-decoration: none; font-weight: bold; border-radius: 8px; margin: 20px 0; font-size: 16px; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+            .token-box { background: #e0f2fe; border: 1px border #0284c7; padding: 12px; border-radius: 6px; font-family: monospace; word-break: break-all; margin: 15px 0; font-size: 13px; color: #0369a1; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎓 Welcome to SUST Research Hub</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${fullName},</h2>
+              <p>Thank you for registering with your SUST institutional email address. To complete your account creation and activate your access, please verify your email address below.</p>
+              
+              <div style="text-align: center;">
+                <a href="${verifyUrl}" class="button">Verify Email Address</a>
+              </div>
+              
+              <p>Or copy and paste this link into your browser:</p>
+              <div class="token-box">${verifyUrl}</div>
+              
+              <p>This verification link will expire in 24 hours.</p>
+              
+              <p>If you did not create an account on SUST Research Hub, please ignore this email.</p>
+              
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer">
+              <p>Shahjalal University of Science and Technology, Sylhet, Bangladesh</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
 }
+

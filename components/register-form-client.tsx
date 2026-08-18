@@ -34,9 +34,30 @@ export default function RegisterFormClient() {
     username: "",
   })
 
+  const [emailError, setEmailError] = useState("")
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
     setFormData((prev) => ({ ...prev, [id]: value }))
+
+    if (id === "email") {
+      const val = value.trim().toLowerCase()
+      if (val.includes("@")) {
+        const domain = val.split("@")[1] || ""
+        if (domain && !domain.endsWith("sust.edu") && !domain.endsWith("sust.edu.bd")) {
+          setEmailError("Only SUST institutional emails (@student.sust.edu or @sust.edu) are allowed.")
+        } else {
+          setEmailError("")
+          if (domain.includes("student.sust.edu")) {
+            setUserRole("student")
+          } else if (domain.includes("sust.edu")) {
+            setUserRole("supervisor")
+          }
+        }
+      } else {
+        setEmailError("")
+      }
+    }
   }
 
   const handleSelectChange = (field: string, value: string) => {
@@ -48,6 +69,14 @@ export default function RegisterFormClient() {
 
     try {
       setIsLoading(true)
+
+      const emailLower = formData.email.trim().toLowerCase()
+      if (!emailLower.endsWith("sust.edu") && !emailLower.endsWith("sust.edu.bd")) {
+        toast.error("Only SUST institutional emails (@student.sust.edu or @sust.edu) are allowed.")
+        setEmailError("Only SUST institutional emails (@student.sust.edu or @sust.edu) are allowed.")
+        setIsLoading(false)
+        return
+      }
 
       // Validate passwords match
       if (formData.password !== formData.confirmPassword) {
@@ -69,16 +98,6 @@ export default function RegisterFormClient() {
         return
       }
 
-      // Validate username format (only lowercase letters, numbers, dots, underscores, hyphens)
-      if (userRole === "supervisor" && formData.username) {
-        const usernameRegex = /^[a-z0-9._-]+$/
-        if (!usernameRegex.test(formData.username)) {
-          toast.error("Username can only contain lowercase letters, numbers, dots, underscores, and hyphens")
-          setIsLoading(false)
-          return
-        }
-      }
-
       // Prepare registration data
       const data = {
         email: formData.email,
@@ -97,8 +116,7 @@ export default function RegisterFormClient() {
 
       if (result.success) {
         setShowSuccess(true)
-        toast.success("Registration submitted successfully!")
-        router.refresh()
+        toast.success(result.message || "Registration submitted successfully!")
       } else {
         toast.error(result.error || "Registration failed. Please try again.")
       }
@@ -114,11 +132,11 @@ export default function RegisterFormClient() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-background to-accent/5">
         <div className="w-full max-w-md">
-          <div className="bg-card p-8 rounded-lg border text-center space-y-6">
+          <div className="bg-card p-8 rounded-2xl border border-border text-center space-y-6 shadow-xl">
             <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                 <svg
-                  className="h-8 w-8 text-green-600 dark:text-green-400"
+                  className="h-8 w-8 text-blue-600 dark:text-blue-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -127,31 +145,34 @@ export default function RegisterFormClient() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold">Registration Submitted!</h1>
-              <p className="text-muted-foreground">Your account has been created successfully.</p>
+              <h1 className="text-2xl font-bold">Check Your Email!</h1>
+              <p className="text-sm text-muted-foreground">
+                We've sent a verification link to <br />
+                <strong className="text-foreground font-mono">{formData.email}</strong>
+              </p>
             </div>
 
-            <Alert>
-              <AlertDescription className="text-sm text-left">
-                <strong>What happens next?</strong>
-                <ul className="mt-2 space-y-1 list-disc list-inside">
-                  <li>An admin will review your registration</li>
-                  <li>You'll receive an email once approved</li>
-                  <li>After approval, you can log in and start using the system</li>
-                </ul>
+            <Alert className="bg-blue-500/5 border-blue-500/20">
+              <AlertDescription className="text-xs text-left text-muted-foreground space-y-2">
+                <p><strong>Next Steps:</strong></p>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Open your SUST Webmail / Inbox.</li>
+                  <li>Click the <strong>Verify Email Address</strong> link.</li>
+                  <li>Your account will be instantly activated!</li>
+                </ol>
               </AlertDescription>
             </Alert>
 
-            <div className="pt-4">
-              <Button onClick={() => router.push("/login")} className="w-full">
-                Go to Login
+            <div className="pt-2">
+              <Button onClick={() => router.push("/login")} variant="outline" className="w-full rounded-xl">
+                Go to Login Page
               </Button>
             </div>
           </div>
@@ -166,8 +187,8 @@ export default function RegisterFormClient() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">
-                          <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
-                        </div>
+              <Image src="/sustlogo.png" alt="Research Hub Logo" width={30} height={30} className="object-contain" />
+            </div>
             <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Research Hub
             </span>
@@ -256,22 +277,36 @@ export default function RegisterFormClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-foreground font-medium">
-                  Email Address
+                  Institutional Email Address
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="example@sust.edu.com"
+                  placeholder={userRole === "student" ? "username@student.sust.edu" : "username@sust.edu"}
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="bg-input border-border text-foreground"
+                  className={`bg-input border-border text-foreground ${emailError ? "border-amber-500 focus:ring-amber-500" : ""}`}
                   required
                 />
+                {emailError && (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2 text-amber-600 dark:text-amber-400 text-xs font-medium mt-1">
+                    <span className="text-base leading-none">⚠️</span>
+                    <div>
+                      <strong>Only SUST institutional emails allowed:</strong>
+                      <p className="mt-0.5">Please use your official <code>@student.sust.edu</code> (student) or <code>@sust.edu</code> (teacher) email address.</p>
+                    </div>
+                  </div>
+                )}
+                {!emailError && (
+                  <p className="text-xs text-muted-foreground">
+                    Must be an official SUST email address ending in <code>@student.sust.edu</code> or <code>@sust.edu</code>
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-foreground font-medium">
-                  Phone Number
+                  Phone Number <span className="text-muted-foreground font-normal">(Optional)</span>
                 </Label>
                 <Input
                   id="phone"
@@ -280,9 +315,9 @@ export default function RegisterFormClient() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="bg-input border-border text-foreground"
-                  required
                 />
               </div>
+
 
               <div className="space-y-2">
                 <Label htmlFor="department" className="text-foreground font-medium">

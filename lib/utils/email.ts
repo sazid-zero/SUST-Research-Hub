@@ -31,3 +31,13 @@ export async function sendAdminNotificationEmail(
   const template = emailTemplates.adminNotificationEmail(userName, userEmail, userRole, dashboardUrl)
   await sendEmail(adminEmail, template.subject, template.html)
 }
+
+export async function sendVerificationLinkEmail(
+  email: string,
+  fullName: string,
+  verifyUrl: string
+): Promise<void> {
+  const template = emailTemplates.verificationEmail(fullName, verifyUrl)
+  await sendEmail(email, template.subject, template.html)
+}
+
