@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 import { getCurrentUser } from "@/lib/auth"
 import { sql } from "@/lib/db"
 import { createNotification } from "@/app/actions/notifications"
+import { sendAuthorshipClaimEmail } from "@/lib/utils/email"
+
 
 /**
  * Submit an authorship claim for a ghost author entry.
@@ -176,7 +178,11 @@ export async function resolveAuthorshipClaim(
             WHERE id = ${claimId}
         `
 
-        // Send Notification
+        // Send Notification & Email
+        const [claimant] = await sql`SELECT email, full_name FROM users WHERE id = ${claim.user_id}`
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        const paperLink = `${siteUrl}/${claim.workspace_type}/${claim.workspace_id}`
+
         if (action === "approved") {
             await createNotification({
                 userId: claim.user_id,
@@ -198,6 +204,21 @@ export async function resolveAuthorshipClaim(
                 sourceType: claim.workspace_type
             })
         }
+
+        if (claimant && claimant.email) {
+            try {
+                await sendAuthorshipClaimEmail(
+                    claimant.email,
+                    claimant.full_name || 'Researcher',
+                    claim.author_name_matched || 'Research Workspace',
+                    action as 'approved' | 'rejected',
+                    paperLink
+                )
+            } catch (emailErr) {
+                console.error("Failed to send authorship claim email:", emailErr)
+            }
+        }
+
 
         revalidatePath("/admin/claims")
         revalidatePath(`/paper/${claim.workspace_id}`)

@@ -10,7 +10,8 @@ import fs from "fs"
 import path from "path"
 import crypto from "crypto"
 import { createNotification } from "./notifications"
-import { sendEmail } from "@/lib/mail"
+import { sendWorkspaceInvitationEmail, sendSupervisionRequestEmail } from "@/lib/utils/email"
+
 
 const createWorkspaceSchema = z.object({
   type: z.enum(["thesis", "project", "publication"]),
@@ -243,11 +244,10 @@ export async function inviteMember(prevState: any, formData: FormData) {
         }
 
         // Send Email
-        await sendEmail({
-            to: email,
-            subject: `SUST Research Hub: Invitation to join ${type}`,
-            text: `You have been invited by ${user.full_name} to join as a ${role || 'member'} in the workspace. Link: ${process.env.NEXT_PUBLIC_APP_URL}/student/workspace/${type}/${workspaceId}`
-        })
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        const inviteLink = `${siteUrl}/student/workspace/${type}/${workspaceId}`
+        await sendWorkspaceInvitationEmail(email, user.full_name, workspaceTitle, role || 'member', inviteLink)
+
 
         return { message: `Invited ${userResult[0].full_name} successfully`, success: true }
 
@@ -444,11 +444,17 @@ export async function requestSupervision(prevState: any, formData: FormData) {
             })
 
             // Send Email
-            await sendEmail({
-                to: supervisorEmail,
-                subject: `New Supervision Request: ${type}`,
-                text: `${user.full_name} has requested you to supervise their research: ${topicProposal}. Review here: ${process.env.NEXT_PUBLIC_APP_URL}/student/workspace/${type}/${workspaceId}`
-            })
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+            const requestLink = `${siteUrl}/supervisor/requests`
+            await sendSupervisionRequestEmail(
+                supervisorEmail,
+                supervisorName,
+                user.full_name,
+                formData.get('workspaceTitle') as string || 'Research Workspace',
+                topicProposal,
+                requestLink
+            )
+
         }
 
         return { message: "Supervision request sent successfully. Workspace moved to pending.", success: true }

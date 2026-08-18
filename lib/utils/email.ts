@@ -41,3 +41,70 @@ export async function sendVerificationLinkEmail(
   await sendEmail(email, template.subject, template.html)
 }
 
+export async function sendSupervisionRequestEmail(
+  supervisorEmail: string,
+  supervisorName: string,
+  studentName: string,
+  workspaceTitle: string,
+  proposal: string,
+  link: string
+): Promise<void> {
+  const template = emailTemplates.supervisionRequestEmail(supervisorName, studentName, workspaceTitle, proposal, link)
+  await sendEmail(supervisorEmail, template.subject, template.html)
+}
+
+export async function sendSupervisionResponseEmail(
+  studentEmail: string,
+  studentName: string,
+  supervisorName: string,
+  action: 'accepted' | 'declined',
+  link: string
+): Promise<void> {
+  const template = emailTemplates.supervisionResponseEmail(studentName, supervisorName, action, link)
+  await sendEmail(studentEmail, template.subject, template.html)
+}
+
+export async function sendPaperApprovalEmail(
+  studentEmail: string,
+  studentName: string,
+  paperTitle: string,
+  link: string
+): Promise<void> {
+  const template = emailTemplates.paperApprovalEmail(studentName, paperTitle, link)
+  await sendEmail(studentEmail, template.subject, template.html)
+}
+
+export async function sendPaperRevisionEmail(
+  studentEmail: string,
+  studentName: string,
+  paperTitle: string,
+  feedback: string,
+  link: string
+): Promise<void> {
+  const template = emailTemplates.paperRevisionEmail(studentName, paperTitle, feedback, link)
+  await sendEmail(studentEmail, template.subject, template.html)
+}
+
+export async function sendWorkspaceInvitationEmail(
+  toEmail: string,
+  inviterName: string,
+  workspaceTitle: string,
+  role: string,
+  link: string
+): Promise<void> {
+  const template = emailTemplates.workspaceInvitationEmail(inviterName, workspaceTitle, role, link)
+  await sendEmail(toEmail, template.subject, template.html)
+}
+
+export async function sendAuthorshipClaimEmail(
+  toEmail: string,
+  userName: string,
+  paperTitle: string,
+  action: 'approved' | 'rejected',
+  link: string
+): Promise<void> {
+  const template = emailTemplates.authorshipClaimEmail(userName, paperTitle, action, link)
+  await sendEmail(toEmail, template.subject, template.html)
+}
+
+

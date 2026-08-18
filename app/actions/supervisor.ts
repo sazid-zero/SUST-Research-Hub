@@ -4,6 +4,7 @@ import { sql } from '@/lib/db'
 import { getCurrentUser } from './auth'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
+import { sendSupervisionResponseEmail } from '@/lib/utils/email'
 
 
 export async function getSupervisorStats() {
@@ -110,13 +111,13 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
                     `
                 }
             }
-        }
-
         // --- Notification Logic ---
+
         const [requestData] = await sql`
-            SELECT student_id, thesis_id, project_id 
-            FROM supervision_requests 
-            WHERE id = ${requestId}
+            SELECT sr.student_id, sr.thesis_id, sr.project_id, u.email as student_email, u.full_name as student_name 
+            FROM supervision_requests sr
+            JOIN users u ON sr.student_id = u.id
+            WHERE sr.id = ${requestId}
         `
         
         if (requestData) {
@@ -127,6 +128,8 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
             
             const sourceId = requestData.thesis_id || requestData.project_id
             const sourceType = requestData.thesis_id ? 'thesis' : 'project'
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+            const workspaceLink = `${siteUrl}/student/workspace/${sourceType}/${sourceId}`
 
             await createNotification({
                 userId: requestData.student_id,
@@ -137,7 +140,20 @@ export async function handleSupervisionRequest(requestId: number, action: 'accep
                 sourceId: sourceId,
                 sourceType: sourceType
             })
+
+            try {
+                await sendSupervisionResponseEmail(
+                    requestData.student_email,
+                    requestData.student_name,
+                    user.full_name,
+                    action === 'accept' ? 'accepted' : 'declined',
+                    workspaceLink
+                )
+            } catch (emailErr) {
+                console.error("Failed to send supervision response email:", emailErr)
+            }
         }
+
 
         revalidatePath('/supervisor/requests')
 

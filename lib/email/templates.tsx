@@ -240,5 +240,233 @@ export const emailTemplates = {
       </html>
     `,
   }),
+
+  supervisionRequestEmail: (supervisorName: string, studentName: string, workspaceTitle: string, proposal: string, link: string) => ({
+    subject: `New Supervision Request from ${studentName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .box { background: white; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin: 15px 0; }
+            .button { display: inline-block; padding: 12px 25px; background: #4f46e5; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📋 New Supervision Request</h1>
+            </div>
+            <div class="content">
+              <h2>Hello Dr. ${supervisorName},</h2>
+              <p><strong>${studentName}</strong> has submitted a new supervision request for their research workspace.</p>
+              <div class="box">
+                <p><strong>Research Title:</strong> ${workspaceTitle}</p>
+                ${proposal ? `<p><strong>Proposal Summary:</strong> ${proposal}</p>` : ''}
+              </div>
+              <div style="text-align: center;">
+                <a href="${link}" class="button">Review Supervision Request</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  supervisionResponseEmail: (studentName: string, supervisorName: string, action: 'accepted' | 'declined', link: string) => ({
+    subject: `Supervision Request ${action === 'accepted' ? 'Accepted' : 'Declined'} by Dr. ${supervisorName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: ${action === 'accepted' ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'}; color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 25px; background: ${action === 'accepted' ? '#059669' : '#4f46e5'}; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${action === 'accepted' ? '🎉 Supervision Accepted!' : 'Supervision Status Update'}</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${studentName},</h2>
+              <p>Dr. <strong>${supervisorName}</strong> has <strong>${action}</strong> your research supervision request.</p>
+              ${action === 'accepted' ? '<p>Congratulations! You can now collaborate and progress with your research workspace.</p>' : '<p>You can select another supervisor from the research hub.</p>'}
+              <div style="text-align: center;">
+                <a href="${link}" class="button">View Research Workspace</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  paperApprovalEmail: (studentName: string, paperTitle: string, link: string) => ({
+    subject: `Congratulations! Your Paper Has Been Approved & Published`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .box { background: white; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin: 15px 0; }
+            .button { display: inline-block; padding: 12px 25px; background: #059669; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 Paper Approved & Published!</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${studentName},</h2>
+              <p>Great news! Your submitted paper has been reviewed and officially approved by the admin team.</p>
+              <div class="box">
+                <p><strong>Title:</strong> ${paperTitle}</p>
+              </div>
+              <p>It is now publicly visible in the SUST Research Hub publications repository.</p>
+              <div style="text-align: center;">
+                <a href="${link}" class="button">View Published Paper</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  paperRevisionEmail: (studentName: string, paperTitle: string, feedback: string, link: string) => ({
+    subject: `Action Required: Paper Revision Requested`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin: 15px 0; }
+            .button { display: inline-block; padding: 12px 25px; background: #d97706; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✏️ Revision Requested</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${studentName},</h2>
+              <p>Your paper <strong>"${paperTitle}"</strong> requires revision before it can be published.</p>
+              <div class="box">
+                <strong>Admin Feedback:</strong><br>
+                ${feedback}
+              </div>
+              <p>Please update your paper according to the feedback and resubmit.</p>
+              <div style="text-align: center;">
+                <a href="${link}" class="button">Revise & Resubmit Paper</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  workspaceInvitationEmail: (inviterName: string, workspaceTitle: string, role: string, link: string) => ({
+    subject: `You've been invited to join ${workspaceTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 25px; background: #2563eb; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🤝 Research Workspace Invitation</h1>
+            </div>
+            <div class="content">
+              <p><strong>${inviterName}</strong> invited you to collaborate as a <strong>${role}</strong> on the research workspace:</p>
+              <h3>${workspaceTitle}</h3>
+              <div style="text-align: center;">
+                <a href="${link}" class="button">Join Workspace</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
+  authorshipClaimEmail: (userName: string, paperTitle: string, action: 'approved' | 'rejected', link: string) => ({
+    subject: `Authorship Claim ${action === 'approved' ? 'Approved' : 'Rejected'}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: ${action === 'approved' ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'}; color: white; padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 25px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 25px; background: #2563eb; color: white; text-decoration: none; font-weight: bold; border-radius: 6px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 25px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Authorship Claim Update</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${userName},</h2>
+              <p>Your claim of authorship for <strong>"${paperTitle}"</strong> has been <strong>${action}</strong> by the admin team.</p>
+              <div style="text-align: center;">
+                <a href="${link}" class="button">View Paper</a>
+              </div>
+              <p>Best regards,<br>SUST Research Hub Team</p>
+            </div>
+            <div class="footer"><p>SUST Research Hub</p></div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
 }
+
 

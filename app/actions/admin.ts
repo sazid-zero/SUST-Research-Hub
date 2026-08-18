@@ -2,9 +2,10 @@
 
 import { sql } from '@/lib/db'
 import { getCurrentUser } from './auth'
-import { sendApprovalEmail, sendRejectionEmail } from '@/lib/utils/email'
+import { sendApprovalEmail, sendRejectionEmail, sendPaperApprovalEmail, sendPaperRevisionEmail } from '@/lib/utils/email'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
+
 
 export async function getPendingRegistrations() {
   try {
@@ -516,7 +517,16 @@ export async function approvePaperSubmission(publicationId: number, reviewReques
       sourceType: 'publication'
     })
 
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      const paperLink = `${siteUrl}/student/workspace/publication/${publicationId}`
+      await sendPaperApprovalEmail(request.email, request.full_name, request.title, paperLink)
+    } catch (emailErr) {
+      console.error("Failed to send paper approval email:", emailErr)
+    }
+
     revalidatePath('/admin/papers')
+
     return { success: true, message: 'Paper approved and published successfully' }
   } catch (error: any) {
     console.error('Approve paper error:', error)
@@ -572,7 +582,16 @@ export async function rejectPaperSubmission(publicationId: number, reviewRequest
       sourceType: 'publication'
     })
 
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      const paperLink = `${siteUrl}/student/workspace/publication/${publicationId}`
+      await sendPaperRevisionEmail(request.email, request.full_name, request.title, feedback, paperLink)
+    } catch (emailErr) {
+      console.error("Failed to send paper revision email:", emailErr)
+    }
+
     revalidatePath('/admin/papers')
+
     return { success: true, message: 'Paper rejected successfully' }
   } catch (error: any) {
     console.error('Reject paper error:', error)
