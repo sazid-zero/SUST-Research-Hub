@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { 
     Plus, Search, 
     FileText, Link as LinkIcon, Database, Github,
     Trash2, ExternalLink,
     File as FileIcon, FileVideo, FileAudio, Presentation,
-    ImageIcon, Upload, Code, Brain
+    ImageIcon, Upload, Code, Brain, X, Save, Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,12 +23,10 @@ import {
     getResourceLinks, 
     addResourceLink, 
     deleteResourceLink,
-    uploadDocument,
     deleteDocument,
     getWorkspaceModels,
     createModel,
     deleteWorkspaceModel,
-    uploadPublicationPDF,
     deletePublicationPDF,
     getWorkspaceDatasets,
     createDataset,
@@ -39,6 +37,13 @@ import {
 
 interface ResourcesTabProps {
   workspace: any
+}
+
+interface PendingFile {
+  id: string
+  file: File
+  name: string
+  size: number
 }
 
 export function ResourcesTab({ workspace }: ResourcesTabProps) {
@@ -52,20 +57,26 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
   // Link Dialog State
   const [isAddLinkOpen, setIsAddLinkOpen] = useState(false)
   const [linkCategory, setLinkCategory] = useState<'code' | 'dataset' | 'model'>('code')
+  const [linkSubmitting, setLinkSubmitting] = useState(false)
 
   // Dataset Dialog State
   const [isAddDatasetOpen, setIsAddDatasetOpen] = useState(false)
+  const [datasetSubmitting, setDatasetSubmitting] = useState(false)
 
   // Model Dialog State
   const [isAddModelOpen, setIsAddModelOpen] = useState(false)
+  const [modelSubmitting, setModelSubmitting] = useState(false)
 
-  // Upload Document Dialog State
+  // Upload Document Dialog — staged uploads
   const [isUploadDocOpen, setIsUploadDocOpen] = useState(false)
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+  const [docUploading, setDocUploading] = useState(false)
+  const docFileInputRef = useRef<HTMLInputElement>(null)
 
-  // Publication Main PDF State
+  // Publication Main PDF — staged upload
   const [isUploadPaperOpen, setIsUploadPaperOpen] = useState(false)
-  const [paperFile, setPaperFile] = useState<File | null>(null)
+  const [pendingPaperFile, setPendingPaperFile] = useState<File | null>(null)
+  const [paperUploading, setPaperUploading] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string | null>(workspace.publication?.pdf_url || null)
 
   useEffect(() => {
@@ -111,56 +122,85 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
       return result.secure_url
   }
 
-  const handleFileUpload = async () => {
-      if (!uploadFile) return
-
-      try {
-          toast.loading("Uploading to Cloudinary...", { id: "upload-toast" })
-          const fileUrl = await uploadDirectToCloudinary(uploadFile)
-          
-          const result = await saveResourceMetadata({
-              workspaceId: workspace.id,
-              workspaceType: workspace.type,
-              fileName: uploadFile.name,
-              fileUrl: fileUrl,
-              fileSize: uploadFile.size,
-              resourceType: 'document',
-              publicId: '' // handled internally by url now
-          })
-
-          if (result.success) {
-              toast.success(result.message, { id: "upload-toast" })
-              setIsUploadDocOpen(false)
-              setUploadFile(null)
-              fetchResources()
-          } else {
-              toast.error(result.message, { id: "upload-toast" })
-          }
-      } catch (error: any) {
-          toast.error(error.message || "Failed to upload document", { id: "upload-toast" })
-      }
+  // ── Staged file selection (no upload yet) ──────────────────────────
+  const handleDocFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || [])
+      const newPending: PendingFile[] = files.map(f => ({
+          id: `${f.name}-${f.size}-${Date.now()}-${Math.random()}`,
+          file: f,
+          name: f.name,
+          size: f.size,
+      }))
+      setPendingFiles(prev => [...prev, ...newPending])
+      // reset input so same file can be re-added if removed
+      if (docFileInputRef.current) docFileInputRef.current.value = ""
   }
 
-  const handlePaperUpload = async () => {
-      if (!paperFile) return
+  const removePendingFile = (id: string) => {
+      setPendingFiles(prev => prev.filter(f => f.id !== id))
+  }
 
+  // ── Save: upload all pending files at once ─────────────────────────
+  const handleSaveDocuments = async () => {
+      if (pendingFiles.length === 0) return
+      setDocUploading(true)
+      const toastId = "doc-upload-toast"
+      toast.loading(`Uploading ${pendingFiles.length} file(s)...`, { id: toastId })
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const pending of pendingFiles) {
+          try {
+              const fileUrl = await uploadDirectToCloudinary(pending.file)
+              const result = await saveResourceMetadata({
+                  workspaceId: workspace.id,
+                  workspaceType: workspace.type,
+                  fileName: pending.name,
+                  fileUrl,
+                  fileSize: pending.size,
+                  resourceType: 'document',
+                  publicId: ''
+              })
+              if (result.success) successCount++
+              else failCount++
+          } catch {
+              failCount++
+          }
+      }
+
+      if (failCount === 0) {
+          toast.success(`${successCount} file(s) uploaded successfully`, { id: toastId })
+      } else {
+          toast.warning(`${successCount} uploaded, ${failCount} failed`, { id: toastId })
+      }
+
+      setPendingFiles([])
+      setDocUploading(false)
+      setIsUploadDocOpen(false)
+      fetchResources()
+  }
+
+  const handleSavePaper = async () => {
+      if (!pendingPaperFile) return
+      setPaperUploading(true)
+      toast.loading("Uploading PDF...", { id: "paper-upload-toast" })
       try {
-          toast.loading("Uploading PDF to Cloudinary...", { id: "upload-toast" })
-          const fileUrl = await uploadDirectToCloudinary(paperFile)
-
+          const fileUrl = await uploadDirectToCloudinary(pendingPaperFile)
           const result = await savePublicationPDFMetadata(workspace.id, fileUrl)
-          
           if (result.success) {
-              toast.success(result.message, { id: "upload-toast" })
-              setIsUploadPaperOpen(false)
-              setPaperFile(null)
+              toast.success(result.message, { id: "paper-upload-toast" })
               setPdfUrl(fileUrl)
+              setPendingPaperFile(null)
+              setIsUploadPaperOpen(false)
               fetchResources()
           } else {
-              toast.error(result.message, { id: "upload-toast" })
+              toast.error(result.message, { id: "paper-upload-toast" })
           }
       } catch (error: any) {
-          toast.error(error.message || "Failed to upload PDF", { id: "upload-toast" })
+          toast.error(error.message || "Failed to upload PDF", { id: "paper-upload-toast" })
+      } finally {
+          setPaperUploading(false)
       }
   }
 
@@ -175,25 +215,30 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
       }
   }
 
-  const handleAddLink = async (formData: FormData) => {
-    const title = formData.get("title") as string
-    const url = formData.get("url") as string
-
-    const result = await addResourceLink(workspace.id, workspace.type, title, url, linkCategory)
-    if (result.success) {
-        toast.success(result.message)
-        setIsAddLinkOpen(false)
-        fetchResources()
-    } else {
-        toast.error(result.message)
-    }
+  // ── Link form submit (no page refresh) ───────────────────────────
+  const handleAddLink = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      setLinkSubmitting(true)
+      const formData = new FormData(e.currentTarget)
+      const title = formData.get("title") as string
+      const url = formData.get("url") as string
+      const result = await addResourceLink(workspace.id, workspace.type, title, url, linkCategory)
+      if (result.success) {
+          toast.success(result.message)
+          setIsAddLinkOpen(false)
+          ;(e.target as HTMLFormElement).reset()
+          fetchResources()
+      } else {
+          toast.error(result.message)
+      }
+      setLinkSubmitting(false)
   }
 
   const handleDeleteLink = async (id: number) => {
       const result = await deleteResourceLink(id, workspace.id, workspace.type)
       if (result.success) {
           toast.success("Link removed")
-          fetchResources()
+          setLinks(prev => prev.filter(l => l.id !== id))
       }
   }
 
@@ -201,7 +246,7 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
       const result = await deleteDocument(id, workspace.id, workspace.type)
       if (result.success) {
           toast.success(result.message)
-          fetchResources()
+          setDocuments(prev => prev.filter(d => d.id !== id))
       } else {
           toast.error(result.message)
       }
@@ -211,46 +256,58 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
       const result = await deleteWorkspaceModel(id, workspace.id, workspace.type)
       if (result.success) {
           toast.success(result.message)
-          fetchResources()
+          setModels(prev => prev.filter(m => m.id !== id))
       } else {
           toast.error(result.message)
       }
   }
 
-  const handleAddDataset = async (formData: FormData) => {
+  // ── Dataset form submit (no page refresh) ────────────────────────
+  const handleAddDataset = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      setDatasetSubmitting(true)
+      const formData = new FormData(e.currentTarget)
       formData.append("workspaceId", workspace.id.toString())
       formData.append("workspaceType", workspace.type)
       const result = await createDataset(null, formData)
       if (result.success) {
           toast.success(result.message)
           setIsAddDatasetOpen(false)
+          ;(e.target as HTMLFormElement).reset()
           fetchResources()
       } else {
           toast.error(result.message)
       }
+      setDatasetSubmitting(false)
   }
 
   const handleDeleteDataset = async (id: number) => {
       const result = await deleteWorkspaceDataset(id, workspace.id, workspace.type)
       if (result.success) {
           toast.success(result.message)
-          fetchResources()
+          setDatasets(prev => prev.filter(d => d.id !== id))
       } else {
           toast.error(result.message)
       }
   }
 
-  const handleAddModel = async (formData: FormData) => {
+  // ── Model form submit (no page refresh) ─────────────────────────
+  const handleAddModel = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      setModelSubmitting(true)
+      const formData = new FormData(e.currentTarget)
       formData.append("workspaceId", workspace.id.toString())
       formData.append("workspaceType", workspace.type)
       const result = await createModel(null, formData)
       if (result.success) {
           toast.success(result.message)
           setIsAddModelOpen(false)
+          ;(e.target as HTMLFormElement).reset()
           fetchResources()
       } else {
           toast.error(result.message)
       }
+      setModelSubmitting(false)
   }
 
   const getFileIcon = (name: string) => {
@@ -287,13 +344,24 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
 
   const codeLinks = filteredLinks.filter(l => l.category === 'code')
 
-  const allModels = filteredModels.map(m => ({ id: m.id, name: m.name, url: m.external_url || m.file_url, description: m.description }))
+  const allModels = filteredModels.map(m => ({
+      id: m.id,
+      name: m.name,
+      url: m.external_url || m.file_url || (m.description?.match(/URL: (.+)/)?.[1]),
+      description: m.description?.replace(/\nURL: .+$/, '').replace(/^URL: .+$/, '') || ''
+  }))
   const allDatasets = filteredDatasets.map(d => ({ id: d.id, title: d.title, url: d.location, description: d.description }))
 
   const getLinkDialogTitle = () => {
       if (linkCategory === 'code') return "Link Code Repository"
       if (linkCategory === 'dataset') return "Link Dataset"
       return "Link Model"
+  }
+
+  const formatSize = (bytes: number) => {
+      if (bytes < 1024) return `${bytes} B`
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
   return (
@@ -363,7 +431,7 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                                     Files & Documents
                                 </CardTitle>
                                 <Button onClick={() => setIsUploadDocOpen(true)} size="sm" variant="outline" className="h-8 gap-1">
-                                    <Upload className="w-3.5 h-3.5" /> Upload Document
+                                    <Upload className="w-3.5 h-3.5" /> Upload Documents
                                 </Button>
                             </CardHeader>
                             <CardContent className="p-0">
@@ -377,7 +445,7 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                                                         <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary truncate block">
                                                             {doc.file_name}
                                                         </a>
-                                                        <span className="text-xs text-muted-foreground">{doc.resource_type} • {(doc.file_size / 1024).toFixed(1)} KB</span>
+                                                        <span className="text-xs text-muted-foreground">{doc.resource_type} • {formatSize(doc.file_size)}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -453,11 +521,15 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                                             <div className="flex items-center gap-3 overflow-hidden">
                                                 <Database className="w-5 h-5 text-indigo-500" />
                                                 <div className="truncate">
-                                                    <a href={dataset.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary truncate block">
-                                                        {dataset.title}
-                                                    </a>
+                                                    {dataset.url ? (
+                                                        <a href={dataset.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary truncate block">
+                                                            {dataset.title}
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-sm font-medium truncate block">{dataset.title}</span>
+                                                    )}
                                                     {dataset.description && <span className="text-xs text-muted-foreground block truncate">{dataset.description}</span>}
-                                                    <span className="text-xs text-muted-foreground truncate">{dataset.url}</span>
+                                                    {dataset.url && <span className="text-xs text-muted-foreground truncate">{dataset.url}</span>}
                                                 </div>
                                             </div>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -498,11 +570,15 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                                             <div className="flex items-center gap-3 overflow-hidden">
                                                 <Brain className="w-5 h-5 text-green-500" />
                                                 <div className="truncate">
-                                                    <a href={model.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary truncate block">
-                                                        {model.name}
-                                                    </a>
+                                                    {model.url ? (
+                                                        <a href={model.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary truncate block">
+                                                            {model.name}
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-sm font-medium truncate block">{model.name}</span>
+                                                    )}
                                                     {model.description && <span className="text-xs text-muted-foreground block truncate">{model.description}</span>}
-                                                    <span className="text-xs text-muted-foreground truncate">{model.url}</span>
+                                                    {model.url && <span className="text-xs text-muted-foreground truncate">{model.url}</span>}
                                                 </div>
                                             </div>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -534,7 +610,7 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                 <DialogHeader>
                     <DialogTitle>{getLinkDialogTitle()}</DialogTitle>
                 </DialogHeader>
-                <form action={handleAddLink} className="space-y-4 py-4">
+                <form onSubmit={handleAddLink} className="space-y-4 py-4">
                     <div className="space-y-2">
                         <Label>Title</Label>
                         <Input name="title" placeholder={linkCategory === 'code' ? "e.g. GitHub Repository" : linkCategory === 'dataset' ? "e.g. Kaggle Dataset" : "e.g. HuggingFace Model"} required />
@@ -544,35 +620,89 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                         <Input name="url" type="url" placeholder="https://..." required />
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Add Link</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsAddLinkOpen(false)}>Cancel</Button>
+                        <Button type="submit" disabled={linkSubmitting}>
+                            {linkSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Add Link"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
 
-        {/* Dialog 2: Upload Document Dialog */}
-        <Dialog open={isUploadDocOpen} onOpenChange={setIsUploadDocOpen}>
-            <DialogContent>
+        {/* Dialog 2: Upload Document Dialog (staged) */}
+        <Dialog open={isUploadDocOpen} onOpenChange={(open) => {
+            if (!open) { setPendingFiles([]); }
+            setIsUploadDocOpen(open)
+        }}>
+            <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Upload Document</DialogTitle>
+                    <DialogTitle>Upload Documents</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label>Select File</Label>
-                        <Input 
-                            type="file" 
-                            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                <div className="space-y-4 py-2">
+                    {/* Drop zone / file picker */}
+                    <div
+                        className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                        onClick={() => docFileInputRef.current?.click()}
+                    >
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm font-medium">Click to select files</p>
+                        <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, images, videos and more</p>
+                        <input
+                            ref={docFileInputRef}
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={handleDocFileSelect}
                         />
                     </div>
+
+                    {/* Staged file list */}
+                    {pendingFiles.length > 0 && (
+                        <div className="space-y-2">
+                            <p className="text-sm font-medium text-muted-foreground">{pendingFiles.length} file(s) ready to upload:</p>
+                            <div className="max-h-48 overflow-y-auto space-y-1 rounded-md border p-2">
+                                {pendingFiles.map((pf) => (
+                                    <div key={pf.id} className="flex items-center justify-between gap-2 py-1 px-2 rounded hover:bg-muted/50 group">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            {getFileIcon(pf.name)}
+                                            <span className="text-sm truncate">{pf.name}</span>
+                                            <span className="text-xs text-muted-foreground shrink-0">{formatSize(pf.size)}</span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => removePendingFile(pf.id)}
+                                            type="button"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleFileUpload} disabled={!uploadFile}>Upload</Button>
+                    <Button type="button" variant="outline" onClick={() => { setPendingFiles([]); setIsUploadDocOpen(false); }}>Cancel</Button>
+                    <Button 
+                        onClick={handleSaveDocuments} 
+                        disabled={pendingFiles.length === 0 || docUploading}
+                    >
+                        {docUploading
+                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading...</>
+                            : <><Save className="w-4 h-4 mr-2" />Save {pendingFiles.length > 0 ? `(${pendingFiles.length})` : ''}</>
+                        }
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
 
-        {/* Dialog 3: Upload Main Publication PDF Dialog */}
-        <Dialog open={isUploadPaperOpen} onOpenChange={setIsUploadPaperOpen}>
+        {/* Dialog 3: Upload Main Publication PDF Dialog (staged) */}
+        <Dialog open={isUploadPaperOpen} onOpenChange={(open) => {
+            if (!open) setPendingPaperFile(null)
+            setIsUploadPaperOpen(open)
+        }}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Upload Main Publication PDF</DialogTitle>
@@ -583,12 +713,25 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                         <Input 
                             type="file" 
                             accept=".pdf"
-                            onChange={(e) => setPaperFile(e.target.files?.[0] || null)}
+                            onChange={(e) => setPendingPaperFile(e.target.files?.[0] || null)}
                         />
                     </div>
+                    {pendingPaperFile && (
+                        <div className="flex items-center gap-2 text-sm p-2 rounded bg-muted/50">
+                            <FileText className="w-4 h-4 text-red-500 shrink-0" />
+                            <span className="truncate">{pendingPaperFile.name}</span>
+                            <span className="text-muted-foreground shrink-0">{formatSize(pendingPaperFile.size)}</span>
+                        </div>
+                    )}
                 </div>
                 <DialogFooter>
-                    <Button onClick={handlePaperUpload} disabled={!paperFile}>Upload</Button>
+                    <Button type="button" variant="outline" onClick={() => { setPendingPaperFile(null); setIsUploadPaperOpen(false); }}>Cancel</Button>
+                    <Button onClick={handleSavePaper} disabled={!pendingPaperFile || paperUploading}>
+                        {paperUploading
+                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading...</>
+                            : <><Save className="w-4 h-4 mr-2" />Save & Upload</>
+                        }
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -599,7 +742,7 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                 <DialogHeader>
                     <DialogTitle>Add Dataset</DialogTitle>
                 </DialogHeader>
-                <form action={handleAddDataset} className="space-y-4 py-4">
+                <form onSubmit={handleAddDataset} className="space-y-4 py-4">
                     <div className="space-y-2">
                         <Label>Title *</Label>
                         <Input name="title" placeholder="e.g. Bengali Sentiment Analysis Corpus" required />
@@ -636,7 +779,10 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                         <Input name="tags" placeholder="e.g. NLP, Bangla, Sentiment" />
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Add Dataset</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsAddDatasetOpen(false)}>Cancel</Button>
+                        <Button type="submit" disabled={datasetSubmitting}>
+                            {datasetSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Add Dataset"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -648,14 +794,14 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                 <DialogHeader>
                     <DialogTitle>Add Model</DialogTitle>
                 </DialogHeader>
-                <form action={handleAddModel} className="space-y-4 py-4">
+                <form onSubmit={handleAddModel} className="space-y-4 py-4">
                     <div className="space-y-2">
                         <Label>Model Name *</Label>
                         <Input name="title" placeholder="e.g. BERT Fine-tuned Bengali" required />
                     </div>
                     <div className="space-y-2">
-                        <Label>Model URL *</Label>
-                        <Input name="download_url" type="url" placeholder="https://huggingface.co/..." required />
+                        <Label>Model URL</Label>
+                        <Input name="download_url" type="url" placeholder="https://huggingface.co/..." />
                     </div>
                     <div className="space-y-2">
                         <Label>Model Type / Task</Label>
@@ -700,7 +846,10 @@ export function ResourcesTab({ workspace }: ResourcesTabProps) {
                         <Input name="tags" placeholder="e.g. NLP, BERT, Fine-tuned" />
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Add Model</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsAddModelOpen(false)}>Cancel</Button>
+                        <Button type="submit" disabled={modelSubmitting}>
+                            {modelSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : "Add Model"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

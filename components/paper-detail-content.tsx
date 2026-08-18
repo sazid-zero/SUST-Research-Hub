@@ -625,38 +625,47 @@ export function PaperDetailContent({ publication, user }: PaperDetailContentProp
 
                                         {files.length > 0 ? (
                                             <div className="space-y-3">
-                                                {files.map((file: any) => {
+                                                {files.map((file: any, fileIndex: number) => {
                                                     const { icon: FileIcon, color, bg, border } = getResourceIcon(file.resource_type)
+                                                    const isExternal = !!file.external_url
+                                                    const linkHref = file.external_url || file.file_url || file.url || ""
                                                     return (
                                                         <a
-                                                            key={file.id}
-                                                            href={file.file_url}
-                                                            target="_blank"
+                                                            key={file.id ?? fileIndex}
+                                                            href={linkHref || "#"}
+                                                            target={linkHref ? "_blank" : "_self"}
                                                             rel="noopener noreferrer"
                                                             className={`block p-3 rounded-lg border ${border} ${bg} hover:scale-[1.02] transition-transform group`}
                                                         >
-                                                            <div className="flex items-start gap-3">
-                                                                <div className={`p-2 rounded-lg ${bg} border ${border}`}>
-                                                                    <FileIcon className={`h-4 w-4 ${color}`} />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                                                                        {file.file_name}
-                                                                    </p>
-                                                                    {file.description && (
-                                                                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                                                            {file.description}
+                                                            <div className="flex items-start justify-between gap-3">
+                                                                <div className="flex items-start gap-3 min-w-0 flex-1">
+                                                                    <div className={`p-2 rounded-lg ${bg} border ${border} shrink-0 mt-0.5`}>
+                                                                        <FileIcon className={`h-4 w-4 ${color}`} />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                                                                            {file.file_name || file.title || "External Link"}
                                                                         </p>
-                                                                    )}
-                                                                    <div className="flex items-center gap-2 mt-2">
-                                                                        {file.file_size && (
-                                                                            <span className="text-xs text-muted-foreground">
-                                        {formatFileSize(file.file_size)}
-                                      </span>
+                                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                            {isExternal
+                                                                                ? "External Repository"
+                                                                                : file.file_size
+                                                                                    ? formatFileSize(file.file_size)
+                                                                                    : "Size not available"}
+                                                                        </p>
+                                                                        {file.description && (
+                                                                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                                                                {file.description}
+                                                                            </p>
+                                                                        )}
+                                                                        {isExternal && (
+                                                                            <p className="text-xs text-muted-foreground mt-1.5 font-mono break-all line-clamp-1 group-hover:text-primary transition-colors">
+                                                                                {file.external_url}
+                                                                            </p>
                                                                         )}
                                                                     </div>
                                                                 </div>
-                                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-0.5" />
                                                             </div>
                                                         </a>
                                                     )

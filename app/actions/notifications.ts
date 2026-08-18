@@ -15,7 +15,6 @@ export async function getNotifications() {
             ORDER BY created_at DESC 
             LIMIT 50
         `
-        console.log(`Fetched ${notifications.length} notifications for user ${user.id}:`, notifications.slice(0, 2))
         return notifications
     } catch (error) {
         console.error("Fetch notifications error:", error)
@@ -29,7 +28,6 @@ export async function markNotificationAsRead(id: number) {
 
     try {
         // For now, just return success - column doesn't exist in schema
-        console.log(`Mark notification ${id} as read for user ${user.id}`)
         return { success: true }
     } catch (error) {
         console.error("Mark notification error:", error)
@@ -72,7 +70,6 @@ export async function createNotification({
     sourceId?: number
     sourceType?: string
 }) {
-    console.log(`[createNotification] Starting for user ${userId}, type: ${type}`)
     try {
         const result = await sql`
             INSERT INTO notifications (user_id, type, title, message, link, created_at)
@@ -80,7 +77,6 @@ export async function createNotification({
             RETURNING id
         `
         const notificationId = result[0]?.id
-        console.log(`[createNotification] SUCCESS - created notification ID ${notificationId} for user ${userId}`)
         
         // Revalidate paths to ensure the popover updates
         try {
@@ -88,7 +84,6 @@ export async function createNotification({
             revalidatePath("/student/dashboard")
             revalidatePath("/notifications")
         } catch (revalidateErr) {
-            console.log("[createNotification] Revalidate info:", revalidateErr)
         }
         
         return { success: true }

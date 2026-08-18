@@ -579,3 +579,123 @@ export async function rejectPaperSubmission(publicationId: number, reviewRequest
     return { success: false, error: error.message }
   }
 }
+
+// ─── Publication Management ───────────────────────────────────────────────────
+
+export async function getAllPublicationsAdmin() {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized', publications: [] }
+    }
+
+    const results = await sql`
+      SELECT p.id, p.title, p.abstract, p.year, p.status, p.visibility,
+             p.published_date as submitted_date,
+             p.created_at, p.department,
+             (
+               SELECT pa.author_name
+               FROM publication_authors pa
+               WHERE pa.publication_id = p.id
+               ORDER BY pa.author_order ASC
+               LIMIT 1
+             ) as owner_name
+      FROM publications p
+      ORDER BY p.created_at DESC
+    `
+
+    return { success: true, publications: results }
+  } catch (error: any) {
+    console.error('Get all publications admin error:', error)
+    return { success: false, error: error.message, publications: [] }
+  }
+}
+
+export async function deletePublication(publicationId: number) {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    await sql`DELETE FROM publications WHERE id = ${publicationId}`
+    revalidatePath('/admin/theses')
+    return { success: true, message: 'Publication deleted successfully' }
+  } catch (error: any) {
+    console.error('Delete publication error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+export async function setPublicationVisibility(publicationId: number, visibility: 'visible' | 'hidden') {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    await sql`UPDATE publications SET visibility = ${visibility}, updated_at = NOW() WHERE id = ${publicationId}`
+    revalidatePath('/admin/theses')
+    return { success: true, message: `Publication visibility set to ${visibility}` }
+  } catch (error: any) {
+    console.error('Set publication visibility error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+// ─── Project Management ───────────────────────────────────────────────────────
+
+export async function getAllProjectsAdmin() {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized', projects: [] }
+    }
+
+    const results = await sql`
+      SELECT p.id, p.title, p.description, p.status, p.department, p.field,
+             p.created_at, p.updated_at, p.visibility,
+             COALESCE(u.full_name, p.ghost_supervisor) as supervisor_name
+      FROM projects p
+      LEFT JOIN users u ON p.supervisor_id = u.id
+      ORDER BY p.created_at DESC
+    `
+
+    return { success: true, projects: results }
+  } catch (error: any) {
+    console.error('Get all projects admin error:', error)
+    return { success: false, error: error.message, projects: [] }
+  }
+}
+
+export async function deleteProject(projectId: number) {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    await sql`DELETE FROM projects WHERE id = ${projectId}`
+    revalidatePath('/admin/theses')
+    return { success: true, message: 'Project deleted successfully' }
+  } catch (error: any) {
+    console.error('Delete project error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+export async function setProjectVisibility(projectId: number, visibility: 'visible' | 'hidden') {
+  try {
+    const admin = await getCurrentUser()
+    if (!admin || admin.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    await sql`UPDATE projects SET visibility = ${visibility}, updated_at = NOW() WHERE id = ${projectId}`
+    revalidatePath('/admin/theses')
+    return { success: true, message: `Project visibility set to ${visibility}` }
+  } catch (error: any) {
+    console.error('Set project visibility error:', error)
+    return { success: false, error: error.message }
+  }
+}

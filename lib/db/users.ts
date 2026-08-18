@@ -1,5 +1,5 @@
 
-import { db, sql } from "./index"
+import { db, sql } from "./index.ts"
 
 export interface User {
     id: number

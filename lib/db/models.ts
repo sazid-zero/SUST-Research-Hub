@@ -1,4 +1,4 @@
-import { db } from "./index"
+import { db } from "./index.ts"
 
 export interface Model {
   id: number
@@ -53,40 +53,47 @@ export async function getModels(filters?: {
 }): Promise<any[]> {
   try {
     let query = `
-      SELECT * FROM models
-      WHERE 1=1
+      SELECT m.* FROM models m
+      LEFT JOIN theses t ON m.workspace_type = 'thesis' AND m.workspace_id = t.id
+      LEFT JOIN projects p ON m.workspace_type = 'project' AND m.workspace_id = p.id
+      LEFT JOIN publications pub ON m.workspace_type = 'publication' AND m.workspace_id = pub.id
+      WHERE (
+        (m.workspace_type = 'thesis' AND t.status = 'approved') OR
+        (m.workspace_type = 'project' AND p.status = 'approved') OR
+        (m.workspace_type = 'publication' AND pub.status IN ('published', 'approved'))
+      )
     `
 
     const params: any[] = []
 
     if (filters?.search) {
-      query += ` AND (COALESCE(title, name) ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
+      query += ` AND (COALESCE(m.title, m.name) ILIKE $${params.length + 1} OR m.description ILIKE $${params.length + 1})`
       params.push(`%${filters.search}%`)
     }
 
     if (filters?.type && filters.type !== "all") {
-      query += ` AND model_type = $${params.length + 1}`
+      query += ` AND m.model_type = $${params.length + 1}`
       params.push(filters.type)
     }
 
     if (filters?.framework && filters.framework !== "all") {
-      query += ` AND framework = $${params.length + 1}`
+      query += ` AND m.framework = $${params.length + 1}`
       params.push(filters.framework)
     }
 
     // Sorting
     switch (filters?.sortBy) {
       case "newest":
-        query += ` ORDER BY created_at DESC`
+        query += ` ORDER BY m.created_at DESC`
         break
       case "oldest":
-        query += ` ORDER BY created_at ASC`
+        query += ` ORDER BY m.created_at ASC`
         break
       case "title":
-        query += ` ORDER BY COALESCE(title, name) ASC`
+        query += ` ORDER BY COALESCE(m.title, m.name) ASC`
         break
       default:
-        query += ` ORDER BY created_at DESC`
+        query += ` ORDER BY m.created_at DESC`
     }
 
     // Pagination

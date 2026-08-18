@@ -26,7 +26,6 @@ export function NotificationsPopover() {
           getNotifications(),
           getUnreadCount()
       ])
-      console.log(`[NotificationsPopover] Fetched ${data.length} notifications, unread: ${count}`, data)
       setNotifications(data)
       setUnreadCount(count)
     } catch (error) {

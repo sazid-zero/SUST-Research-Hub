@@ -1,10 +1,10 @@
 
-import { db, sql } from "./index"
-import { getProjectById, Project } from "./projects"
-import { getThesisById, ThesisWithAuthors } from "./theses"
-import { getPublicationById, Publication } from "./publications"
-import { Model } from "./models"
-import { Dataset } from "./datasets"
+import { db, sql } from "./index.ts"
+import { getProjectById, Project } from "./projects.ts"
+import { getThesisById, ThesisWithAuthors } from "./theses.ts"
+import { getPublicationById, Publication } from "./publications.ts"
+import { Model } from "./models.ts"
+import { Dataset } from "./datasets.ts"
 
 export type WorkspaceType = "thesis" | "project" | "publication"
 

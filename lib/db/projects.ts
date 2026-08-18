@@ -1,9 +1,9 @@
 
-import { db, sql } from "./index"
-import { Dataset } from "./datasets"
-import { Model } from "./models"
-import { Publication } from "./publications"
-import { ThesisWithAuthors } from "./theses"
+import { db, sql } from "./index.ts"
+import { Dataset } from "./datasets.ts"
+import { Model } from "./models.ts"
+import { Publication } from "./publications.ts"
+import { ThesisWithAuthors } from "./theses.ts"
 
 export interface Project {
   id: number

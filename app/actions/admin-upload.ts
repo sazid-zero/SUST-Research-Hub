@@ -265,7 +265,7 @@ export async function uploadLegacyWorkspace(formData: FormData) {
             }
             if (datasetUrl) {
                 const dTags = datasetTagsStr ? datasetTagsStr.split(',').map(t => t.trim()) : []
-                await sql`INSERT INTO datasets (workspace_id, workspace_type, title, description, type, size, location, tags, download_url, created_at, updated_at) VALUES (${workspaceId}, ${type}, ${datasetTitle}, ${datasetDescription}, ${datasetType}, ${datasetSize}, ${datasetUrl}, ${dTags}, ${datasetUrl}, NOW(), NOW())`
+                await sql`INSERT INTO datasets (workspace_id, workspace_type, title, description, type, size, location, tags, created_at, updated_at) VALUES (${workspaceId}, ${type}, ${datasetTitle}, ${datasetDescription}, ${datasetType}, ${datasetSize}, ${datasetUrl}, ${dTags}, NOW(), NOW())`
             }
             if (modelUrl) {
                 const tags = modelTagsStr ? modelTagsStr.split(',').map(t => t.trim()) : []
@@ -273,11 +273,11 @@ export async function uploadLegacyWorkspace(formData: FormData) {
                 
                 await sql`
                     INSERT INTO models (
-                        workspace_id, workspace_type, title, description, 
-                        accuracy, framework, tags, model_type, download_url, created_at, updated_at
+                        workspace_id, workspace_type, name, description, 
+                        accuracy, framework, tags, model_type, download_url, external_url, created_at, updated_at
                     ) VALUES (
                         ${workspaceId}, ${type}, ${modelTitle}, ${modelDescription}, 
-                        ${accuracy}, ${modelFramework}, ${tags}, ${modelType}, ${modelUrl}, NOW(), NOW()
+                        ${accuracy}, ${modelFramework}, ${tags}, ${modelType}, ${modelUrl}, ${modelUrl}, NOW(), NOW()
                     )
                 `
             }

@@ -152,6 +152,69 @@ export async function getAllPublishedTheses(): Promise<ThesisWithAuthors[]> {
     })
 }
 
+// Admin-only: fetch ALL theses regardless of status
+export async function getAllThesesAdmin(): Promise<ThesisWithAuthors[]> {
+    return executeQueryWithRetry(async () => {
+        const result = await sql`
+            SELECT
+                t.id,
+                t.title,
+                t.abstract,
+                t.department,
+                t.field,
+                t.year,
+                t.submitted_date,
+                t.supervisor_id,
+                t.status,
+                t.visibility,
+                t.views,
+                t.downloads,
+                t.keywords,
+                t.created_at,
+                t.updated_at,
+                COALESCE(u.full_name, t.ghost_supervisor) as supervisor_name,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', COALESCE(u2.id, ta.id),
+                                'full_name', COALESCE(u2.full_name, ta.author_name),
+                                'student_id', COALESCE(u2.student_id, ''),
+                                'author_order', ta.author_order
+                            ) ORDER BY ta.author_order
+                        )
+                        FROM thesis_authors ta
+                        LEFT JOIN users u2 ON ta.author_id = u2.id
+                        WHERE ta.thesis_id = t.id
+                    ),
+                    '[]'::json
+                ) as authors,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', tf.id, 'file_name', tf.file_name,
+                                'file_url', tf.file_url, 'file_type', tf.file_type,
+                                'file_size', tf.file_size
+                            )
+                        )
+                        FROM thesis_files tf
+                        WHERE tf.thesis_id = t.id
+                    ),
+                    '[]'::json
+                ) as files
+            FROM theses t
+                     LEFT JOIN users u ON t.supervisor_id = u.id
+            ORDER BY t.created_at DESC
+        `
+
+        return result as ThesisWithAuthors[]
+    }).catch((error: any) => {
+        console.error("[v0] Database error in getAllThesesAdmin after retries:", error?.message)
+        return []
+    })
+}
+
 export async function getRecentTheses(limit = 9): Promise<ThesisWithAuthors[]> {
     return executeQueryWithRetry(async () => {
         const result = await sql`

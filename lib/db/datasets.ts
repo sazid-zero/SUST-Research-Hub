@@ -1,4 +1,4 @@
-import { db } from "./index"
+import { db } from "./index.ts"
 
 export interface Dataset {
   id: number
@@ -48,35 +48,42 @@ export async function getDatasets(filters?: {
 }): Promise<any[]> {
   try {
     let query = `
-      SELECT * FROM datasets
-      WHERE 1=1
+      SELECT d.* FROM datasets d
+      LEFT JOIN theses t ON d.workspace_type = 'thesis' AND d.workspace_id = t.id
+      LEFT JOIN projects p ON d.workspace_type = 'project' AND d.workspace_id = p.id
+      LEFT JOIN publications pub ON d.workspace_type = 'publication' AND d.workspace_id = pub.id
+      WHERE (
+        (d.workspace_type = 'thesis' AND t.status = 'approved') OR
+        (d.workspace_type = 'project' AND p.status = 'approved') OR
+        (d.workspace_type = 'publication' AND pub.status IN ('published', 'approved'))
+      )
     `
 
     const params: any[] = []
 
     if (filters?.search) {
-      query += ` AND (title ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`
+      query += ` AND (d.title ILIKE $${params.length + 1} OR d.description ILIKE $${params.length + 1})`
       params.push(`%${filters.search}%`)
     }
 
     if (filters?.type && filters.type !== "all") {
-      query += ` AND type = $${params.length + 1}`
+      query += ` AND d.type = $${params.length + 1}`
       params.push(filters.type)
     }
 
     // Sorting
     switch (filters?.sortBy) {
       case "newest":
-        query += ` ORDER BY created_at DESC`
+        query += ` ORDER BY d.created_at DESC`
         break
       case "oldest":
-        query += ` ORDER BY created_at ASC`
+        query += ` ORDER BY d.created_at ASC`
         break
       case "title":
-        query += ` ORDER BY title ASC`
+        query += ` ORDER BY d.title ASC`
         break
       default:
-        query += ` ORDER BY created_at DESC`
+        query += ` ORDER BY d.created_at DESC`
     }
 
     // Pagination

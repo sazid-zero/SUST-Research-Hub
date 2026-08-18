@@ -81,7 +81,7 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
             title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             desc.toLowerCase().includes(searchQuery.toLowerCase())
 
-        const datasetType = (dataset.type || "").toLowerCase().replace(/\s+/g, "-")
+        const datasetType = (dataset.dataset_type || dataset.type || "").toLowerCase().replace(/\s+/g, "-")
         const normalizedFilter = filterModality.toLowerCase().replace(/\s+/g, "-")
         const matchesModality = filterModality === "all" || datasetType === normalizedFilter
 
@@ -301,9 +301,9 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                             <h3 className="text-sm font-semibold font-sans text-foreground group-hover:text-primary transition-colors flex items-center gap-1 flex-nowrap min-w-0">
                                                 <IconBrandDatabricks className="h-4 w-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
                                                 <span className="truncate">{dataset.title || dataset.name}</span>
-                                                {dataset.location && (
+                                                {(dataset.download_url || dataset.location) && (
                                                     <a
-                                                        href={dataset.location}
+                                                        href={dataset.download_url || dataset.location}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="ml-auto flex-shrink-0 text-muted-foreground hover:text-primary"
@@ -320,7 +320,8 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                             )}
                                             <div className="flex items-center flex-wrap gap-x-[5px] gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
                                                 {(() => {
-                                                    const dataType = (dataset.type || "").toLowerCase()
+                                                    const resolvedType = dataset.dataset_type || dataset.type || ""
+                                                    const dataType = resolvedType.toLowerCase()
                                                     const modalityInfo = modalityColors[dataType] || {
                                                         icon: IconChartBubble,
                                                         colorClass: "text-primary",
@@ -328,12 +329,12 @@ export default function DatasetsContent({ user, initialDatasets }: DatasetsConte
                                                         borderClass: "border-primary/20",
                                                     }
                                                     const ModalityIcon = modalityInfo.icon
-                                                    return dataset.type ? (
+                                                    return resolvedType ? (
                                                         <span
                                                             className={`flex items-center gap-1 ${modalityInfo.bgClass} ${modalityInfo.colorClass} border ${modalityInfo.borderClass} px-2 py-0.5 rounded-md capitalize`}
                                                         >
                                                             <ModalityIcon className="h-3 w-3" />
-                                                            {dataset.type}
+                                                            {resolvedType}
                                                         </span>
                                                     ) : null
                                                 })()}

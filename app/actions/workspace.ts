@@ -238,7 +238,6 @@ export async function inviteMember(prevState: any, formData: FormData) {
                 sourceId: workspaceId,
                 sourceType: type
             })
-            console.log(`[inviteMember] Notification creation result:`, notifyResult)
         } catch (notifyErr) {
             console.error("[inviteMember] Failed to create notification:", notifyErr)
         }
@@ -865,17 +864,30 @@ export async function createModel(prevState: any, formData: FormData) {
     const user = await getCurrentUser()
     if (!user) return { message: "Unauthorized", success: false }
 
-    const workspaceId = parseInt(formData.get("workspaceId") as string)
-    const workspaceType = formData.get("workspaceType") as string
-    const title = (formData.get("title") || formData.get("name")) as string
-    const description = formData.get("description") as string
-    const status = formData.get("status") as string
-    const accuracyStr = formData.get("accuracy") as string
-    const framework = formData.get("framework") as string
-    const version = formData.get("version") as string
-    const model_type = (formData.get("model_type") || "neural_network") as string
-    const download_url = (formData.get("download_url") || "") as string
-    const tagsStr = formData.get("tags") as string
+    const workspaceId = parseInt(formData.get("workspaceId") as string);
+    const workspaceType = formData.get("workspaceType") as string;
+    const title = (formData.get("title") || formData.get("name")) as string;
+    const description = formData.get("description") as string;
+    const status = formData.get("status") as string;
+    const accuracyStr = formData.get("accuracy") as string;
+    const framework = formData.get("framework") as string;
+    const version = formData.get("version") as string;
+    const model_type_raw = (formData.get("model_type") || "neural_network") as string;
+    let model_type = model_type_raw.replace(/-/g, "_");
+    
+    // Map to valid enums for the DB check constraint
+    const validModelTypes = [
+      "neural_network", "decision_tree", "regression", "classification", 
+      "clustering", "nlp", "computer_vision", "reinforcement_learning", "other"
+    ];
+    if (model_type === "image_classification" || model_type === "object_detection") {
+      model_type = "computer_vision";
+    } else if (!validModelTypes.includes(model_type)) {
+      model_type = "other";
+    }
+
+    const download_url = (formData.get("download_url") || "") as string;
+    const tagsStr = formData.get("tags") as string;
 
     if (!workspaceId || !workspaceType || !title) {
         return { message: "Missing required fields", success: false }
@@ -887,14 +899,16 @@ export async function createModel(prevState: any, formData: FormData) {
     try {
         await sql`
             INSERT INTO models (
-                workspace_id, workspace_type, title, description, 
-                status, accuracy, framework, version, tags, 
-                model_type, download_url, created_at, updated_at
+                workspace_id, workspace_type, title, description,
+                status, accuracy, framework, version, tags,
+                model_type, download_url, external_url,
+                created_at, updated_at
             )
             VALUES (
-                ${workspaceId}, ${workspaceType}, ${title}, ${description}, 
-                ${status}, ${accuracy}, ${framework}, ${version}, ${tags}, 
-                ${model_type}, ${download_url}, NOW(), NOW()
+                ${workspaceId}, ${workspaceType}, ${title}, ${description || null},
+                ${status || null}, ${accuracy}, ${framework || null}, ${version || null}, ${tags},
+                ${model_type}, ${download_url || null}, null,
+                NOW(), NOW()
             )
         `
         revalidateWorkspace(workspaceId, workspaceType)
@@ -930,7 +944,28 @@ export async function createDataset(prevState: any, formData: FormData) {
     const title = formData.get("title") as string
     const description = formData.get("description") as string
     const type = formData.get("type") as string
-    const size = formData.get("size") as string
+    const sizeRaw = formData.get("size") as string
+    // Parse size string (e.g., "3.5 GB") into numeric megabytes
+    const parseSizeToMB = (value: string | null): number | null => {
+      if (!value) return null
+      const match = value.trim().match(/^([\d\.]+)\s*(TB|GB|MB|KB)?$/i)
+      if (!match) return null
+      const num = parseFloat(match[1])
+      const unit = (match[2] || "MB").toUpperCase()
+      switch (unit) {
+        case "TB":
+          return num * 1024 * 1024
+        case "GB":
+          return num * 1024
+        case "MB":
+          return num
+        case "KB":
+          return num / 1024
+        default:
+          return null
+      }
+    }
+    const size = parseSizeToMB(sizeRaw)
     const location = formData.get("location") as string
     const version = formData.get("version") as string
     const tagsStr = formData.get("tags") as string
@@ -943,8 +978,16 @@ export async function createDataset(prevState: any, formData: FormData) {
 
     try {
         await sql`
-            INSERT INTO datasets (workspace_id, workspace_type, title, description, type, size, location, version, tags, created_at, updated_at)
-            VALUES (${workspaceId}, ${workspaceType}, ${title}, ${description}, ${type}, ${size}, ${location}, ${version}, ${tags}, NOW(), NOW())
+            INSERT INTO datasets (
+                workspace_id, workspace_type, title, description,
+                type, size, version, download_url, tags,
+                created_at, updated_at
+            )
+            VALUES (
+                ${workspaceId}, ${workspaceType}, ${title}, ${description || null},
+                ${type || null}, ${size}, ${version || null}, ${location || null}, ${tags},
+                NOW(), NOW()
+            )
         `
         revalidateWorkspace(workspaceId, workspaceType)
         return { message: "Dataset added successfully", success: true }

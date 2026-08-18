@@ -1,22 +1,53 @@
-import { getAllTheses } from "@/lib/data/theses"
-import ThesesManagementClient from "@/components/admin/theses-client"
+import { getAllThesesAdmin } from "@/lib/db/theses"
+import { getAllPublicationsAdmin, getAllProjectsAdmin } from "@/app/actions/admin"
+import ResearchManagementClient from "@/components/admin/research-management-client"
 
 export const revalidate = 0 // Always fetch fresh data
 
 export default async function AdminThesesPage() {
-  const allTheses = await getAllTheses()
+  const [theses, pubResult, projResult] = await Promise.all([
+    getAllThesesAdmin(),
+    getAllPublicationsAdmin(),
+    getAllProjectsAdmin(),
+  ])
 
-  const formattedTheses = allTheses.map((thesis) => ({
+  const formattedTheses = theses.map((thesis: any) => ({
     id: thesis.id,
     title: thesis.title,
-    author: thesis.author,
-    supervisor: thesis.supervisor,
+    author: thesis.authors?.[0]?.full_name || 'Unknown',
+    supervisor: thesis.supervisor_name || '',
     department: thesis.department,
     status: thesis.status,
     visibility: thesis.visibility || 'visible',
-    submittedDate: thesis.submitted,
-    approvedDate: thesis.status === "approved" ? thesis.submitted : null,
+    submittedDate: thesis.submitted_date || thesis.created_at,
   }))
 
-  return <ThesesManagementClient initialTheses={formattedTheses} />
+  const formattedPublications = (pubResult.publications ?? []).map((p: any) => ({
+    id: p.id,
+    title: p.title,
+    author: p.owner_name || 'Unknown',
+    department: p.department || '',
+    status: p.status,
+    visibility: p.visibility || 'visible',
+    submittedDate: p.submitted_date || p.created_at,
+    year: p.year,
+  }))
+
+  const formattedProjects = (projResult.projects ?? []).map((p: any) => ({
+    id: p.id,
+    title: p.title,
+    author: p.supervisor_name || 'Unknown',
+    department: p.department || '',
+    status: p.status,
+    visibility: p.visibility || 'visible',
+    submittedDate: p.created_at,
+  }))
+
+  return (
+    <ResearchManagementClient
+      initialTheses={formattedTheses}
+      initialPublications={formattedPublications}
+      initialProjects={formattedProjects}
+    />
+  )
 }

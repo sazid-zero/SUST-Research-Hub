@@ -15,7 +15,6 @@ export default function NotificationsDebugPage() {
     try {
       const data = await getDebugNotifications()
       setDebugData(data)
-      console.log("[Debug] Notifications data:", data)
     } catch (error) {
       console.error("[Debug] Error:", error)
       setDebugData({ error: "Failed to fetch debug data" })
